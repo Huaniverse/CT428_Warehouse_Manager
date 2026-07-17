@@ -1,1 +1,4 @@
 DuLieu.xlsx
+
+# [IMP-04] DB credentials — không commit lên repo
+config.php

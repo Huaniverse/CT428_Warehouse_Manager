@@ -16,7 +16,7 @@ switch ($action) {
     case 'list':
         if (!$conn) { echo json_encode(['success' => false, 'message' => 'Lỗi kết nối DB']); exit; }
 
-        $sql = "SELECT u.id, u.username, u.full_name, u.role, u.is_active,
+        $sql = "SELECT u.id, u.username, u.full_name, u.role, u.is_active, u.allow_import_export,
                        u.created_at, u.last_login,
                        creator.full_name AS created_by_name
                 FROM users u
@@ -55,16 +55,17 @@ switch ($action) {
         if (strlen($new_password) < 6) {
             echo json_encode(['success' => false, 'message' => 'Mật khẩu phải có ít nhất 6 ký tự.']); exit;
         }
-        if (!in_array($new_role, ['admin', 'staff'])) {
+        if (!in_array($new_role, ['admin', 'store_manager', 'staff'])) {
             $new_role = 'staff';
         }
 
         $hash = password_hash($new_password, PASSWORD_BCRYPT, ['cost' => 12]);
+        $allow_ie = (int)($_POST['allow_import_export'] ?? 0);
 
         $stmt = $conn->prepare(
-            "INSERT INTO users (username, password, full_name, role, created_by) VALUES (?, ?, ?, ?, ?)"
+            "INSERT INTO users (username, password, full_name, role, allow_import_export, created_by) VALUES (?, ?, ?, ?, ?, ?)"
         );
-        $stmt->bind_param("ssssi", $new_username, $hash, $new_fullname, $new_role, $creator_id);
+        $stmt->bind_param("ssssii", $new_username, $hash, $new_fullname, $new_role, $allow_ie, $creator_id);
 
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Tạo tài khoản thành công.', 'id' => $conn->insert_id]);
@@ -194,6 +195,53 @@ switch ($action) {
             echo json_encode(['success' => true, 'message' => 'Đã đăng xuất user khỏi hệ thống.', 'rows' => $stmt->affected_rows]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Lỗi: ' . $stmt->error]);
+        }
+        $stmt->close();
+        break;
+
+    // ── Cấp quyền nhập/xuất kho cho staff ────────────────────────────────
+    case 'update_permissions':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']); exit;
+        }
+        if (!$conn) { echo json_encode(['success' => false, 'message' => 'Lỗi kết nối DB']); exit; }
+
+        $target_id       = (int)($_POST['id'] ?? 0);
+        $allow_import    = (int)($_POST['allow_import_export'] ?? 0) ? 1 : 0;
+
+        // Chỉ admin và store_manager mới được cấp quyền
+        $caller_role = $_SESSION['role'] ?? '';
+        if ($caller_role !== 'admin' && $caller_role !== 'store_manager') {
+            echo json_encode(['success' => false, 'message' => 'Bạn không có quyền cấp quyền này.']); exit;
+        }
+
+        // Không cho thay đổi quyền của chính mình
+        if ($target_id === (int)$_SESSION['user_id']) {
+            echo json_encode(['success' => false, 'message' => 'Không thể thay đổi quyền của chính mình.']); exit;
+        }
+
+        // Kiểm tra target là staff
+        $check = $conn->prepare("SELECT role FROM users WHERE id = ?");
+        $check->bind_param("i", $target_id);
+        $check->execute();
+        $target_user = $check->get_result()->fetch_assoc();
+        $check->close();
+
+        if (!$target_user) {
+            echo json_encode(['success' => false, 'message' => 'Không tìm thấy tài khoản.']); exit;
+        }
+        if ($target_user['role'] !== 'staff') {
+            echo json_encode(['success' => false, 'message' => 'Chỉ có thể cấp quyền cho tài khoản Staff.']); exit;
+        }
+
+        $stmt = $conn->prepare("UPDATE users SET allow_import_export = ? WHERE id = ?");
+        $stmt->bind_param("ii", $allow_import, $target_id);
+
+        if ($stmt->execute() && $stmt->affected_rows >= 0) {
+            $label = $allow_import ? 'cấp' : 'thu hồi';
+            echo json_encode(['success' => true, 'message' => "Đã $label quyền nhập/xuất kho."]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Không tìm thấy tài khoản hoặc không có thay đổi.']);
         }
         $stmt->close();
         break;

@@ -63,6 +63,14 @@ if ($conn) {
             $chart2_data[]   = (double)$row['TongGiaTri'];
         }
     }
+
+    // 7. [FIX-07] Danh sách danh mục — lấy 1 lần, dùng lại cho cả 2 dropdown
+    $categories_list = [];
+    if ($res_cat = $conn->query("SELECT MaDM, TenDM FROM danhmuc ORDER BY TenDM ASC")) {
+        while ($row = $res_cat->fetch_assoc()) {
+            $categories_list[] = $row;
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -89,13 +97,14 @@ if ($conn) {
       <h1>Quản Lí Kho</h1>
     </div>
     <div class="header_right">
-      <div class="display_right">
+      <!-- [FIX-05] Ẩn thanh tìm kiếm header và nút thông báo — chưa implement, dùng phương án A -->
+      <div class="display_right" style="display:none;">
         <button class="search_button">
           <span class="material-symbols-outlined">search</span>
         </button>
         <input class="input_find" type="text" placeholder="Tìm kiếm nhanh...">
       </div>
-      <button class="action_button" title="Thông báo">
+      <button class="action_button" title="Thông báo" style="display:none;">
         <span class="material-symbols-outlined">notifications</span>
       </button>
 
@@ -105,7 +114,10 @@ if ($conn) {
           <span class="material-symbols-outlined">account_circle</span>
           <span class="user_name_display"><?php echo htmlspecialchars($current_user['name']); ?></span>
           <span class="user_role_badge <?php echo $current_user['role']; ?>">
-            <?php echo $current_user['role'] === 'admin' ? 'Admin' : 'Staff'; ?>
+            <?php
+              $role_labels = ['admin' => 'Admin', 'store_manager' => 'CH Trưởng', 'staff' => 'Staff'];
+              echo $role_labels[$current_user['role']] ?? 'Staff';
+            ?>
           </span>
           <span class="material-symbols-outlined" style="font-size:16px; color:#94a3b8;">expand_more</span>
         </button>
@@ -134,6 +146,12 @@ if ($conn) {
           <span class="material-symbols-outlined">inventory</span>
           <span>Kho hàng</span>
         </a>
+        <?php if (canImportExport()): ?>
+        <a class="menu_item" data-tab="lichsu">
+          <span class="material-symbols-outlined">history</span>
+          <span>Lịch sử</span>
+        </a>
+        <?php endif; ?>
         <?php if ($is_admin): ?>
         <a class="menu_item" data-tab="caidat">
           <span class="material-symbols-outlined">manage_accounts</span>
@@ -230,16 +248,9 @@ if ($conn) {
             <div class="input_group">
               <select name="category" id="select_category">
                 <option value="">Tất cả danh mục</option>
-                <?php
-                if ($conn) {
-                    $sql = "SELECT MaDM, TenDM FROM danhmuc";
-                    if ($result = $conn->query($sql)) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<option value="' . htmlspecialchars($row['MaDM']) . '">' . htmlspecialchars($row['TenDM']) . '</option>';
-                        }
-                    }
-                }
-                ?>
+                <?php foreach ($categories_list as $row): ?>
+                  <option value="<?php echo htmlspecialchars($row['MaDM']); ?>"><?php echo htmlspecialchars($row['TenDM']); ?></option>
+                <?php endforeach; ?>
               </select>
             </div>
           </div>
@@ -265,11 +276,7 @@ if ($conn) {
           </div>
           <div class="search_field_wrapper">
             <span class="search_label">Thao tác</span>
-            <div style="display: flex; align-items: center; height: 38px; gap: 8px;">
-              <button class="filter_button" id="btn_filter" title="Lọc sản phẩm">
-                <span class="material-symbols-outlined">filter_list</span>
-                <span>Lọc</span>
-              </button>
+            <div style="display: flex; align-items: center; height: 38px; gap: 8px; flex-wrap: wrap;">
               <?php if ($is_admin): ?>
               <button class="add_product_button" id="btn_add_product" title="Thêm sản phẩm">
                 <span class="material-symbols-outlined">add_box</span>
@@ -278,6 +285,16 @@ if ($conn) {
               <button class="filter_button" id="btn_add_category" title="Thêm danh mục" style="background-color: #8b5cf6;">
                 <span class="material-symbols-outlined">library_add</span>
                 <span>Thêm danh mục</span>
+              </button>
+              <?php endif; ?>
+              <?php if (canImportExport()): ?>
+              <button class="filter_button" id="btn_import_stock" title="Nhập kho" style="background-color: #16a34a;">
+                <span class="material-symbols-outlined">download</span>
+                <span>Nhập kho</span>
+              </button>
+              <button class="filter_button" id="btn_export_stock" title="Xuất kho" style="background-color: #ea580c;">
+                <span class="material-symbols-outlined">upload</span>
+                <span>Xuất kho</span>
               </button>
               <?php endif; ?>
             </div>
@@ -297,6 +314,9 @@ if ($conn) {
                   <th>Giá bán</th>
                   <th>Số lượng</th>
                   <th style="width: 120px;">Trạng thái</th>
+                  <?php if ($is_admin): ?>
+                  <th style="width: 90px;">Thao tác</th>
+                  <?php endif; ?>
                 </tr>
               </thead>
               <tbody id="product_table_body">
@@ -306,6 +326,70 @@ if ($conn) {
           </div>
         </div>
       </div>
+
+      <?php if (canImportExport()): ?>
+      <!-- TAB LỊCH SỬ NHẬP/XUẤT KHO -->
+      <div id="content_lichsu" class="tab_content">
+        <h1 style="font-size: 24px; font-weight: 600; color: #0f172a; margin: 0 0 4px 0;">Lịch sử nhập / xuất kho</h1>
+        <p style="font-size: 14px; color: #64748b; margin: 0 0 24px 0;">Xem danh sách các phiếu nhập kho và xuất kho đã thực hiện.</p>
+
+        <!-- Tabs con: Nhập / Xuất -->
+        <div style="display:flex; gap:8px; margin-bottom:20px;">
+          <button class="filter_button history_tab_btn active" id="hist_tab_import" onclick="switchHistoryTab('import')" style="background-color:#16a34a;">
+            <span class="material-symbols-outlined">download</span>
+            <span>Phiếu nhập</span>
+          </button>
+          <button class="filter_button history_tab_btn" id="hist_tab_export" onclick="switchHistoryTab('export')" style="background-color:#ea580c; opacity:0.6;">
+            <span class="material-symbols-outlined">upload</span>
+            <span>Phiếu xuất</span>
+          </button>
+        </div>
+
+        <!-- Bảng phiếu nhập -->
+        <div id="history_import_panel">
+          <div class="table_container">
+            <table class="product_table">
+              <thead>
+                <tr>
+                  <th style="width:70px;">Mã phiếu</th>
+                  <th>Sản phẩm</th>
+                  <th style="width:90px;">Số lượng</th>
+                  <th>Ghi chú</th>
+                  <th>Người tạo</th>
+                  <th style="width:150px;">Ngày tạo</th>
+                </tr>
+              </thead>
+              <tbody id="importHistoryBody">
+                <tr><td colspan="6" class="table_loading">Đang tải...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="importHistoryPagination" style="padding:12px 0; text-align:center;"></div>
+        </div>
+
+        <!-- Bảng phiếu xuất (ẩn mặc định) -->
+        <div id="history_export_panel" style="display:none;">
+          <div class="table_container">
+            <table class="product_table">
+              <thead>
+                <tr>
+                  <th style="width:70px;">Mã phiếu</th>
+                  <th>Sản phẩm</th>
+                  <th style="width:90px;">Số lượng</th>
+                  <th>Ghi chú</th>
+                  <th>Người tạo</th>
+                  <th style="width:150px;">Ngày tạo</th>
+                </tr>
+              </thead>
+              <tbody id="exportHistoryBody">
+                <tr><td colspan="6" class="table_loading">Đang tải...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="exportHistoryPagination" style="padding:12px 0; text-align:center;"></div>
+        </div>
+      </div>
+      <?php endif; ?>
 
       <?php if ($is_admin): ?>
       <!-- TAB QUẢN LÝ NGƯỜI DÙNG (chỉ admin) -->
@@ -351,8 +435,8 @@ if ($conn) {
               <span class="material-symbols-outlined">devices</span>
               Phiên đang hoạt động
             </h3>
-            <button class="btn_secondary" id="btnRefreshSessions">
-              <span class="material-symbols-outlined">refresh</span>
+            <button class="btn_secondary" id="btnRefreshSessions" aria-label="Làm mới danh sách phiên">
+              <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
               Làm mới
             </button>
           </div>
@@ -376,8 +460,8 @@ if ($conn) {
           <span class="material-symbols-outlined">person_add</span>
           Tạo tài khoản mới
         </h3>
-        <button class="modal_close" id="btnCloseModal">
-          <span class="material-symbols-outlined">close</span>
+        <button class="modal_close" id="btnCloseModal" aria-label="Đóng modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
       <div class="modal_body">
@@ -408,6 +492,7 @@ if ($conn) {
             <span class="material-symbols-outlined form_icon">admin_panel_settings</span>
             <select id="new_role" class="form_input" style="cursor:pointer;">
               <option value="staff">Staff — Nhân viên kho</option>
+              <option value="store_manager">CH Trưởng — Quản lý cửa hàng</option>
               <option value="admin">Admin — Quản trị viên</option>
             </select>
           </div>
@@ -433,8 +518,8 @@ if ($conn) {
           <span class="material-symbols-outlined">add_box</span>
           Thêm sản phẩm mới
         </h3>
-        <button class="modal_close" id="btnCloseAddProductModal">
-          <span class="material-symbols-outlined">close</span>
+        <button class="modal_close" id="btnCloseAddProductModal" aria-label="Đóng modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
       <div class="modal_body">
@@ -451,16 +536,9 @@ if ($conn) {
             <span class="material-symbols-outlined form_icon">category</span>
             <select id="new_prod_category" class="form_input" style="cursor:pointer;">
               <option value="">-- Chọn danh mục --</option>
-              <?php
-              if ($conn) {
-                  $sql = "SELECT MaDM, TenDM FROM danhmuc";
-                  if ($result = $conn->query($sql)) {
-                      while ($row = $result->fetch_assoc()) {
-                          echo '<option value="' . htmlspecialchars($row['MaDM']) . '">' . htmlspecialchars($row['TenDM']) . '</option>';
-                      }
-                  }
-              }
-              ?>
+              <?php foreach ($categories_list as $row): ?>
+                <option value="<?php echo htmlspecialchars($row['MaDM']); ?>"><?php echo htmlspecialchars($row['TenDM']); ?></option>
+              <?php endforeach; ?>
             </select>
           </div>
         </div>
@@ -506,8 +584,8 @@ if ($conn) {
           <span class="material-symbols-outlined">library_add</span>
           Thêm danh mục mới
         </h3>
-        <button class="modal_close" id="btnCloseAddCategoryModal">
-          <span class="material-symbols-outlined">close</span>
+        <button class="modal_close" id="btnCloseAddCategoryModal" aria-label="Đóng modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
       <div class="modal_body">
@@ -537,6 +615,203 @@ if ($conn) {
   </div>
   <?php endif; ?>
 
+  <!-- Modal sửa sản phẩm -->
+  <?php if ($is_admin): ?>
+  <div class="modal_overlay" id="editProductModal">
+    <div class="modal_card">
+      <div class="modal_header">
+        <h3>
+          <span class="material-symbols-outlined">edit</span>
+          Sửa sản phẩm
+        </h3>
+        <button class="modal_close" id="btnCloseEditProductModal" aria-label="Đóng modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal_body">
+        <input type="hidden" id="edit_prod_id">
+        <div class="form_group">
+          <label for="edit_prod_name">Tên sản phẩm</label>
+          <div class="form_input_wrapper">
+            <span class="material-symbols-outlined form_icon">shopping_bag</span>
+            <input type="text" id="edit_prod_name" class="form_input">
+          </div>
+        </div>
+        <div class="form_group">
+          <label for="edit_prod_category">Danh mục</label>
+          <div class="form_input_wrapper">
+            <span class="material-symbols-outlined form_icon">category</span>
+            <select id="edit_prod_category" class="form_input" style="cursor:pointer;">
+              <option value="">-- Chọn danh mục --</option>
+              <?php foreach ($categories_list as $row): ?>
+                <option value="<?php echo htmlspecialchars($row['MaDM']); ?>"><?php echo htmlspecialchars($row['TenDM']); ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+        </div>
+        <div class="form_group">
+          <label for="edit_prod_price">Giá bán (VNĐ)</label>
+          <div class="form_input_wrapper">
+            <span class="material-symbols-outlined form_icon">payments</span>
+            <input type="number" id="edit_prod_price" class="form_input" min="0">
+          </div>
+        </div>
+        <div class="form_group">
+          <label for="edit_prod_desc">Mô tả sản phẩm</label>
+          <div class="form_input_wrapper" style="align-items: flex-start; padding: 6px 12px;">
+            <span class="material-symbols-outlined form_icon" style="margin-top:6px;">description</span>
+            <textarea id="edit_prod_desc" class="form_input" rows="3" style="resize:vertical; border:none; outline:none; background:transparent; width:100%; font-family:inherit;"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal_footer">
+        <button class="btn_secondary" id="btnCancelEditProductModal">Hủy</button>
+        <button class="btn_primary" id="btnSubmitEditProduct">
+          <span class="material-symbols-outlined">save</span>
+          Lưu thay đổi
+        </button>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <!-- Modal nhập kho -->
+  <?php if (canImportExport()): ?>
+  <div class="modal_overlay" id="importStockModal">
+    <div class="modal_card" style="width: 420px;">
+      <div class="modal_header">
+        <h3>
+          <span class="material-symbols-outlined" style="color:#16a34a;">download</span>
+          Nhập kho
+        </h3>
+        <button class="modal_close" id="btnCloseImportModal" aria-label="Đóng modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal_body">
+        <div class="form_group">
+          <label for="import_product">Sản phẩm</label>
+          <div class="form_input_wrapper">
+            <span class="material-symbols-outlined form_icon">inventory_2</span>
+            <select id="import_product" class="form_input" style="cursor:pointer;">
+              <option value="">-- Chọn sản phẩm --</option>
+            </select>
+          </div>
+        </div>
+        <div class="form_group">
+          <label for="import_quantity">Số lượng nhập</label>
+          <div class="form_input_wrapper">
+            <span class="material-symbols-outlined form_icon">add_circle</span>
+            <input type="number" id="import_quantity" class="form_input" min="1" placeholder="Nhập số lượng...">
+          </div>
+        </div>
+        <div class="form_group">
+          <label for="import_note">Ghi chú</label>
+          <div class="form_input_wrapper" style="align-items: flex-start; padding: 6px 12px;">
+            <span class="material-symbols-outlined form_icon" style="margin-top:6px;">description</span>
+            <textarea id="import_note" class="form_input" rows="2" placeholder="Lý do nhập kho..." style="resize:vertical; border:none; outline:none; background:transparent; width:100%; font-family:inherit;"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal_footer">
+        <button class="btn_secondary" id="btnCancelImportModal">Hủy</button>
+        <button class="btn_primary" id="btnSubmitImport" style="background-color: #16a34a;">
+          <span class="material-symbols-outlined">save</span>
+          Xác nhận nhập kho
+        </button>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <!-- Modal xuất kho -->
+  <?php if (canImportExport()): ?>
+  <div class="modal_overlay" id="exportStockModal">
+    <div class="modal_card" style="width: 420px;">
+      <div class="modal_header">
+        <h3>
+          <span class="material-symbols-outlined" style="color:#ea580c;">upload</span>
+          Xuất kho
+        </h3>
+        <button class="modal_close" id="btnCloseExportModal" aria-label="Đóng modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal_body">
+        <div class="form_group">
+          <label for="export_product">Sản phẩm</label>
+          <div class="form_input_wrapper">
+            <span class="material-symbols-outlined form_icon">inventory_2</span>
+            <select id="export_product" class="form_input" style="cursor:pointer;">
+              <option value="">-- Chọn sản phẩm --</option>
+            </select>
+          </div>
+        </div>
+        <div id="export_stock_info" style="display:none; background:#fef3c7; border:1px solid #fbbf24; border-radius:8px; padding:10px 14px; margin-bottom:12px; font-size:13px; color:#92400e;">
+          Tồn kho hiện tại: <strong id="export_current_stock">0</strong>
+        </div>
+        <div class="form_group">
+          <label for="export_quantity">Số lượng xuất</label>
+          <div class="form_input_wrapper">
+            <span class="material-symbols-outlined form_icon">remove_circle</span>
+            <input type="number" id="export_quantity" class="form_input" min="1" placeholder="Nhập số lượng...">
+          </div>
+        </div>
+        <div class="form_group">
+          <label for="export_note">Ghi chú</label>
+          <div class="form_input_wrapper" style="align-items: flex-start; padding: 6px 12px;">
+            <span class="material-symbols-outlined form_icon" style="margin-top:6px;">description</span>
+            <textarea id="export_note" class="form_input" rows="2" placeholder="Lý do xuất kho..." style="resize:vertical; border:none; outline:none; background:transparent; width:100%; font-family:inherit;"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal_footer">
+        <button class="btn_secondary" id="btnCancelExportModal">Hủy</button>
+        <button class="btn_primary" id="btnSubmitExport" style="background-color: #ea580c;">
+          <span class="material-symbols-outlined">save</span>
+          Xác nhận xuất kho
+        </button>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <!-- Modal cấp quyền cho staff -->
+  <?php if ($is_admin): ?>
+  <div class="modal_overlay" id="permissionsModal">
+    <div class="modal_card" style="width: 380px;">
+      <div class="modal_header">
+        <h3>
+          <span class="material-symbols-outlined">admin_panel_settings</span>
+          Cấp quyền
+        </h3>
+        <button class="modal_close" id="btnClosePermissionsModal" aria-label="Đóng modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal_body">
+        <input type="hidden" id="perm_user_id">
+        <p style="font-size:14px; color:#475569; margin-bottom:16px;">
+          Cấp quyền cho: <strong id="perm_user_name"></strong>
+        </p>
+        <div class="form_group">
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+            <input type="checkbox" id="perm_import_export" style="width:18px; height:18px; cursor:pointer;">
+            <span>Cho phép nhập/xuất kho</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal_footer">
+        <button class="btn_secondary" id="btnCancelPermissionsModal">Hủy</button>
+        <button class="btn_primary" id="btnSubmitPermissions">
+          <span class="material-symbols-outlined">save</span>
+          Lưu quyền
+        </button>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
   <!-- Toast notifications -->
   <div class="toast_container" id="toastContainer"></div>
 
@@ -557,6 +832,7 @@ if ($conn) {
             if (activeTab) activeTab.classList.add('active_tab');
 
             if (tabId === 'khohang') fetchFilteredProducts();
+            if (tabId === 'lichsu') switchHistoryTab('import');
             if (tabId === 'caidat') {
                 loadUsers();
                 loadSessions();
@@ -590,21 +866,88 @@ if ($conn) {
             price_sort: priceSortVal, qty_sort: qtySortVal
         });
 
+        const isAdm = <?php echo $is_admin ? 'true' : 'false'; ?>;
+        const colspan = isAdm ? 8 : 7;
         const tbody = document.getElementById('product_table_body');
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 32px; color: #64748b;">Đang tải dữ liệu...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="' + colspan + '" style="text-align: center; padding: 32px; color: #64748b;">Đang tải dữ liệu...</td></tr>';
 
-        fetch('filter_products.php?' + params.toString())
+        fetch('filter_products.php?' + params.toString(), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
             .then(r => r.text())
-            .then(html => { tbody.innerHTML = html; })
+            .then(html => {
+                // filter_products.php trả về HTML fragment — nếu bị redirect về
+                // login page thì HTML sẽ chứa thẻ <html>, không phải <tr>.
+                // Nếu session hết, auth.php trả JSON { redirect: '...' } thay vì HTML
+                if (html.trim().startsWith('{')) {
+                    try {
+                        const json = JSON.parse(html);
+                        if (json.redirect) { window.location.href = json.redirect; return; }
+                    } catch(e) {}
+                }
+                if (html.trim().toLowerCase().startsWith('<!doctype') || html.includes('<html')) {
+                    window.location.href = 'login.php?expired=1';
+                    return;
+                }
+                tbody.innerHTML = html;
+            })
             .catch(err => {
                 console.error('Error:', err);
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 32px; color: #ef4444;">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="' + colspan + '" style="text-align: center; padding: 32px; color: #ef4444;">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại.</td></tr>';
             });
     }
 
-    const btnFilter = document.getElementById('btn_filter');
-    if (btnFilter) {
-        btnFilter.addEventListener('click', e => { e.preventDefault(); fetchFilteredProducts(); });
+    // Auto-filter khi thay đổi dropdown (category, price, quantity)
+    ['select_category', 'select_price', 'select_quantity'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', fetchFilteredProducts);
+    });
+
+    // [IMP-06] Debounce helper — trì hoãn gọi hàm sau khi người dùng ngừng gõ
+    function debounce(fn, delay) {
+        let timer;
+        return function(...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(this, args), delay);
+        };
+    }
+
+    // Tìm kiếm real-time khi gõ vào ô search (debounce 400ms)
+    const searchInput = document.getElementById('search_input_sort');
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(fetchFilteredProducts, 400));
+    }
+
+    // ─── Session-aware fetch wrapper ──────────────────────────────────────────
+    // Gửi header X-Requested-With để PHP (auth.php) nhận biết là AJAX request.
+    // Khi session hết hạn/bị kick, PHP trả 401 + JSON { redirect: '...' }
+    // Khi server lỗi (5xx/4xx), ném Error để .catch() của caller bắt được.
+    function apiFetch(url, options = {}) {
+        options.headers = Object.assign({ 'X-Requested-With': 'XMLHttpRequest' }, options.headers || {});
+        return fetch(url, options)
+            .then(r => {
+                // [FIX-02] Kiểm tra HTTP status trước khi parse JSON
+                if (r.status === 401) {
+                    // Session hết hạn hoặc bị kick — parse JSON để lấy redirect URL
+                    return r.json().then(data => {
+                        window.location.href = data.redirect || 'login.php?expired=1';
+                        return new Promise(() => {}); // dừng chain
+                    });
+                }
+                if (!r.ok) {
+                    // Lỗi HTTP khác (403, 500...) — ném lỗi để .catch() xử lý
+                    return Promise.reject(new Error('Lỗi máy chủ: HTTP ' + r.status));
+                }
+                return r.json();
+            })
+            .then(data => {
+                // Fallback: server trả 200 nhưng có field redirect (backward compat)
+                if (data && data.redirect) {
+                    window.location.href = data.redirect;
+                    return new Promise(() => {});
+                }
+                return data;
+            });
     }
 
     // ─── Toast ────────────────────────────────────────────────────────────────
@@ -621,14 +964,348 @@ if ($conn) {
         }, 3500);
     }
 
+    // ─── Helper: load product dropdown for import/export modals ──────────────
+    function loadProductDropdown(selectId) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        select.innerHTML = '<option value="">Đang tải...</option>';
+        fetch('filter_products.php?search=&category=&price_sort=&qty_sort=', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.text())
+        .then(html => {
+            // Parse HTML table rows to extract product data
+            const parser = new DOMParser();
+            const doc = parser.parseFromString('<table>' + html + '</table>', 'text/html');
+            const rows = doc.querySelectorAll('tr');
+            let options = '<option value="">-- Chọn sản phẩm --</option>';
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 2) {
+                    const maSp = cells[0].textContent.trim();
+                    const tenSp = cells[1].textContent.trim();
+                    if (maSp && !isNaN(maSp)) {
+                        options += `<option value="${maSp}">${tenSp} (Mã: ${maSp})</option>`;
+                    }
+                }
+            });
+            select.innerHTML = options;
+        })
+        .catch(() => { select.innerHTML = '<option value="">Lỗi tải danh sách</option>'; });
+    }
+
+    // ─── Edit Product ────────────────────────────────────────────────────────
+    function openEditProduct(maSp) {
+        apiFetch('admin/edit_product.php?action=get&id=' + maSp)
+            .then(data => {
+                if (!data.success) { showToast(data.message, 'error'); return; }
+                const p = data.product;
+                document.getElementById('edit_prod_id').value = p.MaSP;
+                document.getElementById('edit_prod_name').value = p.TenSP;
+                document.getElementById('edit_prod_category').value = p.DanhMuc;
+                document.getElementById('edit_prod_price').value = p.Gia;
+                document.getElementById('edit_prod_desc').value = p.MoTa || '';
+                document.getElementById('editProductModal').classList.add('open');
+            })
+            .catch(() => showToast('Không thể tải thông tin sản phẩm.', 'error'));
+    }
+
+    function toggleProductActive(maSp, newActive) {
+        const label = newActive == 1 ? 'khôi phục' : 'ẩn';
+        if (!confirm(`Bạn có chắc muốn ${label} sản phẩm này?`)) return;
+        const fd = new FormData();
+        fd.append('ma_sp', maSp);
+        fd.append('is_active', newActive);
+        apiFetch('admin/edit_product.php?action=toggle_active', { method: 'POST', body: fd })
+            .then(data => {
+                showToast(data.message, data.success ? 'success' : 'error');
+                if (data.success) fetchFilteredProducts();
+            })
+            .catch(() => showToast('Lỗi kết nối máy chủ.', 'error'));
+    }
+
+    // ─── Edit Product Modal ──────────────────────────────────────────────────
+    const editProdModal = document.getElementById('editProductModal');
+    if (editProdModal) {
+        document.getElementById('btnCloseEditProductModal')?.addEventListener('click', () => editProdModal.classList.remove('open'));
+        document.getElementById('btnCancelEditProductModal')?.addEventListener('click', () => editProdModal.classList.remove('open'));
+        editProdModal.addEventListener('click', e => { if (e.target === editProdModal) editProdModal.classList.remove('open'); });
+
+        document.getElementById('btnSubmitEditProduct')?.addEventListener('click', function() {
+            const fd = new FormData();
+            fd.append('ma_sp', document.getElementById('edit_prod_id').value);
+            fd.append('ten_sp', document.getElementById('edit_prod_name').value.trim());
+            fd.append('danhmuc', document.getElementById('edit_prod_category').value);
+            fd.append('gia', document.getElementById('edit_prod_price').value);
+            fd.append('mota', document.getElementById('edit_prod_desc').value.trim());
+
+            if (fd.get('ten_sp') === '' || fd.get('danhmuc') === '') {
+                showToast('Vui lòng nhập đầy đủ thông tin.', 'error'); return;
+            }
+
+            this.disabled = true;
+            this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
+
+            apiFetch('admin/edit_product.php?action=update', { method: 'POST', body: fd })
+                .then(data => {
+                    this.disabled = false;
+                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu thay đổi';
+                    showToast(data.message, data.success ? 'success' : 'error');
+                    if (data.success) { editProdModal.classList.remove('open'); fetchFilteredProducts(); }
+                })
+                .catch(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu thay đổi';
+                    showToast('Lỗi kết nối máy chủ.', 'error');
+                });
+        });
+    }
+
+    // ─── Import Stock Modal ──────────────────────────────────────────────────
+    const importModal = document.getElementById('importStockModal');
+    if (importModal) {
+        document.getElementById('btn_import_stock')?.addEventListener('click', () => {
+            loadProductDropdown('import_product');
+            document.getElementById('import_quantity').value = '';
+            document.getElementById('import_note').value = '';
+            importModal.classList.add('open');
+        });
+        document.getElementById('btnCloseImportModal')?.addEventListener('click', () => importModal.classList.remove('open'));
+        document.getElementById('btnCancelImportModal')?.addEventListener('click', () => importModal.classList.remove('open'));
+        importModal.addEventListener('click', e => { if (e.target === importModal) importModal.classList.remove('open'); });
+
+        document.getElementById('btnSubmitImport')?.addEventListener('click', function() {
+            const fd = new FormData();
+            fd.append('san_pham', document.getElementById('import_product').value);
+            fd.append('so_luong', document.getElementById('import_quantity').value);
+            fd.append('ghi_chu', document.getElementById('import_note').value.trim());
+
+            if (!fd.get('san_pham') || !fd.get('so_luong') || parseInt(fd.get('so_luong')) <= 0) {
+                showToast('Vui lòng chọn sản phẩm và nhập số lượng hợp lệ.', 'error'); return;
+            }
+
+            this.disabled = true;
+            this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang xử lý...';
+
+            apiFetch('admin/import_stock.php?action=create', { method: 'POST', body: fd })
+                .then(data => {
+                    this.disabled = false;
+                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận nhập kho';
+                    showToast(data.message, data.success ? 'success' : 'error');
+                    if (data.success) { importModal.classList.remove('open'); fetchFilteredProducts(); }
+                })
+                .catch(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận nhập kho';
+                    showToast('Lỗi kết nối máy chủ.', 'error');
+                });
+        });
+    }
+
+    // ─── Export Stock Modal ──────────────────────────────────────────────────
+    const exportModal = document.getElementById('exportStockModal');
+    if (exportModal) {
+        document.getElementById('btn_export_stock')?.addEventListener('click', () => {
+            loadProductDropdown('export_product');
+            document.getElementById('export_quantity').value = '';
+            document.getElementById('export_note').value = '';
+            document.getElementById('export_stock_info').style.display = 'none';
+            exportModal.classList.add('open');
+        });
+        document.getElementById('btnCloseExportModal')?.addEventListener('click', () => exportModal.classList.remove('open'));
+        document.getElementById('btnCancelExportModal')?.addEventListener('click', () => exportModal.classList.remove('open'));
+        exportModal.addEventListener('click', e => { if (e.target === exportModal) exportModal.classList.remove('open'); });
+
+        // Hiển thị tồn kho khi chọn SP
+        document.getElementById('export_product')?.addEventListener('change', function() {
+            const spId = this.value;
+            const infoDiv = document.getElementById('export_stock_info');
+            if (!spId) { infoDiv.style.display = 'none'; return; }
+            apiFetch('admin/edit_product.php?action=get&id=' + spId)
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('export_current_stock').textContent = data.product.SoLuong;
+                        infoDiv.style.display = 'block';
+                    }
+                });
+        });
+
+        document.getElementById('btnSubmitExport')?.addEventListener('click', function() {
+            const fd = new FormData();
+            fd.append('san_pham', document.getElementById('export_product').value);
+            fd.append('so_luong', document.getElementById('export_quantity').value);
+            fd.append('ghi_chu', document.getElementById('export_note').value.trim());
+
+            if (!fd.get('san_pham') || !fd.get('so_luong') || parseInt(fd.get('so_luong')) <= 0) {
+                showToast('Vui lòng chọn sản phẩm và nhập số lượng hợp lệ.', 'error'); return;
+            }
+
+            this.disabled = true;
+            this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang xử lý...';
+
+            apiFetch('admin/export_stock.php?action=create', { method: 'POST', body: fd })
+                .then(data => {
+                    this.disabled = false;
+                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận xuất kho';
+                    showToast(data.message, data.success ? 'success' : 'error');
+                    if (data.success) { exportModal.classList.remove('open'); fetchFilteredProducts(); }
+                })
+                .catch(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận xuất kho';
+                    showToast('Lỗi kết nối máy chủ.', 'error');
+                });
+        });
+    }
+
+    // ─── Import History (tab-based) ──────────────────────────────────────────
+    function loadImportHistory(page = 1) {
+        const tbody = document.getElementById('importHistoryBody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Đang tải...</td></tr>';
+
+        apiFetch('admin/import_stock.php?action=list&page=' + page)
+            .then(data => {
+                if (!data.success || data.records.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6"><div class="empty_state"><span class="material-symbols-outlined">inventory_2</span><p>Chưa có phiếu nhập kho nào.</p></div></td></tr>';
+                    document.getElementById('importHistoryPagination').innerHTML = '';
+                    return;
+                }
+                tbody.innerHTML = data.records.map(r => {
+                    const date = new Date(r.ngay_tao).toLocaleString('vi-VN');
+                    return `<tr>
+                        <td>${r.ma_phieu}</td>
+                        <td><span class="product_name">${escapeHtml(r.TenSP)}</span></td>
+                        <td><strong>${number_format(r.so_luong)}</strong></td>
+                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(r.ghi_chu || '')}">${escapeHtml(r.ghi_chu || '—')}</td>
+                        <td>${escapeHtml(r.nguoi_tao_name)}</td>
+                        <td style="font-size:13px;">${date}</td>
+                    </tr>`;
+                }).join('');
+
+                const totalPages = Math.ceil(data.total / data.per_page);
+                if (totalPages > 1) {
+                    let pag = '';
+                    for (let i = 1; i <= totalPages; i++) {
+                        pag += `<button class="filter_button" style="padding:4px 10px;font-size:12px;${i === page ? 'opacity:1;' : 'opacity:0.5;'}" onclick="loadImportHistory(${i})">${i}</button> `;
+                    }
+                    document.getElementById('importHistoryPagination').innerHTML = pag;
+                } else {
+                    document.getElementById('importHistoryPagination').innerHTML = '';
+                }
+            })
+            .catch(() => {
+                tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Lỗi tải dữ liệu.</td></tr>';
+            });
+    }
+
+    // ─── Export History (tab-based) ──────────────────────────────────────────
+    function loadExportHistory(page = 1) {
+        const tbody = document.getElementById('exportHistoryBody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Đang tải...</td></tr>';
+
+        apiFetch('admin/export_stock.php?action=list&page=' + page)
+            .then(data => {
+                if (!data.success || data.records.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6"><div class="empty_state"><span class="material-symbols-outlined">inventory_2</span><p>Chưa có phiếu xuất kho nào.</p></div></td></tr>';
+                    document.getElementById('exportHistoryPagination').innerHTML = '';
+                    return;
+                }
+                tbody.innerHTML = data.records.map(r => {
+                    const date = new Date(r.ngay_tao).toLocaleString('vi-VN');
+                    return `<tr>
+                        <td>${r.ma_phieu}</td>
+                        <td><span class="product_name">${escapeHtml(r.TenSP)}</span></td>
+                        <td><strong>${number_format(r.so_luong)}</strong></td>
+                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(r.ghi_chu || '')}">${escapeHtml(r.ghi_chu || '—')}</td>
+                        <td>${escapeHtml(r.nguoi_tao_name)}</td>
+                        <td style="font-size:13px;">${date}</td>
+                    </tr>`;
+                }).join('');
+
+                const totalPages = Math.ceil(data.total / data.per_page);
+                if (totalPages > 1) {
+                    let pag = '';
+                    for (let i = 1; i <= totalPages; i++) {
+                        pag += `<button class="filter_button" style="padding:4px 10px;font-size:12px;${i === page ? 'opacity:1;' : 'opacity:0.5;'}" onclick="loadExportHistory(${i})">${i}</button> `;
+                    }
+                    document.getElementById('exportHistoryPagination').innerHTML = pag;
+                } else {
+                    document.getElementById('exportHistoryPagination').innerHTML = '';
+                }
+            })
+            .catch(() => {
+                tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Lỗi tải dữ liệu.</td></tr>';
+            });
+    }
+
+    // ─── Switch history sub-tab (Nhập / Xuất) ──────────────────────────────
+    function switchHistoryTab(type) {
+        const importBtn = document.getElementById('hist_tab_import');
+        const exportBtn = document.getElementById('hist_tab_export');
+        const importPanel = document.getElementById('history_import_panel');
+        const exportPanel = document.getElementById('history_export_panel');
+
+        if (type === 'import') {
+            importBtn.style.opacity = '1';
+            exportBtn.style.opacity = '0.6';
+            importPanel.style.display = '';
+            exportPanel.style.display = 'none';
+            loadImportHistory(1);
+        } else {
+            importBtn.style.opacity = '0.6';
+            exportBtn.style.opacity = '1';
+            importPanel.style.display = 'none';
+            exportPanel.style.display = '';
+            loadExportHistory(1);
+        }
+    }
+
+    // ─── Permissions Modal ───────────────────────────────────────────────────
+    function openPermissionsModal(userId, userName, currentVal) {
+        document.getElementById('perm_user_id').value = userId;
+        document.getElementById('perm_user_name').textContent = userName;
+        document.getElementById('perm_import_export').checked = currentVal == 1;
+        document.getElementById('permissionsModal').classList.add('open');
+    }
+
+    const permModal = document.getElementById('permissionsModal');
+    if (permModal) {
+        document.getElementById('btnClosePermissionsModal')?.addEventListener('click', () => permModal.classList.remove('open'));
+        document.getElementById('btnCancelPermissionsModal')?.addEventListener('click', () => permModal.classList.remove('open'));
+        permModal.addEventListener('click', e => { if (e.target === permModal) permModal.classList.remove('open'); });
+
+        document.getElementById('btnSubmitPermissions')?.addEventListener('click', function() {
+            const fd = new FormData();
+            fd.append('id', document.getElementById('perm_user_id').value);
+            fd.append('allow_import_export', document.getElementById('perm_import_export').checked ? 1 : 0);
+
+            this.disabled = true;
+            this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
+
+            apiFetch('admin/users.php?action=update_permissions', { method: 'POST', body: fd })
+                .then(data => {
+                    this.disabled = false;
+                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu quyền';
+                    showToast(data.message, data.success ? 'success' : 'error');
+                    if (data.success) { permModal.classList.remove('open'); loadUsers(); }
+                })
+                .catch(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu quyền';
+                    showToast('Lỗi kết nối máy chủ.', 'error');
+                });
+        });
+    }
+
     <?php if ($is_admin): ?>
     // ─── Load Users ───────────────────────────────────────────────────────────
     function loadUsers() {
         const tbody = document.getElementById('usersTableBody');
         tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Đang tải...</td></tr>';
 
-        fetch('admin/users.php?action=list')
-            .then(r => r.json())
+        apiFetch('admin/users.php?action=list')
             .then(data => {
                 if (!data.success) { tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Lỗi tải dữ liệu.</td></tr>'; return; }
                 if (data.users.length === 0) {
@@ -636,28 +1313,39 @@ if ($conn) {
                     return;
                 }
                 tbody.innerHTML = data.users.map(u => {
-                    const initials    = u.full_name.split(' ').map(w => w[0]).slice(-2).join('').toUpperCase();
+                    // [FIX-01] Escape tất cả giá trị string từ server trước khi chèn vào innerHTML
+                    const safeName      = escapeHtml(u.full_name);
+                    const safeUsername  = escapeHtml(u.username);
+                    const safeCreatedBy = escapeHtml(u.created_by_name || '');
+
+                    const initials    = safeName.replace(/&amp;|&lt;|&gt;|&quot;|&#039;/g, '').split(' ').map(w => w[0]).filter(Boolean).slice(-2).join('').toUpperCase();
                     const statusBadge = u.is_active == 1
                         ? '<span class="status_badge active">● Hoạt động</span>'
                         : '<span class="status_badge inactive">● Vô hiệu hóa</span>';
                     const roleBadge   = u.role === 'admin'
                         ? '<span class="user_role_badge admin">Admin</span>'
-                        : '<span class="user_role_badge staff">Staff</span>';
+                        : u.role === 'store_manager'
+                        ? '<span class="user_role_badge store_manager">Quản lý kho</span>'
+                        : '<span class="user_role_badge staff">Nhân viên</span>';
                     const lastLogin   = u.last_login ? new Date(u.last_login).toLocaleString('vi-VN') : '— Chưa đăng nhập';
-                    const createdBy   = u.created_by_name || '— Hệ thống';
+                    const createdBy   = safeCreatedBy || '— Hệ thống';
                     const isSelf      = u.id == <?php echo $current_user['id']; ?>;
 
                     const toggleTitle  = u.is_active == 1 ? 'Vô hiệu hóa' : 'Kích hoạt';
                     const toggleIcon   = u.is_active == 1 ? 'block' : 'check_circle';
                     const toggleStatus = u.is_active == 1 ? 0 : 1;
 
+                    // Dùng data-attribute để truyền tên thay vì nhúng thẳng vào onclick
                     const actions = isSelf
                         ? '<span style="font-size:12px;color:#94a3b8;">Tài khoản của bạn</span>'
                         : `<div class="action_group">
                             <button class="btn_icon" title="${toggleTitle}" onclick="toggleUser(${u.id}, ${toggleStatus})">
                                 <span class="material-symbols-outlined">${toggleIcon}</span>
                             </button>
-                            ${u.role !== 'admin' ? `<button class="btn_icon danger" title="Xóa tài khoản" onclick="deleteUser(${u.id}, '${u.full_name.replace(/'/g,"\\'")}')">
+                            ${u.role === 'staff' ? `<button class="btn_icon" title="Quyền nhập/xuất kho" onclick="openPermissionsModal(${u.id}, '${safeName}', ${u.allow_import_export || 0})">
+                                <span class="material-symbols-outlined">admin_panel_settings</span>
+                            </button>` : ''}
+                            ${u.role !== 'admin' ? `<button class="btn_icon danger" title="Xóa tài khoản" data-uid="${u.id}" data-uname="${safeName}" onclick="deleteUser(this.dataset.uid, this.dataset.uname)">
                                 <span class="material-symbols-outlined">delete</span>
                             </button>` : ''}
                            </div>`;
@@ -667,8 +1355,8 @@ if ($conn) {
                           <div class="user_info_cell">
                             <div class="user_avatar">${initials}</div>
                             <div>
-                              <div class="u_fullname">${u.full_name}</div>
-                              <div class="u_username">@${u.username}</div>
+                              <div class="u_fullname">${safeName}</div>
+                              <div class="u_username">@${safeUsername}</div>
                             </div>
                           </div>
                         </td>
@@ -690,12 +1378,12 @@ if ($conn) {
         const fd = new FormData();
         fd.append('id', id);
         fd.append('is_active', newStatus);
-        fetch('admin/users.php?action=toggle', { method: 'POST', body: fd })
-            .then(r => r.json())
+        apiFetch('admin/users.php?action=toggle', { method: 'POST', body: fd })
             .then(data => {
                 showToast(data.message, data.success ? 'success' : 'error');
                 if (data.success) loadUsers();
-            });
+            })
+            .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
     }
 
     // ─── Delete user ──────────────────────────────────────────────────────────
@@ -703,12 +1391,12 @@ if ($conn) {
         if (!confirm(`Bạn có chắc muốn xóa tài khoản "${name}"? Hành động này không thể hoàn tác.`)) return;
         const fd = new FormData();
         fd.append('id', id);
-        fetch('admin/users.php?action=delete', { method: 'POST', body: fd })
-            .then(r => r.json())
+        apiFetch('admin/users.php?action=delete', { method: 'POST', body: fd })
             .then(data => {
                 showToast(data.message, data.success ? 'success' : 'error');
                 if (data.success) loadUsers();
-            });
+            })
+            .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
     }
 
     // ─── Load active sessions ─────────────────────────────────────────────────
@@ -716,14 +1404,18 @@ if ($conn) {
         const list = document.getElementById('sessionList');
         list.innerHTML = '<div class="table_loading">Đang tải...</div>';
 
-        fetch('admin/users.php?action=sessions')
-            .then(r => r.json())
+        apiFetch('admin/users.php?action=sessions')
             .then(data => {
                 if (!data.success || data.sessions.length === 0) {
                     list.innerHTML = '<div class="empty_state"><span class="material-symbols-outlined">sensors_off</span><p>Không có phiên hoạt động nào.</p></div>';
                     return;
                 }
                 list.innerHTML = data.sessions.map(s => {
+                    // [FIX-01] Escape tất cả giá trị string từ server trước khi chèn vào innerHTML
+                    const safeName      = escapeHtml(s.full_name);
+                    const safeUsername  = escapeHtml(s.username);
+                    const safeIp        = escapeHtml(s.ip_address);
+
                     const currentTag  = s.is_current ? '<span class="current_tag">Phiên này</span>' : '';
                     const loginTime   = new Date(s.created_at).toLocaleString('vi-VN');
                     const expireTime  = new Date(s.expires_at).toLocaleString('vi-VN');
@@ -736,16 +1428,19 @@ if ($conn) {
                     return `<div class="session_item ${s.is_current ? 'current_session' : ''}">
                         <div class="session_info">
                             <div class="session_user">
-                                ${s.full_name} (@${s.username}) ${currentTag}
+                                ${safeName} (@${safeUsername}) ${currentTag}
                                 <span class="user_role_badge ${s.role}" style="margin-left:6px;">${s.role === 'admin' ? 'Admin' : 'Staff'}</span>
                             </div>
                             <div class="session_meta">
-                                IP: ${s.ip_address} &nbsp;|&nbsp; Đăng nhập: ${loginTime} &nbsp;|&nbsp; Hết hạn: ${expireTime}
+                                IP: ${safeIp} &nbsp;|&nbsp; Đăng nhập: ${loginTime} &nbsp;|&nbsp; Hết hạn: ${expireTime}
                             </div>
                         </div>
                         ${kickBtn}
                     </div>`;
                 }).join('');
+            })
+            .catch(() => {
+                list.innerHTML = '<div class="empty_state"><span class="material-symbols-outlined">error</span><p>Không thể tải danh sách phiên.</p></div>';
             });
     }
 
@@ -754,12 +1449,12 @@ if ($conn) {
         if (!confirm('Đăng xuất người dùng này khỏi tất cả phiên?')) return;
         const fd = new FormData();
         fd.append('user_id', userId);
-        fetch('admin/users.php?action=kick', { method: 'POST', body: fd })
-            .then(r => r.json())
+        apiFetch('admin/users.php?action=kick', { method: 'POST', body: fd })
             .then(data => {
                 showToast(data.message, data.success ? 'success' : 'error');
                 if (data.success) loadSessions();
-            });
+            })
+            .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
     }
 
     // ─── Modal: Tạo tài khoản ─────────────────────────────────────────────────
@@ -793,8 +1488,7 @@ if ($conn) {
         btnSubmit.disabled = true;
         btnSubmit.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang tạo...';
 
-        fetch('admin/users.php?action=create', { method: 'POST', body: fd })
-            .then(r => r.json())
+        apiFetch('admin/users.php?action=create', { method: 'POST', body: fd })
             .then(data => {
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = '<span class="material-symbols-outlined">save</span> Tạo tài khoản';
@@ -854,6 +1548,19 @@ if ($conn) {
                 return;
             }
 
+            // [IMP-08] Validate kiểu dữ liệu trước khi gửi lên server
+            const priceNum = parseFloat(price);
+            const qtyNum   = parseInt(quantity, 10);
+
+            if (isNaN(priceNum) || priceNum < 0) {
+                showToast('Giá bán phải là số không âm.', 'error');
+                return;
+            }
+            if (isNaN(qtyNum) || qtyNum < 0 || !Number.isInteger(qtyNum)) {
+                showToast('Số lượng phải là số nguyên không âm.', 'error');
+                return;
+            }
+
             const fd = new FormData();
             fd.append('ten_sp', name);
             fd.append('danhmuc', category);
@@ -864,15 +1571,14 @@ if ($conn) {
             btnSubmitProd.disabled = true;
             btnSubmitProd.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
 
-            fetch('admin/add_product.php', { method: 'POST', body: fd })
-                .then(r => r.json())
+            apiFetch('admin/add_product.php', { method: 'POST', body: fd })
                 .then(data => {
                     btnSubmitProd.disabled = false;
                     btnSubmitProd.innerHTML = '<span class="material-symbols-outlined">save</span> Thêm sản phẩm';
                     showToast(data.message, data.success ? 'success' : 'error');
                     if (data.success) {
                         closeAddProdModal();
-                        fetchFilteredProducts(); // Reload product list automatically
+                        fetchFilteredProducts();
                     }
                 })
                 .catch(() => {
@@ -932,6 +1638,11 @@ if ($conn) {
             .replace(/'/g, "&#039;");
     }
 
+    // Helper number format
+    function number_format(num) {
+        return parseInt(num).toLocaleString('vi-VN');
+    }
+
     // Cập nhật tất cả các dropdown danh mục trên giao diện
     function updateCategoryDropdowns(categories) {
         // 1. Dropdown bộ lọc ở trang chính
@@ -979,15 +1690,14 @@ if ($conn) {
             btnSubmitCat.disabled = true;
             btnSubmitCat.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
 
-            fetch('admin/add_category.php', { method: 'POST', body: fd })
-                .then(r => r.json())
+            apiFetch('admin/add_category.php', { method: 'POST', body: fd })
                 .then(data => {
                     btnSubmitCat.disabled = false;
                     btnSubmitCat.innerHTML = '<span class="material-symbols-outlined">save</span> Thêm danh mục';
                     showToast(data.message, data.success ? 'success' : 'error');
                     if (data.success) {
                         closeAddCatModal();
-                        updateCategoryDropdowns(data.categories); // Cập nhật dropdowns tức thì
+                        updateCategoryDropdowns(data.categories);
                     }
                 })
                 .catch(() => {

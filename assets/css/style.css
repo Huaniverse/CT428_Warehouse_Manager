@@ -178,7 +178,8 @@ aside {
     display: flex;
     justify-content: flex-start;
     gap: 16px;
-    align-items: flex-start;
+    align-items: flex-end;
+    flex-wrap: wrap;
     padding: 12px;
     border: #c9c9c9 solid 1px;
     border-radius: 8px;
@@ -421,7 +422,7 @@ aside {
 }
 
 .product_price {
-    font-family: monospace;
+    font-family: 'Inter', sans-serif;
     font-weight: 600;
     color: #0f172a;
 }
@@ -449,6 +450,11 @@ aside {
 .badge.out_of_stock {
     background-color: #fee2e2;
     color: #991b1b;
+}
+
+.badge.hidden_product {
+    background-color: #f1f5f9;
+    color: #94a3b8;
 }
 
 .no_results {
@@ -1359,4 +1365,435 @@ aside {
     padding: 32px;
     color: #94a3b8;
     font-size: 14px;
-}
+}
+
+/*====================================RESPONSIVE DESIGN [FIX-06]=============*/
+/*
+ * Breakpoints:
+ *   ≤ 1024px — Tablet: sidebar chuyển sang top nav nằm ngang
+ *   ≤  768px — Mobile: layout dọc hoàn toàn, filter bar xếp chồng
+ *   ≤  480px — Small mobile: login ẩn brand panel, modal full width
+ */
+
+/* ── Tablet (≤ 1024px) ───────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+    /* Header: thu nhỏ padding */
+    header {
+        padding: 12px 16px;
+    }
+
+    .header_left h1 {
+        font-size: 17px;
+    }
+
+    /* Main layout: sidebar chuyển lên trên */
+    main {
+        flex-direction: column;
+    }
+
+    aside {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 12px 16px;
+    }
+
+    .sidebar_menu {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .menu_item {
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+
+    /* Main content: giảm padding */
+    .main_content {
+        padding: 20px 16px;
+    }
+
+    /* Chart grid: xuống 1 cột */
+    .chart_grid {
+        grid-template-columns: 1fr;
+    }
+
+    .main_content_sort .input_group {
+        width: 200px;
+    }
+}
+
+/* ── Mobile (≤ 768px) ────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    /* Header */
+    header {
+        padding: 10px 12px;
+    }
+
+    .header_left h1 {
+        font-size: 15px;
+    }
+
+    .user_name_display {
+        display: none; /* ẩn tên, giữ avatar và badge */
+    }
+
+    /* Dashboard grid: 2 cột trên mobile */
+    .dashboard_grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .kpi_card {
+        padding: 16px;
+    }
+
+    .kpi_value {
+        font-size: 20px;
+    }
+
+    /* Filter bar: xếp chồng dọc */
+    .main_content_sort {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .main_content_sort .input_group {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .main_content_sort .input_find {
+        width: 100%;
+    }
+
+    /* Table: cho phép scroll ngang */
+    .table_container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .product_table {
+        min-width: 640px;
+    }
+
+    .users_table {
+        min-width: 600px;
+    }
+
+    /* Settings section */
+    .settings_section_header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    /* Login page: ẩn brand panel, card chiếm toàn màn hình */
+    .login_wrapper {
+        flex-direction: column;
+        width: 100%;
+        min-height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .login_brand {
+        display: none;
+    }
+
+    .login_card {
+        width: 100%;
+        padding: 32px 24px;
+        flex: 1;
+    }
+
+    /* Modal: chiếm gần hết màn hình */
+    .modal_card {
+        width: 95vw !important;
+        padding: 24px 16px;
+    }
+}
+
+/* ── Small mobile (≤ 480px) ─────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    /* Dashboard grid: 1 cột */
+    .dashboard_grid {
+        grid-template-columns: 1fr;
+    }
+
+    .main_content {
+        padding: 16px 12px;
+    }
+
+    /* Sidebar menu: icon + text nhỏ hơn */
+    .menu_item {
+        padding: 6px 10px;
+        font-size: 12px;
+        gap: 6px;
+    }
+
+    .menu_item .material-symbols-outlined {
+        font-size: 18px;
+    }
+
+    /* Buttons trong filter bar */
+    .filter_button,
+    .add_product_button {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    /* Session list */
+    .session_item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* ── Role badges ────────────────────────────────────────────────────────── */
+.user_role_badge.store_manager {
+    background-color: #f3e8ff;
+    color: #7e22ce;
+    border: 1px solid #c084fc;
+}
+
+/* ── Import / Export buttons ─────────────────────────────────────────────── */
+.import_stock_button {
+    background-color: #10b981;
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.2s;
+}
+
+.import_stock_button:hover {
+    background-color: #059669;
+}
+
+.export_stock_button {
+    background-color: #f59e0b;
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.2s;
+}
+
+.export_stock_button:hover {
+    background-color: #d97706;
+}
+
+/* ── Action cell (product table) ────────────────────────────────────────── */
+.action_cell {
+    white-space: nowrap;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.action_cell .btn_icon {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    transition: background 0.15s, color 0.15s;
+}
+
+.action_cell .btn_icon:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.action_cell .btn_icon.danger:hover {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.action_cell .btn_icon .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* ── Hidden product row ─────────────────────────────────────────────────── */
+.row_hidden {
+    opacity: 0.55;
+}
+
+/* ── Toggle switch ──────────────────────────────────────────────────────── */
+.toggle_switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.toggle_switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle_slider {
+    position: absolute;
+    inset: 0;
+    background-color: #cbd5e1;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: background-color 0.25s;
+}
+
+.toggle_slider::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.25s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+}
+
+.toggle_switch input:checked + .toggle_slider {
+    background-color: #3b82f6;
+}
+
+.toggle_switch input:checked + .toggle_slider::before {
+    transform: translateX(20px);
+}
+
+/* ── Stock info (export modal) ──────────────────────────────────────────── */
+.stock_info {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #475569;
+}
+
+/* ── Modal form helpers ─────────────────────────────────────────────────── */
+.modal_card .form_group label {
+    font-weight: 500;
+    font-size: 13px;
+    color: #334155;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.modal_card select,
+.modal_card input[type="text"],
+.modal_card input[type="number"],
+.modal_card textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border 0.2s;
+}
+
+.modal_card select:focus,
+.modal_card input[type="text"]:focus,
+.modal_card input[type="number"]:focus,
+.modal_card textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
+}
+
+.modal_card textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.modal_footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.modal_footer .btn_primary,
+.modal_footer .btn_secondary {
+    font-size: 13px;
+    padding: 7px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    font-weight: 500;
+}
+
+.modal_footer .btn_primary {
+    background-color: #3b82f6;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.modal_footer .btn_primary:hover {
+    background-color: #2563eb;
+}
+
+.modal_footer .btn_secondary {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
+.modal_footer .btn_secondary:hover {
+    background-color: #e2e8f0;
+}
+
+/* ── Filter checkbox row ────────────────────────────────────────────────── */
+.filter_row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #475569;
+    cursor: pointer;
+}
+
+.filter_row input[type="checkbox"] {
+    accent-color: #3b82f6;
+}
+
+/* ── Responsive: action column ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .action_cell {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .import_stock_button,
+    .export_stock_button {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+}
+/*===========================================================================*/

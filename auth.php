@@ -7,17 +7,45 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Phát hiện AJAX request: fetch() gửi kèm header X-Requested-With
+// hoặc Accept chứa application/json
+function isAjaxRequest(): bool {
+    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+        strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+        return true;
+    }
+    $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+    return str_contains($accept, 'application/json');
+}
+
+// Hàm chuyển hướng thống nhất: AJAX → JSON, trang thường → redirect
+function redirectToLogin(string $reason = 'expired'): void {
+    if (isAjaxRequest()) {
+        http_response_code(401);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'success'  => false,
+            'redirect' => 'login.php?expired=1',
+            'message'  => $reason === 'expired'
+                ? 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
+                : 'Bạn chưa đăng nhập.',
+        ]);
+        exit;
+    }
+    header('Location: login.php?expired=1');
+    exit;
+}
+
 // Nếu chưa đăng nhập → redirect về login
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['session_token'])) {
-    header('Location: login.php');
-    exit;
+    redirectToLogin('unauthenticated');
 }
 
 // Xác minh session token còn hợp lệ trong DB
 if ($conn) {
     $token = $_SESSION['session_token'];
     $stmt = $conn->prepare(
-        "SELECT s.user_id, s.expires_at, u.is_active, u.role, u.full_name
+        "SELECT s.user_id, s.expires_at, u.is_active, u.role, u.full_name, u.allow_import_export
          FROM sessions s
          JOIN users u ON s.user_id = u.id
          WHERE s.session_token = ? AND s.expires_at > NOW() AND u.is_active = 1"
@@ -33,14 +61,14 @@ if ($conn) {
             // Session hết hạn hoặc user bị vô hiệu hóa → đăng xuất
             $_SESSION = [];
             session_destroy();
-            header('Location: login.php?expired=1');
-            exit;
+            redirectToLogin('expired');
         }
 
-        // Đồng bộ dữ liệu role (phòng trường hợp role thay đổi)
-        $_SESSION['role']     = $session_data['role'];
-        $_SESSION['name']     = $session_data['full_name'];
-        $_SESSION['is_active'] = $session_data['is_active'];
+        // Đồng bộ dữ liệu role và quyền (phòng trường hợp thay đổi)
+        $_SESSION['role']                = $session_data['role'];
+        $_SESSION['name']                = $session_data['full_name'];
+        $_SESSION['is_active']           = $session_data['is_active'];
+        $_SESSION['allow_import_export'] = $session_data['allow_import_export'] ?? 0;
     }
 }
 
@@ -50,19 +78,37 @@ function isAdmin(): bool {
     return ($_SESSION['role'] ?? '') === 'admin';
 }
 
+function isStoreManager(): bool {
+    return ($_SESSION['role'] ?? '') === 'store_manager';
+}
+
+function canImportExport(): bool {
+    $role = $_SESSION['role'] ?? '';
+    if ($role === 'admin' || $role === 'store_manager') return true;
+    if ($role === 'staff') return ($_SESSION['allow_import_export'] ?? 0) == 1;
+    return false;
+}
+
 function requireAdmin(): void {
     if (!isAdmin()) {
         http_response_code(403);
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=utf-8');
         die(json_encode(['success' => false, 'message' => 'Bạn không có quyền thực hiện thao tác này.']));
+    }
+}
+
+function requireLogin(): void {
+    if (!isset($_SESSION['user_id']) || !isset($_SESSION['session_token'])) {
+        redirectToLogin('unauthenticated');
     }
 }
 
 function getCurrentUser(): array {
     return [
-        'id'       => $_SESSION['user_id']  ?? 0,
-        'username' => $_SESSION['username'] ?? '',
-        'name'     => $_SESSION['name']     ?? '',
-        'role'     => $_SESSION['role']     ?? '',
+        'id'                  => $_SESSION['user_id']  ?? 0,
+        'username'            => $_SESSION['username'] ?? '',
+        'name'                => $_SESSION['name']     ?? '',
+        'role'                => $_SESSION['role']     ?? '',
+        'allow_import_export' => $_SESSION['allow_import_export'] ?? 0,
     ];
 }

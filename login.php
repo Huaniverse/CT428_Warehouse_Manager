@@ -18,7 +18,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if ($username === '' || $password === '') {
+    // [IMP-05] Rate limiting — chặn brute force sau 5 lần sai liên tiếp
+    if (!isset($_SESSION['login_attempts'])) {
+        $_SESSION['login_attempts']    = 0;
+        $_SESSION['login_last_attempt'] = 0;
+    }
+
+    $max_attempts  = 5;
+    $lockout_secs  = 300; // 5 phút
+    $now           = time();
+    $time_since    = $now - (int)$_SESSION['login_last_attempt'];
+
+    // Reset đếm nếu đã qua thời gian lockout
+    if ($_SESSION['login_attempts'] >= $max_attempts && $time_since >= $lockout_secs) {
+        $_SESSION['login_attempts'] = 0;
+    }
+
+    if ($_SESSION['login_attempts'] >= $max_attempts) {
+        $wait = $lockout_secs - $time_since;
+        $error = "Quá nhiều lần đăng nhập thất bại. Vui lòng thử lại sau " . ceil($wait / 60) . " phút.";
+    } elseif ($username === '' || $password === '') {
         $error = 'Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.';
     } elseif (!$conn) {
         $error = 'Không thể kết nối cơ sở dữ liệu. Vui lòng thử lại sau.';
@@ -30,13 +49,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
 
         if (!$user) {
+            $_SESSION['login_attempts']++;
+            $_SESSION['login_last_attempt'] = time();
             $error = 'Tên đăng nhập hoặc mật khẩu không đúng.';
         } elseif (!$user['is_active']) {
             $error = 'Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.';
         } elseif (!password_verify($password, $user['password'])) {
+            $_SESSION['login_attempts']++;
+            $_SESSION['login_last_attempt'] = time();
             $error = 'Tên đăng nhập hoặc mật khẩu không đúng.';
         } else {
-            // Xác thực thành công
+            // Xác thực thành công — reset bộ đếm
+            $_SESSION['login_attempts']     = 0;
+            $_SESSION['login_last_attempt'] = 0;
             session_regenerate_id(true);
 
             // Tạo session token ngẫu nhiên
@@ -53,6 +78,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt2->bind_param("sisss", $token, $user['id'], $ip, $ua, $expires_at);
             $stmt2->execute();
             $stmt2->close();
+
+            // [IMP-03] Dọn các session hết hạn — chạy mỗi lần đăng nhập thành công
+            // Giữ bảng sessions gọn, tránh tích tụ records vô thời hạn
+            $conn->query("DELETE FROM sessions WHERE expires_at < NOW()");
 
             // Cập nhật last_login
             $stmt3 = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
@@ -173,8 +202,9 @@ $expired = isset($_GET['expired']) && $_GET['expired'] == '1';
               autocomplete="current-password"
               required
             >
-            <button type="button" class="toggle_password" id="togglePassword" title="Hiện/ẩn mật khẩu">
-              <span class="material-symbols-outlined" id="toggleIcon">visibility</span>
+            <button type="button" class="toggle_password" id="togglePassword"
+                    title="Hiện/ẩn mật khẩu" aria-label="Hiện/ẩn mật khẩu">
+              <span class="material-symbols-outlined" id="toggleIcon" aria-hidden="true">visibility</span>
             </button>
           </div>
         </div>

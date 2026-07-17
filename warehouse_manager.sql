@@ -3,14 +3,13 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th6 30, 2026 lúc 03:24 PM
+-- Thời gian đã tạo: Th7 15, 2026
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -20,6 +19,8 @@ SET time_zone = "+00:00";
 --
 -- Cơ sở dữ liệu: `warehouse_manager`
 --
+CREATE DATABASE IF NOT EXISTS `warehouse_manager` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `warehouse_manager`;
 
 -- --------------------------------------------------------
 
@@ -29,7 +30,8 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `danhmuc` (
   `MaDM` varchar(10) NOT NULL,
-  `TenDM` varchar(100) NOT NULL
+  `TenDM` varchar(100) NOT NULL,
+  PRIMARY KEY (`MaDM`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -51,12 +53,17 @@ INSERT INTO `danhmuc` (`MaDM`, `TenDM`) VALUES
 --
 
 CREATE TABLE `sanpham` (
-  `MaSP` int(11) NOT NULL,
+  `MaSP` int(11) NOT NULL AUTO_INCREMENT,
   `TenSP` varchar(200) NOT NULL,
   `MoTa` text DEFAULT NULL,
   `Gia` decimal(15,0) NOT NULL DEFAULT 0,
   `SoLuong` int(11) NOT NULL DEFAULT 0,
-  `DanhMuc` varchar(10) NOT NULL
+  `DanhMuc` varchar(10) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`MaSP`),
+  KEY `FK_SP_DanhMuc` (`DanhMuc`),
+  FULLTEXT KEY `ft_search` (`TenSP`, `MoTa`),
+  CONSTRAINT `FK_SP_DanhMuc` FOREIGN KEY (`DanhMuc`) REFERENCES `danhmuc` (`MaDM`) ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -234,6 +241,36 @@ INSERT INTO `sanpham` (`MaSP`, `TenSP`, `MoTa`, `Gia`, `SoLuong`, `DanhMuc`) VAL
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `full_name` varchar(100) NOT NULL,
+  `role` enum('admin','store_manager','staff') NOT NULL DEFAULT 'staff',
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `allow_import_export` tinyint(1) NOT NULL DEFAULT 0,
+  `created_by` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `last_login` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`),
+  KEY `created_by` (`created_by`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `users`
+--
+
+INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `role`, `is_active`, `allow_import_export`, `created_by`, `created_at`, `last_login`) VALUES
+(1, 'admin', '$2y$12$tLxN.y5yFOlS4i676dUWJulxHF3T3imvv0VteXiNx7MphW6qhGjqW', 'Quản trị viên', 'admin', 1, 1, 1, NULL, '2026-06-30 12:36:57');
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `sessions`
 --
 
@@ -243,111 +280,110 @@ CREATE TABLE `sessions` (
   `ip_address` varchar(45) DEFAULT NULL,
   `user_agent` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `expires_at` datetime NOT NULL
+  `expires_at` datetime NOT NULL,
+  PRIMARY KEY (`session_token`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_expires_at` (`expires_at`),
+  CONSTRAINT `sessions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Đang đổ dữ liệu cho bảng `sessions`
---
-
-INSERT INTO `sessions` (`session_token`, `user_id`, `ip_address`, `user_agent`, `created_at`, `expires_at`) VALUES
-('76a42bd5d5695762e8afd3e4a9895dafe2f19a973e0ea2ef012dcedf7a7906df1f4d58236ceb29f3e5d96d180a50cbd51368ef3caaf8c20fcacf40241ac96943', 1, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0', '2026-06-30 12:36:57', '2026-06-30 22:36:57');
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `users`
+-- Cấu trúc bảng cho bảng `phieu_nhap`
 --
 
-CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `full_name` varchar(100) NOT NULL,
-  `role` enum('admin','staff') NOT NULL DEFAULT 'staff',
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `created_by` int(11) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `last_login` timestamp NULL DEFAULT NULL
+CREATE TABLE `phieu_nhap` (
+  `ma_phieu` int(11) NOT NULL AUTO_INCREMENT,
+  `san_pham` int(11) NOT NULL,
+  `so_luong` int(11) NOT NULL,
+  `ghi_chu` text DEFAULT NULL,
+  `nguoi_tao` int(11) NOT NULL,
+  `ngay_tao` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`ma_phieu`),
+  KEY `fk_pn_sanpham` (`san_pham`),
+  KEY `fk_pn_nguoi_tao` (`nguoi_tao`),
+  KEY `fk_pn_ngay_tao` (`ngay_tao`),
+  CONSTRAINT `fk_pn_sanpham` FOREIGN KEY (`san_pham`) REFERENCES `sanpham` (`MaSP`) ON DELETE RESTRICT,
+  CONSTRAINT `fk_pn_nguoi_tao` FOREIGN KEY (`nguoi_tao`) REFERENCES `users` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `users`
+-- Đang đổ dữ liệu cho bảng `phieu_nhap`
 --
 
-INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `role`, `is_active`, `created_by`, `created_at`, `last_login`) VALUES
-(1, 'admin', '$2y$12$tLxN.y5yFOlS4i676dUWJulxHF3T3imvv0VteXiNx7MphW6qhGjqW', 'Quản trị viên', 'admin', 1, NULL, '2026-06-30 12:33:17', '2026-06-30 12:36:57');
+INSERT INTO `phieu_nhap` (`ma_phieu`, `san_pham`, `so_luong`, `ghi_chu`, `nguoi_tao`, `ngay_tao`) VALUES
+(1, 20, 200, 'Nhập kho đợt đầu — lô hàng iPhone 13', 1, '2026-05-01 09:00:00'),
+(2, 27, 200, 'Nhập kho đợt đầu — laptop học tập', 1, '2026-05-01 09:15:00'),
+(3, 28, 200, 'Nhập kho đợt đầu — laptop gaming', 1, '2026-05-01 09:30:00'),
+(4, 29, 250, 'Nhập kho đợt đầu — laptop giá rẻ', 1, '2026-05-01 09:45:00'),
+(5, 32, 170, 'Nhập kho đợt đầu — MacBook Pro', 1, '2026-05-01 10:00:00'),
+(6, 10, 350, 'Nhập kho đợt đầu — phụ kiện bán chạy', 1, '2026-05-01 10:15:00'),
+(7, 13, 100, 'Nhập kho đợt đầu — tai nghe Apple', 1, '2026-05-01 10:30:00'),
+(8, 53, 230, 'Nhập kho đợt đầu — tai nghe phổ thông', 1, '2026-05-01 10:45:00'),
+(9, 57, 220, 'Nhập kho đợt đầu — gia dụng', 1, '2026-05-01 11:00:00'),
+(10, 65, 260, 'Nhập kho đợt đầu — gia dụng cao cấp', 1, '2026-05-01 11:15:00'),
+(11, 1, 50, 'Nhập bổ sung lô mới iPhone 15 Pro Max', 1, '2026-05-15 09:00:00'),
+(12, 25, 200, 'Nhập bổ sung — điện thoại tầm trung', 1, '2026-05-15 09:30:00'),
+(13, 33, 120, 'Nhập bổ sung — laptop văn phòng', 1, '2026-05-15 10:00:00'),
+(14, 37, 70, 'Nhập bổ sung phụ kiện gaming', 1, '2026-05-15 10:30:00'),
+(15, 42, 160, 'Nhập bổ sung hub chuyển đổi', 1, '2026-05-15 11:00:00'),
+(16, 48, 120, 'Nhập bổ sung tai nghe giá rẻ', 1, '2026-05-15 11:30:00'),
+(17, 51, 160, 'Nhập bổ sung mic chuyên nghiệp', 1, '2026-05-15 12:00:00'),
+(18, 66, 210, 'Nhập bổ sung gia dụng', 1, '2026-05-15 12:30:00'),
+(19, 7, 160, 'Nhập mùa hè — sạc dự phòng du lịch', 1, '2026-06-10 09:00:00'),
+(20, 30, 150, 'Nhập bổ sung laptop gaming', 1, '2026-06-10 09:30:00'),
+(21, 38, 70, 'Nhập bổ sung bàn phím cơ', 1, '2026-06-10 10:00:00'),
+(22, 44, 200, 'Nhập bổ sung kính cường lực', 1, '2026-06-10 10:30:00'),
+(23, 59, 190, 'Nhập bổ sung gia dụng', 1, '2026-06-10 11:00:00'),
+(24, 61, 100, 'Nhập bổ sung lò vi sóng', 1, '2026-06-10 11:30:00'),
+(25, 161, 190, 'Nhập bổ sung nồi chiên', 1, '2026-06-10 12:00:00');
+
+-- --------------------------------------------------------
 
 --
--- Chỉ mục cho các bảng đã đổ
+-- Cấu trúc bảng cho bảng `phieu_xuat`
 --
 
---
--- Chỉ mục cho bảng `danhmuc`
---
-ALTER TABLE `danhmuc`
-  ADD PRIMARY KEY (`MaDM`);
+CREATE TABLE `phieu_xuat` (
+  `ma_phieu` int(11) NOT NULL AUTO_INCREMENT,
+  `san_pham` int(11) NOT NULL,
+  `so_luong` int(11) NOT NULL,
+  `ghi_chu` text DEFAULT NULL,
+  `nguoi_tao` int(11) NOT NULL,
+  `ngay_tao` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`ma_phieu`),
+  KEY `fk_px_sanpham` (`san_pham`),
+  KEY `fk_px_nguoi_tao` (`nguoi_tao`),
+  KEY `fk_px_ngay_tao` (`ngay_tao`),
+  CONSTRAINT `fk_px_sanpham` FOREIGN KEY (`san_pham`) REFERENCES `sanpham` (`MaSP`) ON DELETE RESTRICT,
+  CONSTRAINT `fk_px_nguoi_tao` FOREIGN KEY (`nguoi_tao`) REFERENCES `users` (`id`) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Chỉ mục cho bảng `sanpham`
---
-ALTER TABLE `sanpham`
-  ADD PRIMARY KEY (`MaSP`),
-  ADD KEY `FK_SP_DanhMuc` (`DanhMuc`);
-
---
--- Chỉ mục cho bảng `sessions`
---
-ALTER TABLE `sessions`
-  ADD PRIMARY KEY (`session_token`),
-  ADD KEY `idx_user_id` (`user_id`),
-  ADD KEY `idx_expires_at` (`expires_at`);
-
---
--- Chỉ mục cho bảng `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `username` (`username`),
-  ADD KEY `created_by` (`created_by`);
-
---
--- AUTO_INCREMENT cho các bảng đã đổ
+-- Đang đổ dữ liệu cho bảng `phieu_xuat`
 --
 
---
--- AUTO_INCREMENT cho bảng `sanpham`
---
-ALTER TABLE `sanpham`
-  MODIFY `MaSP` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=167;
+INSERT INTO `phieu_xuat` (`ma_phieu`, `san_pham`, `so_luong`, `ghi_chu`, `nguoi_tao`, `ngay_tao`) VALUES
+(1, 20, 8, 'Xuất bán — đơn hàng khách lẻ', 1, '2026-05-10 14:00:00'),
+(2, 27, 15, 'Xuất bán — đơn hàng học sinh SV', 1, '2026-05-10 14:30:00'),
+(3, 29, 10, 'Xuất bán — đơn hàng online', 1, '2026-05-10 15:00:00'),
+(4, 13, 12, 'Xuất bán — phụ kiện kèm điện thoại', 1, '2026-05-10 15:30:00'),
+(5, 53, 15, 'Xuất bán — khuyến mãi mùa hè', 1, '2026-05-10 16:00:00'),
+(6, 10, 40, 'Xuất bán buôn — cửa hàng phụ kiện', 1, '2026-05-10 16:30:00'),
+(7, 1, 5, 'Xuất bán — đơn VIP', 1, '2026-05-25 09:00:00'),
+(8, 28, 6, 'Xuất bán — đơn hàng gaming', 1, '2026-05-25 09:30:00'),
+(9, 32, 10, 'Xuất bán — đơn doanh nghiệp', 1, '2026-05-25 10:00:00'),
+(10, 48, 8, 'Xuất bán — đơn online', 1, '2026-05-25 10:30:00'),
+(11, 42, 12, 'Xuất bán — phụ kiện kèm laptop', 1, '2026-05-25 11:00:00'),
+(12, 66, 10, 'Xuất bán — đơn gia dụng', 1, '2026-05-25 11:30:00'),
+(13, 25, 7, 'Xuất bán — đơn online', 1, '2026-06-15 09:00:00'),
+(14, 33, 7, 'Xuất bán — đơn văn phòng', 1, '2026-06-15 09:30:00'),
+(15, 7, 10, 'Xuất bán — phụ kiện kèm điện thoại', 1, '2026-06-15 10:00:00'),
+(16, 30, 6, 'Xuất bán — đơn gaming', 1, '2026-06-15 10:30:00'),
+(17, 44, 12, 'Xuất bán buôn', 1, '2026-06-15 11:00:00'),
+(18, 59, 7, 'Xuất bán — đơn gia dụng', 1, '2026-06-15 11:30:00');
 
---
--- AUTO_INCREMENT cho bảng `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- Các ràng buộc cho các bảng đã đổ
---
-
---
--- Các ràng buộc cho bảng `sanpham`
---
-ALTER TABLE `sanpham`
-  ADD CONSTRAINT `FK_SP_DanhMuc` FOREIGN KEY (`DanhMuc`) REFERENCES `danhmuc` (`MaDM`) ON UPDATE CASCADE;
-
---
--- Các ràng buộc cho bảng `sessions`
---
-ALTER TABLE `sessions`
-  ADD CONSTRAINT `sessions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Các ràng buộc cho bảng `users`
---
-ALTER TABLE `users`
-  ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
