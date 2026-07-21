@@ -3,6 +3,7 @@
 
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../auth.php';
+require_once __DIR__ . '/helpers.php'; // [FIX-07] Dùng helper validation
 requireAdmin();
 
 header('Content-Type: application/json; charset=utf-8');
@@ -24,7 +25,11 @@ switch ($action) {
             exit;
         }
 
-        $stmt = $conn->prepare("SELECT MaSP, TenSP, MoTa, Gia, SoLuong, DanhMuc, is_active FROM sanpham WHERE MaSP = ?");
+        $stmt = $conn->prepare(
+            // [FIX-05] Chỉ lấy sản phẩm đang active — ngăn edit sản phẩm đã ẩn
+            "SELECT MaSP, TenSP, MoTa, Gia, SoLuong, DanhMuc, is_active FROM sanpham WHERE MaSP = ? AND is_active = 1"
+        );
+
         $stmt->bind_param("i", $ma_sp);
         $stmt->execute();
         $product = $stmt->get_result()->fetch_assoc();
@@ -43,40 +48,30 @@ switch ($action) {
             echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']);
             exit;
         }
+        // [SEC-01] Xác minh CSRF token
+        verifyCsrfToken();
 
-        $ma_sp    = (int)($_POST['ma_sp'] ?? 0);
-        $ten_sp   = trim($_POST['ten_sp'] ?? '');
-        $danhmuc  = trim($_POST['danhmuc'] ?? '');
-        $mota     = trim($_POST['mota'] ?? '');
-        $gia      = isset($_POST['gia']) ? (double)$_POST['gia'] : 0.0;
 
+        $ma_sp = (int)($_POST['ma_sp'] ?? 0);
         if ($ma_sp <= 0) {
             echo json_encode(['success' => false, 'message' => 'Mã sản phẩm không hợp lệ.']);
             exit;
         }
-        if ($ten_sp === '') {
-            echo json_encode(['success' => false, 'message' => 'Tên sản phẩm không được để trống.']);
-            exit;
-        }
-        if ($danhmuc === '') {
-            echo json_encode(['success' => false, 'message' => 'Vui lòng chọn danh mục sản phẩm.']);
-            exit;
-        }
-        if ($gia < 0) {
-            echo json_encode(['success' => false, 'message' => 'Giá bán phải lớn hơn hoặc bằng 0.']);
+
+        // Nhận và làm sạch dữ liệu đầu vào, dùng helper để DRY
+        $validation = validateProductInput($conn, $_POST, true);
+
+        if (!$validation['success']) {
+            echo json_encode(['success' => false, 'message' => $validation['message']]);
             exit;
         }
 
-        // Kiểm tra danh mục tồn tại
-        $check_dm = $conn->prepare("SELECT MaDM FROM danhmuc WHERE MaDM = ?");
-        $check_dm->bind_param("s", $danhmuc);
-        $check_dm->execute();
-        if ($check_dm->get_result()->num_rows === 0) {
-            echo json_encode(['success' => false, 'message' => 'Danh mục sản phẩm không tồn tại.']);
-            $check_dm->close();
-            exit;
-        }
-        $check_dm->close();
+        $data = $validation['data'];
+        $ten_sp   = $data['ten_sp'];
+        $danhmuc  = $data['danhmuc'];
+        $mota     = $data['mota'];
+        $gia      = $data['gia'];
+
 
         // Kiểm tra sản phẩm tồn tại
         $check_sp = $conn->prepare("SELECT MaSP FROM sanpham WHERE MaSP = ?");
@@ -108,6 +103,9 @@ switch ($action) {
             echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']);
             exit;
         }
+        // [SEC-01] Xác minh CSRF token
+        verifyCsrfToken();
+
 
         $ma_sp     = (int)($_POST['ma_sp'] ?? 0);
         $new_state = (int)($_POST['is_active'] ?? 0) ? 1 : 0;

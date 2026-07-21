@@ -70,6 +70,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ip         = $_SERVER['REMOTE_ADDR'] ?? '';
             $ua         = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
 
+            // Giới hạn 1 phiên / 1 tài khoản — xoá mọi session cũ trước khi tạo mới
+            $del = $conn->prepare("DELETE FROM sessions WHERE user_id = ?");
+            $del->bind_param("i", $user['id']);
+            $del->execute();
+            $del->close();
+
             // Ghi vào bảng sessions
             $stmt2 = $conn->prepare(
                 "INSERT INTO sessions (session_token, user_id, ip_address, user_agent, expires_at)

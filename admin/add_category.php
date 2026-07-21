@@ -13,6 +13,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// [SEC-01] Xác minh CSRF token — chống CSRF attack
+verifyCsrfToken();
+
+
 if (!$conn) {
     echo json_encode(['success' => false, 'message' => 'Lỗi kết nối cơ sở dữ liệu.']);
     exit;

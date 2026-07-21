@@ -1,0 +1,11 @@
+# [SEC-08] Bảo vệ các file cấu hình và auth khỏi truy cập trực tiếp
+<FilesMatch "^(config\.php|config\.local\.php|config\.local\.example\.php|db\.php|auth\.php)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Tắt directory listing
+Options -Indexes
+
+# Ẩn lỗi PHP trên môi trường thật (tuỳ chọn)
+# php_flag display_errors off

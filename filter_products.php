@@ -12,18 +12,16 @@ $search      = isset($_GET['search']) ? trim($_GET['search']) : '';
 $category    = isset($_GET['category']) ? trim($_GET['category']) : '';
 $price_sort  = isset($_GET['price_sort']) ? trim($_GET['price_sort']) : '';
 $qty_sort    = isset($_GET['qty_sort']) ? trim($_GET['qty_sort']) : '';
+$page        = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$limit_param = isset($_GET['limit']) ? $_GET['limit'] : '10';
 $is_admin    = isAdmin();
 
-$sql = "SELECT s.MaSP, s.TenSP, s.MoTa, s.Gia, s.SoLuong, s.is_active, d.TenDM 
-        FROM sanpham s 
-        JOIN danhmuc d ON s.DanhMuc = d.MaDM 
-        WHERE 1=1";
-
+$where = "1=1";
 $params = [];
 $types = "";
 
 if ($search !== '') {
-    $sql .= " AND (s.TenSP LIKE ? OR s.MoTa LIKE ?)";
+    $where .= " AND (s.TenSP LIKE ? OR s.MoTa LIKE ?)";
     $search_param = "%" . $search . "%";
     $params[] = $search_param;
     $params[] = $search_param;
@@ -31,11 +29,41 @@ if ($search !== '') {
 }
 
 if ($category !== '') {
-    $sql .= " AND s.DanhMuc = ?";
+    $where .= " AND s.DanhMuc = ?";
     $params[] = $category;
     $types .= "s";
 }
 
+// Lấy tổng số lượng để phân trang
+$sql_count = "SELECT COUNT(*) as total FROM sanpham s JOIN danhmuc d ON s.DanhMuc = d.MaDM WHERE $where";
+$stmt_count = $conn->prepare($sql_count);
+if ($stmt_count) {
+    if ($types !== "") {
+        $stmt_count->bind_param($types, ...$params);
+    }
+    $stmt_count->execute();
+    $res_count = $stmt_count->get_result();
+    $total_records = $res_count->fetch_assoc()['total'];
+    $stmt_count->close();
+} else {
+    $total_records = 0;
+}
+
+$limit = ($limit_param === 'all') ? $total_records : (int)$limit_param;
+if ($limit <= 0) $limit = 10;
+$total_pages = $limit > 0 ? ceil($total_records / $limit) : 1;
+if ($page > $total_pages) $page = max(1, $total_pages);
+$offset = ($page - 1) * $limit;
+
+header("X-Total-Records: $total_records");
+header("X-Total-Pages: $total_pages");
+header("X-Current-Page: $page");
+header("X-Per-Page: $limit");
+
+$sql = "SELECT s.MaSP, s.TenSP, s.MoTa, s.Gia, s.SoLuong, s.is_active, d.TenDM 
+        FROM sanpham s 
+        JOIN danhmuc d ON s.DanhMuc = d.MaDM 
+        WHERE $where";
 $order_by_clauses = [];
 
 if ($price_sort === 'asc') {
@@ -56,6 +84,10 @@ if (count($order_by_clauses) > 0) {
     $sql .= " ORDER BY s.MaSP ASC";
 }
 
+if ($limit_param !== 'all') {
+    $sql .= " LIMIT $limit OFFSET $offset";
+}
+
 $colspan = $is_admin ? 8 : 7;
 
 $stmt = $conn->prepare($sql);
@@ -70,7 +102,8 @@ if ($stmt) {
         while ($row = $result->fetch_assoc()) {
             $ma_sp     = (int)$row['MaSP'];
             $ten_sp    = htmlspecialchars($row['TenSP']);
-            $mo_ta     = htmlspecialchars($row['MoTa']);
+            $mo_ta     = htmlspecialchars($row['MoTa'], ENT_QUOTES, 'UTF-8'); // [SEC-02] ENT_QUOTES ngăn XSS qua attribute title
+
             $gia       = number_format($row['Gia'], 0, ',', '.') . ' đ';
             $so_luong  = (int)$row['SoLuong'];
             $ten_dm    = htmlspecialchars($row['TenDM']);

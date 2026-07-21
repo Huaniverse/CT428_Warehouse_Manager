@@ -761,6 +761,53 @@ aside {
     font-size: 18px;
 }
 
+/* ── Product Searchable Combobox ───────────────────────────────────────── */
+.product_combobox {
+    position: relative;
+}
+
+.combobox_dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    max-height: 240px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.combobox_item {
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #334155;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.combobox_item:last-child {
+    border-bottom: none;
+}
+
+.combobox_item:hover,
+.combobox_item.active {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.combobox_empty {
+    padding: 14px;
+    text-align: center;
+    font-size: 13px;
+    color: #94a3b8;
+}
+
 /* Login button */
 .login_btn {
     display: flex;

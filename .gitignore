@@ -1,4 +1,7 @@
 DuLieu.xlsx
 
-# [IMP-04] DB credentials — không commit lên repo
-config.php
+# [SEC-06] Credentials thật — KHÔNG commit lên repo
+config.local.php
+
+# config.php giờ chỉ là loader, an toàn để commit
+# config.local.example.php là template mẫu, an toàn để commit

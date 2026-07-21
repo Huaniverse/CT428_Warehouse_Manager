@@ -7,6 +7,39 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// ── CSRF Protection ───────────────────────────────────────────────────────────
+
+/**
+ * Sinh CSRF token vào session nếu chưa có.
+ * Sử dụng random_bytes(32) → bin2hex để đạt entropy 256-bit.
+ */
+function generateCsrfToken(): string {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+/**
+ * Xác minh CSRF token từ header X-CSRF-Token hoặc POST field csrf_token.
+ * Nếu không hợp lệ → trả 403 JSON và dừng thực thi.
+ */
+function verifyCsrfToken(): void {
+    $expected = $_SESSION['csrf_token'] ?? '';
+    // Ưu tiên lấy từ header (AJAX pattern), fallback về POST field
+    $received = $_SERVER['HTTP_X_CSRF_TOKEN']
+        ?? $_SERVER['HTTP_X_CSRF-TOKEN']
+        ?? $_POST['csrf_token']
+        ?? '';
+
+    if ($expected === '' || !hash_equals($expected, $received)) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'message' => 'CSRF token không hợp lệ. Vui lòng tải lại trang.']);
+        exit;
+    }
+}
+
 // Phát hiện AJAX request: fetch() gửi kèm header X-Requested-With
 // hoặc Accept chứa application/json
 function isAjaxRequest(): bool {
@@ -71,6 +104,10 @@ if ($conn) {
         $_SESSION['allow_import_export'] = $session_data['allow_import_export'] ?? 0;
     }
 }
+
+// Sinh CSRF token cho session (dùng ở mọi trang cần bảo vệ)
+generateCsrfToken();
+
 
 // ── Tiện ích kiểm tra quyền ──────────────────────────────────────────────────
 

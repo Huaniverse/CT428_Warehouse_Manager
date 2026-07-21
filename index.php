@@ -81,13 +81,15 @@ if ($conn) {
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>Quản Lí Kho — Nhóm 10</title>
   <meta name="description" content="Hệ thống quản lý kho hàng, theo dõi tồn kho theo thời gian thực.">
+  <!-- CSRF token — được sinh bởi auth.php::generateCsrfToken(), dùng bởi apiFetch() -->
+  <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
   <link rel="stylesheet" href="assets/css/style.css?v=<?php echo filemtime('assets/css/style.css'); ?>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
@@ -275,6 +277,18 @@ if ($conn) {
             </div>
           </div>
           <div class="search_field_wrapper">
+            <label for="select_limit" class="search_label">Hiển thị</label>
+            <div class="input_group">
+              <select name="limit" id="select_limit">
+                <option value="10">10 SP</option>
+                <option value="20">20 SP</option>
+                <option value="30">30 SP</option>
+                <option value="40">40 SP</option>
+                <option value="50">50 SP</option>
+              </select>
+            </div>
+          </div>
+          <div class="search_field_wrapper">
             <span class="search_label">Thao tác</span>
             <div style="display: flex; align-items: center; height: 38px; gap: 8px; flex-wrap: wrap;">
               <?php if ($is_admin): ?>
@@ -324,6 +338,7 @@ if ($conn) {
               </tbody>
             </table>
           </div>
+          <div id="productPagination" style="padding:12px 0; display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-top: 10px;"></div>
         </div>
       </div>
 
@@ -364,7 +379,7 @@ if ($conn) {
               </tbody>
             </table>
           </div>
-          <div id="importHistoryPagination" style="padding:12px 0; text-align:center;"></div>
+          <div id="importHistoryPagination" style="padding:12px 0; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;"></div>
         </div>
 
         <!-- Bảng phiếu xuất (ẩn mặc định) -->
@@ -386,7 +401,7 @@ if ($conn) {
               </tbody>
             </table>
           </div>
-          <div id="exportHistoryPagination" style="padding:12px 0; text-align:center;"></div>
+          <div id="exportHistoryPagination" style="padding:12px 0; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;"></div>
         </div>
       </div>
       <?php endif; ?>
@@ -675,10 +690,10 @@ if ($conn) {
   </div>
   <?php endif; ?>
 
-  <!-- Modal nhập kho -->
+  <!-- Modal nhập kho (Batch) -->
   <?php if (canImportExport()): ?>
   <div class="modal_overlay" id="importStockModal">
-    <div class="modal_card" style="width: 420px;">
+    <div class="modal_card" style="width: 680px; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal_header">
         <h3>
           <span class="material-symbols-outlined" style="color:#16a34a;">download</span>
@@ -688,36 +703,74 @@ if ($conn) {
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
-      <div class="modal_body">
-        <div class="form_group">
-          <label for="import_product">Sản phẩm</label>
-          <div class="form_input_wrapper">
-            <span class="material-symbols-outlined form_icon">inventory_2</span>
-            <select id="import_product" class="form_input" style="cursor:pointer;">
-              <option value="">-- Chọn sản phẩm --</option>
-            </select>
+      <div class="modal_body" style="overflow-y: auto; flex: 1;">
+        <!-- Bảng danh sách hàng đã thêm vào phiếu -->
+        <div id="importBatchTableWrapper" style="margin-bottom: 16px; display: none;">
+          <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 8px; display: block;">
+            <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle; margin-right:4px;">list_alt</span>
+            Danh sách hàng nhập
+          </label>
+          <div style="border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;">
+            <table class="data_table" style="margin: 0; font-size: 13px;">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">#</th>
+                  <th>Sản phẩm</th>
+                  <th style="width: 100px;">Số lượng</th>
+                  <th>Ghi chú</th>
+                  <th style="width: 50px;"></th>
+                </tr>
+              </thead>
+              <tbody id="importBatchBody"></tbody>
+            </table>
           </div>
         </div>
-        <div class="form_group">
-          <label for="import_quantity">Số lượng nhập</label>
-          <div class="form_input_wrapper">
-            <span class="material-symbols-outlined form_icon">add_circle</span>
-            <input type="number" id="import_quantity" class="form_input" min="1" placeholder="Nhập số lượng...">
+
+        <!-- Form thêm từng sản phẩm -->
+        <div style="background: #f8fafc; border-radius: 10px; padding: 16px; border: 1px dashed #cbd5e1;">
+          <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 10px; display: block;">
+            <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle; margin-right:4px;">add_box</span>
+            Thêm sản phẩm vào phiếu
+          </label>
+          <div class="form_group" style="margin-bottom: 10px;">
+            <label for="import_product">Sản phẩm</label>
+            <div class="product_combobox" id="import_combobox_wrapper">
+              <div class="form_input_wrapper">
+                <span class="material-symbols-outlined form_icon">inventory_2</span>
+                <input type="text" id="import_product" class="form_input" placeholder="Gõ tên sản phẩm để tìm..." autocomplete="off">
+                <input type="hidden" id="import_product_id">
+                <span class="material-symbols-outlined combobox_clear" id="import_combobox_clear" style="display:none;cursor:pointer;font-size:18px;color:#94a3b8;">close</span>
+              </div>
+              <div class="combobox_dropdown" id="import_combobox_dropdown"></div>
+            </div>
           </div>
-        </div>
-        <div class="form_group">
-          <label for="import_note">Ghi chú</label>
-          <div class="form_input_wrapper" style="align-items: flex-start; padding: 6px 12px;">
-            <span class="material-symbols-outlined form_icon" style="margin-top:6px;">description</span>
-            <textarea id="import_note" class="form_input" rows="2" placeholder="Lý do nhập kho..." style="resize:vertical; border:none; outline:none; background:transparent; width:100%; font-family:inherit;"></textarea>
+          <div style="display: flex; gap: 12px;">
+            <div class="form_group" style="margin-bottom: 10px; flex: 1;">
+              <label for="import_quantity">Số lượng nhập</label>
+              <div class="form_input_wrapper">
+                <span class="material-symbols-outlined form_icon">add_circle</span>
+                <input type="number" id="import_quantity" class="form_input" min="1" placeholder="Nhập số lượng...">
+              </div>
+            </div>
+            <div class="form_group" style="margin-bottom: 10px; flex: 1.5;">
+              <label for="import_note">Ghi chú</label>
+              <div class="form_input_wrapper">
+                <span class="material-symbols-outlined form_icon">description</span>
+                <input type="text" id="import_note" class="form_input" placeholder="Lý do nhập kho...">
+              </div>
+            </div>
           </div>
+          <button class="btn_primary" id="btnAddToBatch" type="button" style="background-color: #3b82f6; width: 100%; padding: 8px; font-size: 13px;">
+            <span class="material-symbols-outlined" style="font-size: 18px;">playlist_add</span>
+            Thêm vào phiếu
+          </button>
         </div>
       </div>
       <div class="modal_footer">
         <button class="btn_secondary" id="btnCancelImportModal">Hủy</button>
-        <button class="btn_primary" id="btnSubmitImport" style="background-color: #16a34a;">
+        <button class="btn_primary" id="btnSubmitImport" style="background-color: #16a34a;" disabled>
           <span class="material-symbols-outlined">save</span>
-          Xác nhận nhập kho
+          Xác nhận nhập kho (<span id="importBatchCount">0</span> sản phẩm)
         </button>
       </div>
     </div>
@@ -727,7 +780,7 @@ if ($conn) {
   <!-- Modal xuất kho -->
   <?php if (canImportExport()): ?>
   <div class="modal_overlay" id="exportStockModal">
-    <div class="modal_card" style="width: 420px;">
+    <div class="modal_card" style="width: 680px; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal_header">
         <h3>
           <span class="material-symbols-outlined" style="color:#ea580c;">upload</span>
@@ -737,39 +790,77 @@ if ($conn) {
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
-      <div class="modal_body">
-        <div class="form_group">
-          <label for="export_product">Sản phẩm</label>
-          <div class="form_input_wrapper">
-            <span class="material-symbols-outlined form_icon">inventory_2</span>
-            <select id="export_product" class="form_input" style="cursor:pointer;">
-              <option value="">-- Chọn sản phẩm --</option>
-            </select>
+      <div class="modal_body" style="overflow-y: auto; flex: 1;">
+        <!-- Bảng danh sách hàng đã thêm vào phiếu -->
+        <div id="exportBatchTableWrapper" style="margin-bottom: 16px; display: none;">
+          <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 8px; display: block;">
+            <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle; margin-right:4px;">list_alt</span>
+            Danh sách hàng xuất
+          </label>
+          <div style="border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;">
+            <table class="data_table" style="margin: 0; font-size: 13px;">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">#</th>
+                  <th>Sản phẩm</th>
+                  <th style="width: 100px;">Số lượng</th>
+                  <th>Ghi chú</th>
+                  <th style="width: 50px;"></th>
+                </tr>
+              </thead>
+              <tbody id="exportBatchBody"></tbody>
+            </table>
           </div>
         </div>
-        <div id="export_stock_info" style="display:none; background:#fef3c7; border:1px solid #fbbf24; border-radius:8px; padding:10px 14px; margin-bottom:12px; font-size:13px; color:#92400e;">
-          Tồn kho hiện tại: <strong id="export_current_stock">0</strong>
-        </div>
-        <div class="form_group">
-          <label for="export_quantity">Số lượng xuất</label>
-          <div class="form_input_wrapper">
-            <span class="material-symbols-outlined form_icon">remove_circle</span>
-            <input type="number" id="export_quantity" class="form_input" min="1" placeholder="Nhập số lượng...">
+
+        <!-- Form thêm từng sản phẩm -->
+        <div style="background: #f8fafc; border-radius: 10px; padding: 16px; border: 1px dashed #cbd5e1;">
+          <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 10px; display: block;">
+            <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle; margin-right:4px;">add_box</span>
+            Thêm sản phẩm vào phiếu
+          </label>
+          <div class="form_group" style="margin-bottom: 10px;">
+            <label for="export_product">Sản phẩm</label>
+            <div class="product_combobox" id="export_combobox_wrapper">
+              <div class="form_input_wrapper">
+                <span class="material-symbols-outlined form_icon">inventory_2</span>
+                <input type="text" id="export_product" class="form_input" placeholder="Gõ tên sản phẩm để tìm..." autocomplete="off">
+                <input type="hidden" id="export_product_id">
+                <span class="material-symbols-outlined combobox_clear" id="export_combobox_clear" style="display:none;cursor:pointer;font-size:18px;color:#94a3b8;">close</span>
+              </div>
+              <div class="combobox_dropdown" id="export_combobox_dropdown"></div>
+            </div>
           </div>
-        </div>
-        <div class="form_group">
-          <label for="export_note">Ghi chú</label>
-          <div class="form_input_wrapper" style="align-items: flex-start; padding: 6px 12px;">
-            <span class="material-symbols-outlined form_icon" style="margin-top:6px;">description</span>
-            <textarea id="export_note" class="form_input" rows="2" placeholder="Lý do xuất kho..." style="resize:vertical; border:none; outline:none; background:transparent; width:100%; font-family:inherit;"></textarea>
+          <div id="export_stock_info" style="display:none; background:#fef3c7; border:1px solid #fbbf24; border-radius:8px; padding:10px 14px; margin-bottom:12px; font-size:13px; color:#92400e;">
+            Tồn kho hiện tại: <strong id="export_current_stock">0</strong>
           </div>
+          <div style="display: flex; gap: 12px;">
+            <div class="form_group" style="margin-bottom: 10px; flex: 1;">
+              <label for="export_quantity">Số lượng xuất</label>
+              <div class="form_input_wrapper">
+                <span class="material-symbols-outlined form_icon">remove_circle</span>
+                <input type="number" id="export_quantity" class="form_input" min="1" placeholder="Nhập số lượng...">
+              </div>
+            </div>
+            <div class="form_group" style="margin-bottom: 10px; flex: 1.5;">
+              <label for="export_note">Ghi chú</label>
+              <div class="form_input_wrapper">
+                <span class="material-symbols-outlined form_icon">description</span>
+                <input type="text" id="export_note" class="form_input" placeholder="Lý do xuất kho...">
+              </div>
+            </div>
+          </div>
+          <button class="btn_primary" id="btnAddToExportBatch" type="button" style="background-color: #3b82f6; width: 100%; padding: 8px; font-size: 13px;">
+            <span class="material-symbols-outlined" style="font-size: 18px;">playlist_add</span>
+            Thêm vào phiếu
+          </button>
         </div>
       </div>
       <div class="modal_footer">
         <button class="btn_secondary" id="btnCancelExportModal">Hủy</button>
-        <button class="btn_primary" id="btnSubmitExport" style="background-color: #ea580c;">
+        <button class="btn_primary" id="btnSubmitExport" style="background-color: #ea580c;" disabled>
           <span class="material-symbols-outlined">save</span>
-          Xác nhận xuất kho
+          Xác nhận xuất kho (<span id="exportBatchCount">0</span> sản phẩm)
         </button>
       </div>
     </div>
@@ -807,6 +898,30 @@ if ($conn) {
           <span class="material-symbols-outlined">save</span>
           Lưu quyền
         </button>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <!-- Modal chi tiết phiếu nhập/xuất -->
+  <?php if (canImportExport()): ?>
+  <div class="modal_overlay" id="receiptDetailModal">
+    <div class="modal_card" style="width: 640px; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal_header">
+        <h3>
+          <span class="material-symbols-outlined">receipt_long</span>
+          <span id="receiptDetailTitle">Chi tiết phiếu</span>
+        </h3>
+        <button class="modal_close" id="btnCloseReceiptDetailModal" aria-label="Đóng modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal_body" style="overflow-y: auto; flex: 1;">
+        <div id="receiptDetailInfo" style="margin-bottom: 16px;"></div>
+        <div id="receiptDetailItems"></div>
+      </div>
+      <div class="modal_footer">
+        <button class="btn_secondary" id="btnCloseReceiptDetailModalFooter">Đóng</button>
       </div>
     </div>
   </div>
@@ -854,16 +969,21 @@ if ($conn) {
         });
     }
 
+    let productCurrentPage = 1;
+
     // ─── AJAX Product Filtering ───────────────────────────────────────────────
-    function fetchFilteredProducts() {
+    function fetchFilteredProducts(page = 1) {
+        productCurrentPage = page;
         const searchVal   = document.getElementById('search_input_sort').value;
         const categoryVal = document.getElementById('select_category').value;
         const priceSortVal = document.getElementById('select_price').value;
         const qtySortVal   = document.getElementById('select_quantity').value;
+        const limitVal     = document.getElementById('select_limit')?.value || 10;
 
         const params = new URLSearchParams({
             search: searchVal, category: categoryVal,
-            price_sort: priceSortVal, qty_sort: qtySortVal
+            price_sort: priceSortVal, qty_sort: qtySortVal,
+            limit: limitVal, page: page
         });
 
         const isAdm = <?php echo $is_admin ? 'true' : 'false'; ?>;
@@ -874,7 +994,11 @@ if ($conn) {
         fetch('filter_products.php?' + params.toString(), {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
-            .then(r => r.text())
+            .then(r => {
+                const totalPages = parseInt(r.headers.get('X-Total-Pages') || '1');
+                renderProductPagination(totalPages, page);
+                return r.text();
+            })
             .then(html => {
                 // filter_products.php trả về HTML fragment — nếu bị redirect về
                 // login page thì HTML sẽ chứa thẻ <html>, không phải <tr>.
@@ -897,10 +1021,26 @@ if ($conn) {
             });
     }
 
-    // Auto-filter khi thay đổi dropdown (category, price, quantity)
-    ['select_category', 'select_price', 'select_quantity'].forEach(id => {
+
+
+    function renderProductPagination(totalPages, currentPage) {
+        const container = document.getElementById('productPagination');
+        if (!container) return;
+        if (totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+        let html = '';
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<button class="filter_button" style="padding:4px 10px;font-size:12px;${i === currentPage ? 'opacity:1;' : 'opacity:0.5;'}" onclick="fetchFilteredProducts(${i})">${i}</button> `;
+        }
+        container.innerHTML = html;
+    }
+
+    // Auto-filter khi thay đổi dropdown (category, price, quantity, limit)
+    ['select_category', 'select_price', 'select_quantity', 'select_limit'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.addEventListener('change', fetchFilteredProducts);
+        if (el) el.addEventListener('change', () => fetchFilteredProducts(1));
     });
 
     // [IMP-06] Debounce helper — trì hoãn gọi hàm sau khi người dùng ngừng gõ
@@ -915,15 +1055,27 @@ if ($conn) {
     // Tìm kiếm real-time khi gõ vào ô search (debounce 400ms)
     const searchInput = document.getElementById('search_input_sort');
     if (searchInput) {
-        searchInput.addEventListener('input', debounce(fetchFilteredProducts, 400));
+        searchInput.addEventListener('input', debounce(() => fetchFilteredProducts(1), 400));
     }
 
     // ─── Session-aware fetch wrapper ──────────────────────────────────────────
     // Gửi header X-Requested-With để PHP (auth.php) nhận biết là AJAX request.
     // Khi session hết hạn/bị kick, PHP trả 401 + JSON { redirect: '...' }
     // Khi server lỗi (5xx/4xx), ném Error để .catch() của caller bắt được.
+    // [SEC-01] Tự động đính kèm X-CSRF-Token vào mọi POST/PUT/DELETE request
+    //          để ngăn chặn CSRF attack theo Double-Submit Header pattern.
+    const _csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
     function apiFetch(url, options = {}) {
-        options.headers = Object.assign({ 'X-Requested-With': 'XMLHttpRequest' }, options.headers || {});
+        const method = (options.method || 'GET').toUpperCase();
+        const defaultHeaders = { 'X-Requested-With': 'XMLHttpRequest' };
+
+        // Gắn CSRF token vào tất cả request thay đổi dữ liệu
+        if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+            defaultHeaders['X-CSRF-Token'] = _csrfToken;
+        }
+
+        options.headers = Object.assign(defaultHeaders, options.headers || {});
         return fetch(url, options)
             .then(r => {
                 // [FIX-02] Kiểm tra HTTP status trước khi parse JSON
@@ -964,34 +1116,154 @@ if ($conn) {
         }, 3500);
     }
 
-    // ─── Helper: load product dropdown for import/export modals ──────────────
-    function loadProductDropdown(selectId) {
-        const select = document.getElementById(selectId);
-        if (!select) return;
-        select.innerHTML = '<option value="">Đang tải...</option>';
-        fetch('filter_products.php?search=&category=&price_sort=&qty_sort=', {
+    // ─── Helper: load product combobox (searchable dropdown) ────────────────
+    const _comboData = {};
+
+    function loadProductDropdown(inputId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        const prefix    = inputId.replace('_product', '') + '_combobox';
+        const hidden    = document.getElementById(inputId + '_id');
+        const dropdown  = document.getElementById(prefix + '_dropdown');
+        const clearBtn  = document.getElementById(prefix + '_clear');
+        const wrapper   = document.getElementById(prefix + '_wrapper');
+
+        input.value = '';
+        if (hidden) hidden.value = '';
+        if (dropdown) { dropdown.innerHTML = ''; dropdown.style.display = 'none'; }
+        if (clearBtn) clearBtn.style.display = 'none';
+        input.placeholder = 'Đang tải danh sách...';
+
+        // Only fetch once per inputId
+        if (_comboData[inputId]) {
+            input.placeholder = 'Gõ tên sản phẩm để tìm...';
+            setupComboEvents(inputId);
+            return;
+        }
+
+        fetch('filter_products.php?search=&category=&price_sort=&qty_sort=&limit=all', {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(r => r.text())
         .then(html => {
-            // Parse HTML table rows to extract product data
             const parser = new DOMParser();
             const doc = parser.parseFromString('<table>' + html + '</table>', 'text/html');
             const rows = doc.querySelectorAll('tr');
-            let options = '<option value="">-- Chọn sản phẩm --</option>';
+            const products = [];
             rows.forEach(row => {
                 const cells = row.querySelectorAll('td');
                 if (cells.length >= 2) {
                     const maSp = cells[0].textContent.trim();
                     const tenSp = cells[1].textContent.trim();
                     if (maSp && !isNaN(maSp)) {
-                        options += `<option value="${maSp}">${tenSp} (Mã: ${maSp})</option>`;
+                        products.push({ id: maSp, name: tenSp, label: tenSp + ' (Mã: ' + maSp + ')' });
                     }
                 }
             });
-            select.innerHTML = options;
+            _comboData[inputId] = products;
+            input.placeholder = 'Gõ tên sản phẩm để tìm...';
+            setupComboEvents(inputId);
         })
-        .catch(() => { select.innerHTML = '<option value="">Lỗi tải danh sách</option>'; });
+        .catch(() => { input.placeholder = 'Lỗi tải danh sách sản phẩm'; });
+    }
+
+    function setupComboEvents(inputId) {
+        const input   = document.getElementById(inputId);
+        const prefix  = inputId.replace('_product', '') + '_combobox';
+        const hidden  = document.getElementById(inputId + '_id');
+        const dropdown = document.getElementById(prefix + '_dropdown');
+        const clearBtn = document.getElementById(prefix + '_clear');
+        const wrapper  = document.getElementById(prefix + '_wrapper');
+        const products = _comboData[inputId] || [];
+
+        // Remove old listeners by replacing element references via clone
+        const oldInput = input;
+        if (oldInput._comboBound) return; // already set up
+
+        function filterAndShow(query) {
+            const q = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const filtered = q === '' ? products : products.filter(p => {
+                const name = p.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                return name.includes(q) || p.id.includes(q);
+            });
+            renderComboDropdown(dropdown, filtered);
+        }
+
+        input.addEventListener('input', function() {
+            hidden.value = '';
+            if (clearBtn) clearBtn.style.display = 'none';
+            filterAndShow(this.value);
+        });
+
+        input.addEventListener('focus', function() {
+            filterAndShow(this.value);
+        });
+
+        dropdown.addEventListener('click', function(e) {
+            const item = e.target.closest('.combobox_item');
+            if (!item) return;
+            hidden.value = item.dataset.id;
+            input.value = item.dataset.name;
+            dropdown.style.display = 'none';
+            if (clearBtn) clearBtn.style.display = 'block';
+            input.dispatchEvent(new Event('productSelected'));
+        });
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function() {
+                input.value = '';
+                hidden.value = '';
+                this.style.display = 'none';
+                input.focus();
+                var infoDiv = document.getElementById('export_stock_info');
+                if (infoDiv) infoDiv.style.display = 'none';
+            });
+        }
+
+        document.addEventListener('mousedown', function(e) {
+            if (wrapper && !wrapper.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        input.addEventListener('keydown', function(e) {
+            var items = dropdown.querySelectorAll('.combobox_item');
+            var active = dropdown.querySelector('.combobox_item.active');
+            var idx = Array.from(items).indexOf(active);
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (active) active.classList.remove('active');
+                idx = idx < items.length - 1 ? idx + 1 : 0;
+                if (items[idx]) items[idx].classList.add('active');
+                if (items[idx]) items[idx].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (active) active.classList.remove('active');
+                idx = idx > 0 ? idx - 1 : items.length - 1;
+                if (items[idx]) items[idx].classList.add('active');
+                if (items[idx]) items[idx].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (active) active.click();
+            } else if (e.key === 'Escape') {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        input._comboBound = true;
+    }
+
+    function renderComboDropdown(dropdown, list) {
+        if (list.length === 0) {
+            dropdown.innerHTML = '<div class="combobox_empty">Không tìm thấy sản phẩm</div>';
+            dropdown.style.display = 'block';
+            return;
+        }
+        dropdown.innerHTML = list.map(p =>
+            '<div class="combobox_item" data-id="' + p.id + '" data-name="' + escapeHtml(p.label) + '">' + escapeHtml(p.label) + '</div>'
+        ).join('');
+        dropdown.style.display = 'block';
     }
 
     // ─── Edit Product ────────────────────────────────────────────────────────
@@ -1061,55 +1333,169 @@ if ($conn) {
         });
     }
 
-    // ─── Import Stock Modal ──────────────────────────────────────────────────
+    // ─── Import Stock Modal (Batch) ─────────────────────────────────────────
     const importModal = document.getElementById('importStockModal');
+    let importBatchItems = [];
+
+    function renderImportBatchTable() {
+        const tbody = document.getElementById('importBatchBody');
+        const wrapper = document.getElementById('importBatchTableWrapper');
+        const countSpan = document.getElementById('importBatchCount');
+        const submitBtn = document.getElementById('btnSubmitImport');
+        if (!tbody || !wrapper) return;
+
+        countSpan.textContent = importBatchItems.length;
+        submitBtn.disabled = importBatchItems.length === 0;
+
+        if (importBatchItems.length === 0) {
+            wrapper.style.display = 'none';
+            tbody.innerHTML = '';
+            return;
+        }
+        wrapper.style.display = '';
+        tbody.innerHTML = importBatchItems.map((item, idx) => `<tr>
+            <td style="text-align:center; color:#64748b;">${idx + 1}</td>
+            <td><span class="product_name">${escapeHtml(item.productName)}</span></td>
+            <td style="text-align:center;"><strong>${number_format(item.quantity)}</strong></td>
+            <td style="max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#64748b;" title="${escapeHtml(item.note)}">${escapeHtml(item.note || '—')}</td>
+            <td style="text-align:center;">
+                <button onclick="removeImportBatchItem(${idx})" style="background:none; border:none; cursor:pointer; color:#ef4444; padding:4px;" title="Xóa khỏi phiếu">
+                    <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+                </button>
+            </td>
+        </tr>`).join('');
+    }
+
+    window.removeImportBatchItem = function(idx) {
+        importBatchItems.splice(idx, 1);
+        renderImportBatchTable();
+    };
+
     if (importModal) {
         document.getElementById('btn_import_stock')?.addEventListener('click', () => {
             loadProductDropdown('import_product');
             document.getElementById('import_quantity').value = '';
             document.getElementById('import_note').value = '';
+            importBatchItems = [];
+            renderImportBatchTable();
             importModal.classList.add('open');
         });
         document.getElementById('btnCloseImportModal')?.addEventListener('click', () => importModal.classList.remove('open'));
         document.getElementById('btnCancelImportModal')?.addEventListener('click', () => importModal.classList.remove('open'));
         importModal.addEventListener('click', e => { if (e.target === importModal) importModal.classList.remove('open'); });
 
-        document.getElementById('btnSubmitImport')?.addEventListener('click', function() {
-            const fd = new FormData();
-            fd.append('san_pham', document.getElementById('import_product').value);
-            fd.append('so_luong', document.getElementById('import_quantity').value);
-            fd.append('ghi_chu', document.getElementById('import_note').value.trim());
+        // Nút "Thêm vào phiếu"
+        document.getElementById('btnAddToBatch')?.addEventListener('click', function() {
+            const productId = document.getElementById('import_product_id').value;
+            const productName = document.getElementById('import_product').value;
+            const quantity = parseInt(document.getElementById('import_quantity').value, 10);
+            const note = document.getElementById('import_note').value.trim();
 
-            if (!fd.get('san_pham') || !fd.get('so_luong') || parseInt(fd.get('so_luong')) <= 0) {
-                showToast('Vui lòng chọn sản phẩm và nhập số lượng hợp lệ.', 'error'); return;
+            if (!productId) { showToast('Vui lòng chọn sản phẩm.', 'error'); return; }
+            if (!quantity || quantity <= 0) { showToast('Số lượng nhập phải lớn hơn 0.', 'error'); return; }
+
+            // Kiểm tra sản phẩm đã có trong phiếu chưa
+            const existing = importBatchItems.find(item => item.productId === productId);
+            if (existing) {
+                existing.quantity += quantity;
+                if (note) existing.note = note;
+                showToast(`Đã cộng thêm ${number_format(quantity)} vào "${productName}".`, 'success');
+            } else {
+                importBatchItems.push({ productId, productName, quantity, note });
+                showToast(`Đã thêm "${productName}" vào phiếu.`, 'success');
             }
+
+            renderImportBatchTable();
+            // Reset form nhập
+            document.getElementById('import_quantity').value = '';
+            document.getElementById('import_note').value = '';
+            document.getElementById('import_product').value = '';
+            document.getElementById('import_product_id').value = '';
+            document.getElementById('import_combobox_clear').style.display = 'none';
+        });
+
+        // Nút "Xác nhận nhập kho" — gửi tất cả
+        document.getElementById('btnSubmitImport')?.addEventListener('click', function() {
+            if (importBatchItems.length === 0) {
+                showToast('Chưa có sản phẩm nào trong phiếu.', 'error'); return;
+            }
+
+            const fd = new FormData();
+            fd.append('items', JSON.stringify(importBatchItems.map(item => ({
+                san_pham: item.productId,
+                so_luong: item.quantity,
+                ghi_chu: item.note
+            }))));
 
             this.disabled = true;
             this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang xử lý...';
 
-            apiFetch('admin/import_stock.php?action=create', { method: 'POST', body: fd })
+            apiFetch('admin/import_stock.php?action=create_batch', { method: 'POST', body: fd })
                 .then(data => {
                     this.disabled = false;
-                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận nhập kho';
+                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận nhập kho (<span id="importBatchCount">' + importBatchItems.length + '</span> sản phẩm)';
                     showToast(data.message, data.success ? 'success' : 'error');
-                    if (data.success) { importModal.classList.remove('open'); fetchFilteredProducts(); }
+                    if (data.success) {
+                        importBatchItems = [];
+                        renderImportBatchTable();
+                        importModal.classList.remove('open');
+                        fetchFilteredProducts();
+                    }
                 })
                 .catch(() => {
                     this.disabled = false;
-                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận nhập kho';
+                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận nhập kho (<span id="importBatchCount">' + importBatchItems.length + '</span> sản phẩm)';
                     showToast('Lỗi kết nối máy chủ.', 'error');
                 });
         });
     }
 
-    // ─── Export Stock Modal ──────────────────────────────────────────────────
+    // ─── Export Stock Modal (Batch) ──────────────────────────────────────────
     const exportModal = document.getElementById('exportStockModal');
+    let exportBatchItems = [];
+
+    function renderExportBatchTable() {
+        const tbody = document.getElementById('exportBatchBody');
+        const wrapper = document.getElementById('exportBatchTableWrapper');
+        const countSpan = document.getElementById('exportBatchCount');
+        const submitBtn = document.getElementById('btnSubmitExport');
+        if (!tbody || !wrapper) return;
+
+        countSpan.textContent = exportBatchItems.length;
+        submitBtn.disabled = exportBatchItems.length === 0;
+
+        if (exportBatchItems.length === 0) {
+            wrapper.style.display = 'none';
+            tbody.innerHTML = '';
+            return;
+        }
+        wrapper.style.display = '';
+        tbody.innerHTML = exportBatchItems.map((item, idx) => `<tr>
+            <td style="text-align:center; color:#64748b;">${idx + 1}</td>
+            <td><span class="product_name">${escapeHtml(item.productName)}</span></td>
+            <td style="text-align:center;"><strong>${number_format(item.quantity)}</strong></td>
+            <td style="max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#64748b;" title="${escapeHtml(item.note)}">${escapeHtml(item.note || '—')}</td>
+            <td style="text-align:center;">
+                <button onclick="removeExportBatchItem(${idx})" style="background:none; border:none; cursor:pointer; color:#ef4444; padding:4px;" title="Xóa khỏi phiếu">
+                    <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+                </button>
+            </td>
+        </tr>`).join('');
+    }
+
+    window.removeExportBatchItem = function(idx) {
+        exportBatchItems.splice(idx, 1);
+        renderExportBatchTable();
+    };
+
     if (exportModal) {
         document.getElementById('btn_export_stock')?.addEventListener('click', () => {
             loadProductDropdown('export_product');
             document.getElementById('export_quantity').value = '';
             document.getElementById('export_note').value = '';
             document.getElementById('export_stock_info').style.display = 'none';
+            exportBatchItems = [];
+            renderExportBatchTable();
             exportModal.classList.add('open');
         });
         document.getElementById('btnCloseExportModal')?.addEventListener('click', () => exportModal.classList.remove('open'));
@@ -1117,8 +1503,8 @@ if ($conn) {
         exportModal.addEventListener('click', e => { if (e.target === exportModal) exportModal.classList.remove('open'); });
 
         // Hiển thị tồn kho khi chọn SP
-        document.getElementById('export_product')?.addEventListener('change', function() {
-            const spId = this.value;
+        document.getElementById('export_product')?.addEventListener('productSelected', function() {
+            const spId = document.getElementById('export_product_id').value;
             const infoDiv = document.getElementById('export_stock_info');
             if (!spId) { infoDiv.style.display = 'none'; return; }
             apiFetch('admin/edit_product.php?action=get&id=' + spId)
@@ -1126,33 +1512,86 @@ if ($conn) {
                     if (data.success) {
                         document.getElementById('export_current_stock').textContent = data.product.SoLuong;
                         infoDiv.style.display = 'block';
+                        // Lưu trữ số lượng tối đa vào data attribute
+                        document.getElementById('export_quantity').max = data.product.SoLuong;
                     }
                 });
         });
 
-        document.getElementById('btnSubmitExport')?.addEventListener('click', function() {
-            const fd = new FormData();
-            fd.append('san_pham', document.getElementById('export_product').value);
-            fd.append('so_luong', document.getElementById('export_quantity').value);
-            fd.append('ghi_chu', document.getElementById('export_note').value.trim());
+        // Nút "Thêm vào phiếu"
+        document.getElementById('btnAddToExportBatch')?.addEventListener('click', function() {
+            const productId = document.getElementById('export_product_id').value;
+            const productName = document.getElementById('export_product').value;
+            const quantityInput = document.getElementById('export_quantity');
+            const quantity = parseInt(quantityInput.value, 10);
+            const note = document.getElementById('export_note').value.trim();
+            const currentStock = parseInt(quantityInput.max || 0, 10);
 
-            if (!fd.get('san_pham') || !fd.get('so_luong') || parseInt(fd.get('so_luong')) <= 0) {
-                showToast('Vui lòng chọn sản phẩm và nhập số lượng hợp lệ.', 'error'); return;
+            if (!productId) { showToast('Vui lòng chọn sản phẩm.', 'error'); return; }
+            if (!quantity || quantity <= 0) { showToast('Số lượng xuất phải lớn hơn 0.', 'error'); return; }
+
+            // Kiểm tra số lượng tổng có vượt tồn kho hiện tại không
+            let totalQuantity = quantity;
+            const existing = exportBatchItems.find(item => item.productId === productId);
+            if (existing) {
+                totalQuantity += existing.quantity;
             }
+
+            if (totalQuantity > currentStock) {
+                showToast(`Số lượng yêu cầu (${totalQuantity}) vượt quá tồn kho hiện tại (${currentStock}).`, 'error');
+                return;
+            }
+
+            if (existing) {
+                existing.quantity += quantity;
+                if (note) existing.note = note;
+                showToast(`Đã cộng thêm ${number_format(quantity)} vào "${productName}".`, 'success');
+            } else {
+                exportBatchItems.push({ productId, productName, quantity, note });
+                showToast(`Đã thêm "${productName}" vào phiếu.`, 'success');
+            }
+
+            renderExportBatchTable();
+            // Reset form nhập
+            document.getElementById('export_quantity').value = '';
+            document.getElementById('export_note').value = '';
+            document.getElementById('export_product').value = '';
+            document.getElementById('export_product_id').value = '';
+            document.getElementById('export_combobox_clear').style.display = 'none';
+            document.getElementById('export_stock_info').style.display = 'none';
+        });
+
+        // Nút "Xác nhận xuất kho"
+        document.getElementById('btnSubmitExport')?.addEventListener('click', function() {
+            if (exportBatchItems.length === 0) {
+                showToast('Chưa có sản phẩm nào trong phiếu.', 'error'); return;
+            }
+
+            const fd = new FormData();
+            fd.append('items', JSON.stringify(exportBatchItems.map(item => ({
+                san_pham: item.productId,
+                so_luong: item.quantity,
+                ghi_chu: item.note
+            }))));
 
             this.disabled = true;
             this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang xử lý...';
 
-            apiFetch('admin/export_stock.php?action=create', { method: 'POST', body: fd })
+            apiFetch('admin/export_stock.php?action=create_batch', { method: 'POST', body: fd })
                 .then(data => {
                     this.disabled = false;
-                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận xuất kho';
+                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận xuất kho (<span id="exportBatchCount">' + exportBatchItems.length + '</span> sản phẩm)';
                     showToast(data.message, data.success ? 'success' : 'error');
-                    if (data.success) { exportModal.classList.remove('open'); fetchFilteredProducts(); }
+                    if (data.success) {
+                        exportBatchItems = [];
+                        renderExportBatchTable();
+                        exportModal.classList.remove('open');
+                        fetchFilteredProducts();
+                    }
                 })
                 .catch(() => {
                     this.disabled = false;
-                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận xuất kho';
+                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận xuất kho (<span id="exportBatchCount">' + exportBatchItems.length + '</span> sản phẩm)';
                     showToast('Lỗi kết nối máy chủ.', 'error');
                 });
         });
@@ -1173,7 +1612,8 @@ if ($conn) {
                 }
                 tbody.innerHTML = data.records.map(r => {
                     const date = new Date(r.ngay_tao).toLocaleString('vi-VN');
-                    return `<tr>
+                    const safeMaPhieu = escapeHtml(r.ma_phieu).replace(/'/g, "\\'");
+                    return `<tr style="cursor:pointer;" onclick="openReceiptDetail('import', '${safeMaPhieu}')">
                         <td>${r.ma_phieu}</td>
                         <td><span class="product_name">${escapeHtml(r.TenSP)}</span></td>
                         <td><strong>${number_format(r.so_luong)}</strong></td>
@@ -1214,7 +1654,8 @@ if ($conn) {
                 }
                 tbody.innerHTML = data.records.map(r => {
                     const date = new Date(r.ngay_tao).toLocaleString('vi-VN');
-                    return `<tr>
+                    const safeMaPhieu = escapeHtml(r.ma_phieu).replace(/'/g, "\\'");
+                    return `<tr style="cursor:pointer;" onclick="openReceiptDetail('export', '${safeMaPhieu}')">
                         <td>${r.ma_phieu}</td>
                         <td><span class="product_name">${escapeHtml(r.TenSP)}</span></td>
                         <td><strong>${number_format(r.so_luong)}</strong></td>
@@ -1260,6 +1701,98 @@ if ($conn) {
             exportPanel.style.display = '';
             loadExportHistory(1);
         }
+    }
+
+    // ─── Receipt Detail Modal ──────────────────────────────────────────────
+    const receiptDetailModal = document.getElementById('receiptDetailModal');
+    if (receiptDetailModal) {
+        document.getElementById('btnCloseReceiptDetailModal')?.addEventListener('click', () => receiptDetailModal.classList.remove('open'));
+        document.getElementById('btnCloseReceiptDetailModalFooter')?.addEventListener('click', () => receiptDetailModal.classList.remove('open'));
+        receiptDetailModal.addEventListener('click', e => { if (e.target === receiptDetailModal) receiptDetailModal.classList.remove('open'); });
+    }
+
+    function openReceiptDetail(type, maPhieu) {
+        if (!receiptDetailModal) return;
+        const infoDiv = document.getElementById('receiptDetailInfo');
+        const itemsDiv = document.getElementById('receiptDetailItems');
+        const titleSpan = document.getElementById('receiptDetailTitle');
+
+        titleSpan.textContent = type === 'import' ? 'Chi tiết phiếu nhập' : 'Chi tiết phiếu xuất';
+        infoDiv.innerHTML = '<p style="color:#64748b;">Đang tải...</p>';
+        itemsDiv.innerHTML = '';
+
+        const endpoint = type === 'import' ? 'admin/import_stock.php' : 'admin/export_stock.php';
+        apiFetch(endpoint + '?action=detail&ma_phieu=' + encodeURIComponent(maPhieu))
+            .then(data => {
+                if (!data.success || !data.items || data.items.length === 0) {
+                    infoDiv.innerHTML = '<p style="color:#dc2626;">Không tìm thấy phiếu.</p>';
+                    return;
+                }
+                const ngayTao = new Date(data.ngay_tao).toLocaleString('vi-VN');
+                const icon = type === 'import' ? 'download' : 'upload';
+                const color = type === 'import' ? '#16a34a' : '#ea580c';
+                const label = type === 'import' ? 'Nhập kho' : 'Xuất kho';
+
+                infoDiv.innerHTML = `
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                        <span class="material-symbols-outlined" style="color:${color};font-size:28px;">${icon}</span>
+                        <div>
+                            <div style="font-size:16px;font-weight:600;color:#0f172a;">${label} — ${escapeHtml(data.ma_phieu)}</div>
+                            <div style="font-size:13px;color:#64748b;">${ngayTao}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:24px;font-size:14px;color:#475569;">
+                        <div><strong>Người tạo:</strong> ${escapeHtml(data.nguoi_tao)}</div>
+                        <div><strong>Số mặt hàng:</strong> ${data.items.length}</div>
+                    </div>
+                `;
+
+                let tongTien = 0;
+                let rows = data.items.map((item, idx) => {
+                    const gia = parseInt(item.Gia) || 0;
+                    const thanhTien = gia * parseInt(item.so_luong);
+                    tongTien += thanhTien;
+                    const ghiChu = item.ghi_chu || '—';
+                    return `
+                        <tr>
+                            <td style="text-align:center;">${idx + 1}</td>
+                            <td><span class="product_name">${escapeHtml(item.TenSP)}</span></td>
+                            <td style="text-align:right;">${number_format(gia)}đ</td>
+                            <td style="text-align:center;"><strong>${number_format(item.so_luong)}</strong></td>
+                            <td style="text-align:right;font-weight:600;">${number_format(thanhTien)}đ</td>
+                            <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(ghiChu)}">${escapeHtml(ghiChu)}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                itemsDiv.innerHTML = `
+                    <table class="product_table" style="margin:0;">
+                        <thead>
+                            <tr>
+                                <th style="width:40px;text-align:center;">#</th>
+                                <th>Sản phẩm</th>
+                                <th style="width:100px;text-align:right;">Đơn giá</th>
+                                <th style="width:80px;text-align:center;">Số lượng</th>
+                                <th style="width:110px;text-align:right;">Thành tiền</th>
+                                <th>Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" style="text-align:right;font-weight:600;color:#0f172a;">Tổng cộng:</td>
+                                <td style="text-align:right;font-weight:700;color:${color};font-size:15px;">${number_format(tongTien)}đ</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                `;
+
+                receiptDetailModal.classList.add('open');
+            })
+            .catch(() => {
+                infoDiv.innerHTML = '<p style="color:#dc2626;">Lỗi kết nối máy chủ.</p>';
+            });
     }
 
     // ─── Permissions Modal ───────────────────────────────────────────────────

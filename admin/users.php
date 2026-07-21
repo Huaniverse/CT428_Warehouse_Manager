@@ -37,6 +37,7 @@ switch ($action) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']); exit;
         }
+        verifyCsrfToken(); // [SEC-01] Chống CSRF
         if (!$conn) { echo json_encode(['success' => false, 'message' => 'Lỗi kết nối DB']); exit; }
 
         $new_username  = trim($_POST['username']  ?? '');
@@ -84,6 +85,7 @@ switch ($action) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']); exit;
         }
+        verifyCsrfToken(); // [SEC-01] Chống CSRF
         if (!$conn) { echo json_encode(['success' => false, 'message' => 'Lỗi kết nối DB']); exit; }
 
         $target_id  = (int)($_POST['id'] ?? 0);
@@ -118,6 +120,7 @@ switch ($action) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']); exit;
         }
+        verifyCsrfToken(); // [SEC-01] Chống CSRF
         if (!$conn) { echo json_encode(['success' => false, 'message' => 'Lỗi kết nối DB']); exit; }
 
         $target_id = (int)($_POST['id'] ?? 0);
@@ -180,6 +183,7 @@ switch ($action) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']); exit;
         }
+        verifyCsrfToken(); // [SEC-01] Chống CSRF
         if (!$conn) { echo json_encode(['success' => false, 'message' => 'Lỗi kết nối DB']); exit; }
 
         $kick_user_id = (int)($_POST['user_id'] ?? 0);
@@ -204,6 +208,7 @@ switch ($action) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']); exit;
         }
+        verifyCsrfToken(); // [SEC-01] Chống CSRF
         if (!$conn) { echo json_encode(['success' => false, 'message' => 'Lỗi kết nối DB']); exit; }
 
         $target_id       = (int)($_POST['id'] ?? 0);
@@ -237,7 +242,8 @@ switch ($action) {
         $stmt = $conn->prepare("UPDATE users SET allow_import_export = ? WHERE id = ?");
         $stmt->bind_param("ii", $allow_import, $target_id);
 
-        if ($stmt->execute() && $stmt->affected_rows >= 0) {
+        if ($stmt->execute() && $stmt->affected_rows > 0) { // [FIX-04] >= 0 luôn true → sửa thành > 0
+
             $label = $allow_import ? 'cấp' : 'thu hồi';
             echo json_encode(['success' => true, 'message' => "Đã $label quyền nhập/xuất kho."]);
         } else {
