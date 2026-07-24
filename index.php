@@ -1221,7 +1221,7 @@ if ($conn) {
         }
 
         document.addEventListener('mousedown', function(e) {
-            if (wrapper && !wrapper.contains(e.target)) {
+            if (wrapper && !wrapper.contains(e.target) && !dropdown.contains(e.target)) {
                 dropdown.style.display = 'none';
             }
         });
@@ -1251,19 +1251,51 @@ if ($conn) {
             }
         });
 
+        var scrollParent = input.closest('.modal_body');
+        if (scrollParent) {
+            scrollParent.addEventListener('scroll', function() {
+                if (dropdown.style.display === 'block') {
+                    positionComboDropdown(dropdown);
+                }
+            }, { passive: true });
+        }
+        window.addEventListener('resize', function() {
+            if (dropdown.style.display === 'block') {
+                positionComboDropdown(dropdown);
+            }
+        });
+
         input._comboBound = true;
+    }
+
+    function positionComboDropdown(dropdown) {
+        const input = dropdown.previousElementSibling?.querySelector('input[type="text"]');
+        if (!input) return;
+        const rect = input.getBoundingClientRect();
+        const maxHeight = 240;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const dropHeight = Math.min(maxHeight, dropdown.scrollHeight || maxHeight);
+        dropdown.style.width = rect.width + 'px';
+        dropdown.style.left = rect.left + 'px';
+        if (spaceBelow < dropHeight && rect.top > dropHeight) {
+            dropdown.style.top = (rect.top - dropHeight - 4) + 'px';
+        } else {
+            dropdown.style.top = (rect.bottom + 4) + 'px';
+        }
     }
 
     function renderComboDropdown(dropdown, list) {
         if (list.length === 0) {
             dropdown.innerHTML = '<div class="combobox_empty">Không tìm thấy sản phẩm</div>';
             dropdown.style.display = 'block';
+            positionComboDropdown(dropdown);
             return;
         }
         dropdown.innerHTML = list.map(p =>
             '<div class="combobox_item" data-id="' + p.id + '" data-name="' + escapeHtml(p.label) + '">' + escapeHtml(p.label) + '</div>'
         ).join('');
         dropdown.style.display = 'block';
+        positionComboDropdown(dropdown);
     }
 
     // ─── Edit Product ────────────────────────────────────────────────────────
@@ -2006,12 +2038,12 @@ if ($conn) {
         document.getElementById('new_role').value      = 'staff';
     }
 
-    btnOpenModal.addEventListener('click', openModal);
-    btnCloseModal.addEventListener('click', closeModal);
-    btnCancelModal.addEventListener('click', closeModal);
-    createModal.addEventListener('click', e => { if (e.target === createModal) closeModal(); });
+    if (btnOpenModal) btnOpenModal.addEventListener('click', openModal);
+    if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
+    if (btnCancelModal) btnCancelModal.addEventListener('click', closeModal);
+    if (createModal) createModal.addEventListener('click', e => { if (e.target === createModal) closeModal(); });
 
-    btnSubmit.addEventListener('click', function() {
+    if (btnSubmit) btnSubmit.addEventListener('click', function() {
         const fd = new FormData();
         fd.append('username',  document.getElementById('new_username').value.trim());
         fd.append('full_name', document.getElementById('new_fullname').value.trim());

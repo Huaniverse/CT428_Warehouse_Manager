@@ -300,10 +300,12 @@ CREATE TABLE `phieu_nhap` (
   `ghi_chu` text DEFAULT NULL,
   `nguoi_tao` int(11) NOT NULL,
   `ngay_tao` timestamp NOT NULL DEFAULT current_timestamp(),
+  `ma_phieu_gop` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`ma_phieu`),
   KEY `fk_pn_sanpham` (`san_pham`),
   KEY `fk_pn_nguoi_tao` (`nguoi_tao`),
   KEY `fk_pn_ngay_tao` (`ngay_tao`),
+  KEY `idx_pn_ma_phieu_gop` (`ma_phieu_gop`),
   CONSTRAINT `fk_pn_sanpham` FOREIGN KEY (`san_pham`) REFERENCES `sanpham` (`MaSP`) ON DELETE RESTRICT,
   CONSTRAINT `fk_pn_nguoi_tao` FOREIGN KEY (`nguoi_tao`) REFERENCES `users` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -312,32 +314,32 @@ CREATE TABLE `phieu_nhap` (
 -- Đang đổ dữ liệu cho bảng `phieu_nhap`
 --
 
-INSERT INTO `phieu_nhap` (`ma_phieu`, `san_pham`, `so_luong`, `ghi_chu`, `nguoi_tao`, `ngay_tao`) VALUES
-(1, 20, 200, 'Nhập kho đợt đầu — lô hàng iPhone 13', 1, '2026-05-01 09:00:00'),
-(2, 27, 200, 'Nhập kho đợt đầu — laptop học tập', 1, '2026-05-01 09:15:00'),
-(3, 28, 200, 'Nhập kho đợt đầu — laptop gaming', 1, '2026-05-01 09:30:00'),
-(4, 29, 250, 'Nhập kho đợt đầu — laptop giá rẻ', 1, '2026-05-01 09:45:00'),
-(5, 32, 170, 'Nhập kho đợt đầu — MacBook Pro', 1, '2026-05-01 10:00:00'),
-(6, 10, 350, 'Nhập kho đợt đầu — phụ kiện bán chạy', 1, '2026-05-01 10:15:00'),
-(7, 13, 100, 'Nhập kho đợt đầu — tai nghe Apple', 1, '2026-05-01 10:30:00'),
-(8, 53, 230, 'Nhập kho đợt đầu — tai nghe phổ thông', 1, '2026-05-01 10:45:00'),
-(9, 57, 220, 'Nhập kho đợt đầu — gia dụng', 1, '2026-05-01 11:00:00'),
-(10, 65, 260, 'Nhập kho đợt đầu — gia dụng cao cấp', 1, '2026-05-01 11:15:00'),
-(11, 1, 50, 'Nhập bổ sung lô mới iPhone 15 Pro Max', 1, '2026-05-15 09:00:00'),
-(12, 25, 200, 'Nhập bổ sung — điện thoại tầm trung', 1, '2026-05-15 09:30:00'),
-(13, 33, 120, 'Nhập bổ sung — laptop văn phòng', 1, '2026-05-15 10:00:00'),
-(14, 37, 70, 'Nhập bổ sung phụ kiện gaming', 1, '2026-05-15 10:30:00'),
-(15, 42, 160, 'Nhập bổ sung hub chuyển đổi', 1, '2026-05-15 11:00:00'),
-(16, 48, 120, 'Nhập bổ sung tai nghe giá rẻ', 1, '2026-05-15 11:30:00'),
-(17, 51, 160, 'Nhập bổ sung mic chuyên nghiệp', 1, '2026-05-15 12:00:00'),
-(18, 66, 210, 'Nhập bổ sung gia dụng', 1, '2026-05-15 12:30:00'),
-(19, 7, 160, 'Nhập mùa hè — sạc dự phòng du lịch', 1, '2026-06-10 09:00:00'),
-(20, 30, 150, 'Nhập bổ sung laptop gaming', 1, '2026-06-10 09:30:00'),
-(21, 38, 70, 'Nhập bổ sung bàn phím cơ', 1, '2026-06-10 10:00:00'),
-(22, 44, 200, 'Nhập bổ sung kính cường lực', 1, '2026-06-10 10:30:00'),
-(23, 59, 190, 'Nhập bổ sung gia dụng', 1, '2026-06-10 11:00:00'),
-(24, 61, 100, 'Nhập bổ sung lò vi sóng', 1, '2026-06-10 11:30:00'),
-(25, 161, 190, 'Nhập bổ sung nồi chiên', 1, '2026-06-10 12:00:00');
+INSERT INTO `phieu_nhap` (`ma_phieu`, `san_pham`, `so_luong`, `ghi_chu`, `nguoi_tao`, `ngay_tao`, `ma_phieu_gop`) VALUES
+(1, 20, 200, 'Nhập kho đợt đầu — lô hàng iPhone 13', 1, '2026-05-01 09:00:00', 'PN_20260501090000_1001'),
+(2, 27, 200, 'Nhập kho đợt đầu — laptop học tập', 1, '2026-05-01 09:15:00', 'PN_20260501091500_1002'),
+(3, 28, 200, 'Nhập kho đợt đầu — laptop gaming', 1, '2026-05-01 09:30:00', 'PN_20260501093000_1003'),
+(4, 29, 250, 'Nhập kho đợt đầu — laptop giá rẻ', 1, '2026-05-01 09:45:00', 'PN_20260501094500_1004'),
+(5, 32, 170, 'Nhập kho đợt đầu — MacBook Pro', 1, '2026-05-01 10:00:00', 'PN_20260501100000_1005'),
+(6, 10, 350, 'Nhập kho đợt đầu — phụ kiện bán chạy', 1, '2026-05-01 10:15:00', 'PN_20260501101500_1006'),
+(7, 13, 100, 'Nhập kho đợt đầu — tai nghe Apple', 1, '2026-05-01 10:30:00', 'PN_20260501103000_1007'),
+(8, 53, 230, 'Nhập kho đợt đầu — tai nghe phổ thông', 1, '2026-05-01 10:45:00', 'PN_20260501104500_1008'),
+(9, 57, 220, 'Nhập kho đợt đầu — gia dụng', 1, '2026-05-01 11:00:00', 'PN_20260501110000_1009'),
+(10, 65, 260, 'Nhập kho đợt đầu — gia dụng cao cấp', 1, '2026-05-01 11:15:00', 'PN_20260501111500_1010'),
+(11, 1, 50, 'Nhập bổ sung lô mới iPhone 15 Pro Max', 1, '2026-05-15 09:00:00', 'PN_20260515090000_1011'),
+(12, 25, 200, 'Nhập bổ sung — điện thoại tầm trung', 1, '2026-05-15 09:30:00', 'PN_20260515093000_1012'),
+(13, 33, 120, 'Nhập bổ sung — laptop văn phòng', 1, '2026-05-15 10:00:00', 'PN_20260515100000_1013'),
+(14, 37, 70, 'Nhập bổ sung phụ kiện gaming', 1, '2026-05-15 10:30:00', 'PN_20260515103000_1014'),
+(15, 42, 160, 'Nhập bổ sung hub chuyển đổi', 1, '2026-05-15 11:00:00', 'PN_20260515110000_1015'),
+(16, 48, 120, 'Nhập bổ sung tai nghe giá rẻ', 1, '2026-05-15 11:30:00', 'PN_20260515113000_1016'),
+(17, 51, 160, 'Nhập bổ sung mic chuyên nghiệp', 1, '2026-05-15 12:00:00', 'PN_20260515120000_1017'),
+(18, 66, 210, 'Nhập bổ sung gia dụng', 1, '2026-05-15 12:30:00', 'PN_20260515123000_1018'),
+(19, 7, 160, 'Nhập mùa hè — sạc dự phòng du lịch', 1, '2026-06-10 09:00:00', 'PN_20260610090000_1019'),
+(20, 30, 150, 'Nhập bổ sung laptop gaming', 1, '2026-06-10 09:30:00', 'PN_20260610093000_1020'),
+(21, 38, 70, 'Nhập bổ sung bàn phím cơ', 1, '2026-06-10 10:00:00', 'PN_20260610100000_1021'),
+(22, 44, 200, 'Nhập bổ sung kính cường lực', 1, '2026-06-10 10:30:00', 'PN_20260610103000_1022'),
+(23, 59, 190, 'Nhập bổ sung gia dụng', 1, '2026-06-10 11:00:00', 'PN_20260610110000_1023'),
+(24, 61, 100, 'Nhập bổ sung lò vi sóng', 1, '2026-06-10 11:30:00', 'PN_20260610113000_1024'),
+(25, 161, 190, 'Nhập bổ sung nồi chiên', 1, '2026-06-10 12:00:00', 'PN_20260610120000_1025');
 
 -- --------------------------------------------------------
 
@@ -352,10 +354,12 @@ CREATE TABLE `phieu_xuat` (
   `ghi_chu` text DEFAULT NULL,
   `nguoi_tao` int(11) NOT NULL,
   `ngay_tao` timestamp NOT NULL DEFAULT current_timestamp(),
+  `ma_phieu_gop` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`ma_phieu`),
   KEY `fk_px_sanpham` (`san_pham`),
   KEY `fk_px_nguoi_tao` (`nguoi_tao`),
   KEY `fk_px_ngay_tao` (`ngay_tao`),
+  KEY `idx_px_ma_phieu_gop` (`ma_phieu_gop`),
   CONSTRAINT `fk_px_sanpham` FOREIGN KEY (`san_pham`) REFERENCES `sanpham` (`MaSP`) ON DELETE RESTRICT,
   CONSTRAINT `fk_px_nguoi_tao` FOREIGN KEY (`nguoi_tao`) REFERENCES `users` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -364,25 +368,25 @@ CREATE TABLE `phieu_xuat` (
 -- Đang đổ dữ liệu cho bảng `phieu_xuat`
 --
 
-INSERT INTO `phieu_xuat` (`ma_phieu`, `san_pham`, `so_luong`, `ghi_chu`, `nguoi_tao`, `ngay_tao`) VALUES
-(1, 20, 8, 'Xuất bán — đơn hàng khách lẻ', 1, '2026-05-10 14:00:00'),
-(2, 27, 15, 'Xuất bán — đơn hàng học sinh SV', 1, '2026-05-10 14:30:00'),
-(3, 29, 10, 'Xuất bán — đơn hàng online', 1, '2026-05-10 15:00:00'),
-(4, 13, 12, 'Xuất bán — phụ kiện kèm điện thoại', 1, '2026-05-10 15:30:00'),
-(5, 53, 15, 'Xuất bán — khuyến mãi mùa hè', 1, '2026-05-10 16:00:00'),
-(6, 10, 40, 'Xuất bán buôn — cửa hàng phụ kiện', 1, '2026-05-10 16:30:00'),
-(7, 1, 5, 'Xuất bán — đơn VIP', 1, '2026-05-25 09:00:00'),
-(8, 28, 6, 'Xuất bán — đơn hàng gaming', 1, '2026-05-25 09:30:00'),
-(9, 32, 10, 'Xuất bán — đơn doanh nghiệp', 1, '2026-05-25 10:00:00'),
-(10, 48, 8, 'Xuất bán — đơn online', 1, '2026-05-25 10:30:00'),
-(11, 42, 12, 'Xuất bán — phụ kiện kèm laptop', 1, '2026-05-25 11:00:00'),
-(12, 66, 10, 'Xuất bán — đơn gia dụng', 1, '2026-05-25 11:30:00'),
-(13, 25, 7, 'Xuất bán — đơn online', 1, '2026-06-15 09:00:00'),
-(14, 33, 7, 'Xuất bán — đơn văn phòng', 1, '2026-06-15 09:30:00'),
-(15, 7, 10, 'Xuất bán — phụ kiện kèm điện thoại', 1, '2026-06-15 10:00:00'),
-(16, 30, 6, 'Xuất bán — đơn gaming', 1, '2026-06-15 10:30:00'),
-(17, 44, 12, 'Xuất bán buôn', 1, '2026-06-15 11:00:00'),
-(18, 59, 7, 'Xuất bán — đơn gia dụng', 1, '2026-06-15 11:30:00');
+INSERT INTO `phieu_xuat` (`ma_phieu`, `san_pham`, `so_luong`, `ghi_chu`, `nguoi_tao`, `ngay_tao`, `ma_phieu_gop`) VALUES
+(1, 20, 8, 'Xuất bán — đơn hàng khách lẻ', 1, '2026-05-10 14:00:00', 'PX_20260510140000_2001'),
+(2, 27, 15, 'Xuất bán — đơn hàng học sinh SV', 1, '2026-05-10 14:30:00', 'PX_20260510143000_2002'),
+(3, 29, 10, 'Xuất bán — đơn hàng online', 1, '2026-05-10 15:00:00', 'PX_20260510150000_2003'),
+(4, 13, 12, 'Xuất bán — phụ kiện kèm điện thoại', 1, '2026-05-10 15:30:00', 'PX_20260510153000_2004'),
+(5, 53, 15, 'Xuất bán — khuyến mãi mùa hè', 1, '2026-05-10 16:00:00', 'PX_20260510160000_2005'),
+(6, 10, 40, 'Xuất bán buôn — cửa hàng phụ kiện', 1, '2026-05-10 16:30:00', 'PX_20260510163000_2006'),
+(7, 1, 5, 'Xuất bán — đơn VIP', 1, '2026-05-25 09:00:00', 'PX_20260525090000_2007'),
+(8, 28, 6, 'Xuất bán — đơn hàng gaming', 1, '2026-05-25 09:30:00', 'PX_20260525093000_2008'),
+(9, 32, 10, 'Xuất bán — đơn doanh nghiệp', 1, '2026-05-25 10:00:00', 'PX_20260525100000_2009'),
+(10, 48, 8, 'Xuất bán — đơn online', 1, '2026-05-25 10:30:00', 'PX_20260525103000_2010'),
+(11, 42, 12, 'Xuất bán — phụ kiện kèm laptop', 1, '2026-05-25 11:00:00', 'PX_20260525110000_2011'),
+(12, 66, 10, 'Xuất bán — đơn gia dụng', 1, '2026-05-25 11:30:00', 'PX_20260525113000_2012'),
+(13, 25, 7, 'Xuất bán — đơn online', 1, '2026-06-15 09:00:00', 'PX_20260615090000_2013'),
+(14, 33, 7, 'Xuất bán — đơn văn phòng', 1, '2026-06-15 09:30:00', 'PX_20260615093000_2014'),
+(15, 7, 10, 'Xuất bán — phụ kiện kèm điện thoại', 1, '2026-06-15 10:00:00', 'PX_20260615100000_2015'),
+(16, 30, 6, 'Xuất bán — đơn gaming', 1, '2026-06-15 10:30:00', 'PX_20260615103000_2016'),
+(17, 44, 12, 'Xuất bán buôn', 1, '2026-06-15 11:00:00', 'PX_20260615110000_2017'),
+(18, 59, 7, 'Xuất bán — đơn gia dụng', 1, '2026-06-15 11:30:00', 'PX_20260615113000_2018');
 
 COMMIT;
 

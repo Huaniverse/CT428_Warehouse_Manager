@@ -96,10 +96,11 @@ switch ($action) {
                 exit;
             }
 
+            $ma_phieu_gop = 'PX_' . date('YmdHis') . '_' . rand(1000, 9999);
             $stmt = $conn->prepare(
-                "INSERT INTO phieu_xuat (san_pham, so_luong, ghi_chu, nguoi_tao, ngay_tao) VALUES (?, ?, ?, ?, NOW())"
+                "INSERT INTO phieu_xuat (san_pham, so_luong, ghi_chu, nguoi_tao, ngay_tao, ma_phieu_gop) VALUES (?, ?, ?, ?, NOW(), ?)"
             );
-            $stmt->bind_param("iisi", $san_pham, $so_luong, $ghi_chu, $nguoi_tao);
+            $stmt->bind_param("iisis", $san_pham, $so_luong, $ghi_chu, $nguoi_tao, $ma_phieu_gop);
             $stmt->execute();
             $ma_phieu = $conn->insert_id;
             $stmt->close();
@@ -248,7 +249,7 @@ switch ($action) {
         $bind_types = "";
         $bind_values = [];
 
-        if ($role !== 'admin') {
+        if ($role !== 'admin' && $role !== 'store_manager') {
             $where .= " AND px.nguoi_tao = ?";
             $bind_types .= "i";
             $bind_values[] = $user_id;
@@ -321,7 +322,7 @@ switch ($action) {
         $bind_types = "";
         $bind_values = [];
 
-        if ($role !== 'admin') {
+        if ($role !== 'admin' && $role !== 'store_manager') {
             $where .= " AND px.nguoi_tao = ?";
             $bind_types .= "i";
             $bind_values[] = $user_id;
