@@ -134,6 +134,15 @@ function requireAdmin(): void {
     }
 }
 
+function requireAdminOrStoreManager(): void {
+    $role = $_SESSION['role'] ?? '';
+    if ($role !== 'admin' && $role !== 'store_manager') {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=utf-8');
+        die(json_encode(['success' => false, 'message' => 'Bạn không có quyền thực hiện thao tác này.']));
+    }
+}
+
 function requireLogin(): void {
     if (!isset($_SESSION['user_id']) || !isset($_SESSION['session_token'])) {
         redirectToLogin('unauthenticated');

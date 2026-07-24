@@ -4,7 +4,7 @@
 
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../auth.php';
-requireAdmin();
+requireAdminOrStoreManager();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -59,6 +59,11 @@ switch ($action) {
         if (!in_array($new_role, ['admin', 'store_manager', 'staff'])) {
             $new_role = 'staff';
         }
+        // Store manager chỉ có thể tạo tài khoản staff
+        $caller_role = $_SESSION['role'] ?? '';
+        if ($caller_role === 'store_manager' && $new_role !== 'staff') {
+            $new_role = 'staff';
+        }
 
         $hash = password_hash($new_password, PASSWORD_BCRYPT, ['cost' => 12]);
         $allow_ie = (int)($_POST['allow_import_export'] ?? 0);
@@ -94,6 +99,19 @@ switch ($action) {
         // Không cho tự vô hiệu hóa bản thân
         if ($target_id === (int)$_SESSION['user_id']) {
             echo json_encode(['success' => false, 'message' => 'Không thể vô hiệu hóa tài khoản của chính mình.']); exit;
+        }
+
+        // Store manager chỉ được toggle tài khoản staff
+        $caller_role = $_SESSION['role'] ?? '';
+        if ($caller_role === 'store_manager') {
+            $check_role = $conn->prepare("SELECT role FROM users WHERE id = ?");
+            $check_role->bind_param("i", $target_id);
+            $check_role->execute();
+            $target_role = $check_role->get_result()->fetch_assoc()['role'] ?? '';
+            $check_role->close();
+            if ($target_role !== 'staff') {
+                echo json_encode(['success' => false, 'message' => 'Chỉ được thao tác trên tài khoản Staff.']); exit;
+            }
         }
 
         $stmt = $conn->prepare("UPDATE users SET is_active = ? WHERE id = ?");
@@ -142,6 +160,11 @@ switch ($action) {
         }
         if ($target_user['role'] === 'admin') {
             echo json_encode(['success' => false, 'message' => 'Không thể xóa tài khoản admin.']); exit;
+        }
+        // Store manager chỉ được xóa tài khoản staff
+        $caller_role = $_SESSION['role'] ?? '';
+        if ($caller_role === 'store_manager' && $target_user['role'] !== 'staff') {
+            echo json_encode(['success' => false, 'message' => 'Chỉ được xóa tài khoản Staff.']); exit;
         }
 
         $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");

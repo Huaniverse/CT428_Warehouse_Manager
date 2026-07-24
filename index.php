@@ -5,6 +5,7 @@ require_once __DIR__ . '/auth.php';
 
 $current_user = getCurrentUser();
 $is_admin     = isAdmin();
+$is_store_manager = isStoreManager();
 
 // Fetch stats if connection is valid
 $total_categories = 0;
@@ -154,7 +155,7 @@ if ($conn) {
           <span>Lịch sử</span>
         </a>
         <?php endif; ?>
-        <?php if ($is_admin): ?>
+        <?php if ($is_admin || $is_store_manager): ?>
         <a class="menu_item" data-tab="caidat">
           <span class="material-symbols-outlined">manage_accounts</span>
           <span>Quản lý người dùng</span>
@@ -366,10 +367,10 @@ if ($conn) {
             <table class="product_table">
               <thead>
                 <tr>
-                  <th style="width:70px;">Mã phiếu</th>
-                  <th>Sản phẩm</th>
-                  <th style="width:90px;">Số lượng</th>
-                  <th>Ghi chú</th>
+                  <th style="width:180px;">Mã phiếu</th>
+                  <th style="width:100px;">Số loại hàng</th>
+                  <th style="width:100px;">Tổng SL</th>
+                  <th style="width:150px;">Tổng giá trị</th>
                   <th>Người tạo</th>
                   <th style="width:150px;">Ngày tạo</th>
                 </tr>
@@ -388,10 +389,10 @@ if ($conn) {
             <table class="product_table">
               <thead>
                 <tr>
-                  <th style="width:70px;">Mã phiếu</th>
-                  <th>Sản phẩm</th>
-                  <th style="width:90px;">Số lượng</th>
-                  <th>Ghi chú</th>
+                  <th style="width:180px;">Mã phiếu</th>
+                  <th style="width:100px;">Số loại hàng</th>
+                  <th style="width:100px;">Tổng SL</th>
+                  <th style="width:150px;">Tổng giá trị</th>
                   <th>Người tạo</th>
                   <th style="width:150px;">Ngày tạo</th>
                 </tr>
@@ -406,8 +407,8 @@ if ($conn) {
       </div>
       <?php endif; ?>
 
-      <?php if ($is_admin): ?>
-      <!-- TAB QUẢN LÝ NGƯỜI DÙNG (chỉ admin) -->
+      <?php if ($is_admin || $is_store_manager): ?>
+      <!-- TAB QUẢN LÝ NGƯỜI DÙNG -->
       <div id="content_caidat" class="tab_content">
         <h1 style="font-size: 24px; font-weight: 600; color: #0f172a; margin: 0 0 4px 0;">Quản lý người dùng</h1>
         <p style="font-size: 14px; color: #64748b; margin: 0 0 24px 0;">Tạo và quản lý tài khoản nhân viên, theo dõi phiên đăng nhập đang hoạt động.</p>
@@ -419,7 +420,7 @@ if ($conn) {
               <span class="material-symbols-outlined">group</span>
               Danh sách tài khoản
             </h3>
-            <button class="btn_primary" id="btnOpenCreateModal">
+             <button class="btn_primary" id="btnOpenCreateModal" <?php if (!$is_admin): ?>style="display:none"<?php endif; ?>>
               <span class="material-symbols-outlined">person_add</span>
               Tạo tài khoản
             </button>
@@ -868,7 +869,7 @@ if ($conn) {
   <?php endif; ?>
 
   <!-- Modal cấp quyền cho staff -->
-  <?php if ($is_admin): ?>
+  <?php if ($is_admin || $is_store_manager): ?>
   <div class="modal_overlay" id="permissionsModal">
     <div class="modal_card" style="width: 380px;">
       <div class="modal_header">
@@ -987,6 +988,7 @@ if ($conn) {
         });
 
         const isAdm = <?php echo $is_admin ? 'true' : 'false'; ?>;
+        const isStoreMgr = <?php echo $is_store_manager ? 'true' : 'false'; ?>;
         const colspan = isAdm ? 8 : 7;
         const tbody = document.getElementById('product_table_body');
         tbody.innerHTML = '<tr><td colspan="' + colspan + '" style="text-align: center; padding: 32px; color: #64748b;">Đang tải dữ liệu...</td></tr>';
@@ -1645,11 +1647,12 @@ if ($conn) {
                 tbody.innerHTML = data.records.map(r => {
                     const date = new Date(r.ngay_tao).toLocaleString('vi-VN');
                     const safeMaPhieu = escapeHtml(r.ma_phieu).replace(/'/g, "\\'");
+                    const tongGia = number_format(parseInt(r.tong_gia_tien) || 0);
                     return `<tr style="cursor:pointer;" onclick="openReceiptDetail('import', '${safeMaPhieu}')">
-                        <td>${r.ma_phieu}</td>
-                        <td><span class="product_name">${escapeHtml(r.TenSP)}</span></td>
-                        <td><strong>${number_format(r.so_luong)}</strong></td>
-                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(r.ghi_chu || '')}">${escapeHtml(r.ghi_chu || '—')}</td>
+                        <td><span style="font-family:monospace;font-weight:600;">${escapeHtml(r.ma_phieu)}</span></td>
+                        <td style="text-align:center;">${r.so_loai_hang} loại</td>
+                        <td style="text-align:center;"><strong>${number_format(r.tong_so_luong)}</strong></td>
+                        <td style="text-align:right;font-weight:600;color:#16a34a;">${tongGia}đ</td>
                         <td>${escapeHtml(r.nguoi_tao_name)}</td>
                         <td style="font-size:13px;">${date}</td>
                     </tr>`;
@@ -1687,11 +1690,12 @@ if ($conn) {
                 tbody.innerHTML = data.records.map(r => {
                     const date = new Date(r.ngay_tao).toLocaleString('vi-VN');
                     const safeMaPhieu = escapeHtml(r.ma_phieu).replace(/'/g, "\\'");
+                    const tongGia = number_format(parseInt(r.tong_gia_tien) || 0);
                     return `<tr style="cursor:pointer;" onclick="openReceiptDetail('export', '${safeMaPhieu}')">
-                        <td>${r.ma_phieu}</td>
-                        <td><span class="product_name">${escapeHtml(r.TenSP)}</span></td>
-                        <td><strong>${number_format(r.so_luong)}</strong></td>
-                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(r.ghi_chu || '')}">${escapeHtml(r.ghi_chu || '—')}</td>
+                        <td><span style="font-family:monospace;font-weight:600;">${escapeHtml(r.ma_phieu)}</span></td>
+                        <td style="text-align:center;">${r.so_loai_hang} loại</td>
+                        <td style="text-align:center;"><strong>${number_format(r.tong_so_luong)}</strong></td>
+                        <td style="text-align:right;font-weight:600;color:#ea580c;">${tongGia}đ</td>
                         <td>${escapeHtml(r.nguoi_tao_name)}</td>
                         <td style="font-size:13px;">${date}</td>
                     </tr>`;
@@ -1864,7 +1868,23 @@ if ($conn) {
         });
     }
 
-    <?php if ($is_admin): ?>
+    // Helper escape HTML chống XSS
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // Helper number format
+    function number_format(num) {
+        return parseInt(num).toLocaleString('vi-VN');
+    }
+
+    <?php if ($is_admin || $is_store_manager): ?>
     // ─── Load Users ───────────────────────────────────────────────────────────
     function loadUsers() {
         const tbody = document.getElementById('usersTableBody');
@@ -1900,20 +1920,21 @@ if ($conn) {
                     const toggleIcon   = u.is_active == 1 ? 'block' : 'check_circle';
                     const toggleStatus = u.is_active == 1 ? 0 : 1;
 
-                    // Dùng data-attribute để truyền tên thay vì nhúng thẳng vào onclick
-                    const actions = isSelf
-                        ? '<span style="font-size:12px;color:#94a3b8;">Tài khoản của bạn</span>'
-                        : `<div class="action_group">
-                            <button class="btn_icon" title="${toggleTitle}" onclick="toggleUser(${u.id}, ${toggleStatus})">
-                                <span class="material-symbols-outlined">${toggleIcon}</span>
-                            </button>
-                            ${u.role === 'staff' ? `<button class="btn_icon" title="Quyền nhập/xuất kho" onclick="openPermissionsModal(${u.id}, '${safeName}', ${u.allow_import_export || 0})">
-                                <span class="material-symbols-outlined">admin_panel_settings</span>
-                            </button>` : ''}
-                            ${u.role !== 'admin' ? `<button class="btn_icon danger" title="Xóa tài khoản" data-uid="${u.id}" data-uname="${safeName}" onclick="deleteUser(this.dataset.uid, this.dataset.uname)">
-                                <span class="material-symbols-outlined">delete</span>
-                            </button>` : ''}
-                           </div>`;
+                     // Dùng data-attribute để truyền tên thay vì nhúng thẳng vào onclick
+                     const canManage = <?php echo $is_admin ? 'true' : 'false'; ?> ? u.role !== 'admin' : u.role === 'staff';
+                     const actions = isSelf
+                         ? '<span style="font-size:12px;color:#94a3b8;">Tài khoản của bạn</span>'
+                         : `<div class="action_group">
+                             ${canManage ? `<button class="btn_icon" title="${toggleTitle}" onclick="toggleUser(${u.id}, ${toggleStatus})">
+                                 <span class="material-symbols-outlined">${toggleIcon}</span>
+                             </button>` : ''}
+                             ${u.role === 'staff' ? `<button class="btn_icon" title="Quyền nhập/xuất kho" onclick="openPermissionsModal(${u.id}, '${safeName}', ${u.allow_import_export || 0})">
+                                 <span class="material-symbols-outlined">admin_panel_settings</span>
+                             </button>` : ''}
+                             ${canManage ? `<button class="btn_icon danger" title="Xóa tài khoản" data-uid="${u.id}" data-uname="${safeName}" onclick="deleteUser(this.dataset.uid, this.dataset.uname)">
+                                 <span class="material-symbols-outlined">delete</span>
+                             </button>` : ''}
+                            </div>`;
 
                     return `<tr>
                         <td>
@@ -2190,22 +2211,6 @@ if ($conn) {
         catCodeInput.addEventListener('input', function() {
             this.value = this.value.toUpperCase();
         });
-    }
-
-    // Helper escape HTML chống XSS
-    function escapeHtml(text) {
-        if (!text) return '';
-        return text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
-    // Helper number format
-    function number_format(num) {
-        return parseInt(num).toLocaleString('vi-VN');
     }
 
     // Cập nhật tất cả các dropdown danh mục trên giao diện

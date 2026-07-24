@@ -30,7 +30,6 @@ switch ($action) {
             echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']);
             exit;
         }
-        // [SEC-01] Xác minh CSRF token
         verifyCsrfToken();
 
         $san_pham = (int)($_POST['san_pham'] ?? 0);
@@ -47,22 +46,9 @@ switch ($action) {
             exit;
         }
 
-        // Kiểm tra sản phẩm tồn tại và đang active
-        $check = $conn->prepare("SELECT MaSP, TenSP, SoLuong FROM sanpham WHERE MaSP = ? AND is_active = 1");
-        $check->bind_param("i", $san_pham);
-        $check->execute();
-        $product = $check->get_result()->fetch_assoc();
-        $check->close();
-
-        if (!$product) {
-            echo json_encode(['success' => false, 'message' => 'Sản phẩm không tồn tại hoặc đã bị ẩn.']);
-            exit;
-        }
-
-        // Transaction: insert phiếu + cập nhật tồn kho (atomic để tránh race condition)
         $conn->begin_transaction();
         try {
-            // [FIX-RC] Khóa dòng sản phẩm trước khi insert để tránh race condition
+            // Lock sản phẩm
             $lock = $conn->prepare("SELECT MaSP, TenSP FROM sanpham WHERE MaSP = ? AND is_active = 1 FOR UPDATE");
             $lock->bind_param("i", $san_pham);
             $lock->execute();
@@ -75,22 +61,26 @@ switch ($action) {
                 exit;
             }
 
-            $ma_phieu_gop = 'PN_' . date('YmdHis') . '_' . rand(1000, 9999);
-            $stmt = $conn->prepare(
-                "INSERT INTO phieu_nhap (san_pham, so_luong, ghi_chu, nguoi_tao, ngay_tao, ma_phieu_gop) VALUES (?, ?, ?, ?, NOW(), ?)"
-            );
-            $stmt->bind_param("iisis", $san_pham, $so_luong, $ghi_chu, $nguoi_tao, $ma_phieu_gop);
-            $stmt->execute();
-            $ma_phieu = $conn->insert_id;
-            $stmt->close();
+            $ma_phieu = 'PN_' . date('YmdHis') . '_' . rand(1000, 9999);
 
-            // [FIX-RC] Atomic UPDATE: cộng trực tiếp tại DB, không đọc-sửa-ghi
+            // Insert header
+            $header = $conn->prepare("INSERT INTO phieu_nhap (ma_phieu, nguoi_tao, ngay_tao) VALUES (?, ?, NOW())");
+            $header->bind_param("si", $ma_phieu, $nguoi_tao);
+            $header->execute();
+            $header->close();
+
+            // Insert detail
+            $detail = $conn->prepare("INSERT INTO chi_tiet_phieu_nhap (ma_phieu, san_pham, so_luong, ghi_chu) VALUES (?, ?, ?, ?)");
+            $detail->bind_param("siis", $ma_phieu, $san_pham, $so_luong, $ghi_chu);
+            $detail->execute();
+            $detail->close();
+
+            // Cập nhật tồn kho
             $update = $conn->prepare("UPDATE sanpham SET SoLuong = SoLuong + ? WHERE MaSP = ?");
             $update->bind_param("ii", $so_luong, $san_pham);
             $update->execute();
             $update->close();
 
-            // Lấy số lượng mới để hiển thị trong thông báo
             $fetch = $conn->prepare("SELECT SoLuong FROM sanpham WHERE MaSP = ?");
             $fetch->bind_param("i", $san_pham);
             $fetch->execute();
@@ -135,9 +125,20 @@ switch ($action) {
         $nguoi_tao = $_SESSION['user_id'];
         $conn->begin_transaction();
         try {
+            $ma_phieu = 'PN_' . date('YmdHis') . '_' . rand(1000, 9999);
+
+            // Insert 1 header
+            $header = $conn->prepare("INSERT INTO phieu_nhap (ma_phieu, nguoi_tao, ngay_tao) VALUES (?, ?, NOW())");
+            $header->bind_param("si", $ma_phieu, $nguoi_tao);
+            $header->execute();
+            $header->close();
+
+            $detail_stmt = $conn->prepare("INSERT INTO chi_tiet_phieu_nhap (ma_phieu, san_pham, so_luong, ghi_chu) VALUES (?, ?, ?, ?)");
+            $lock = $conn->prepare("SELECT MaSP, TenSP FROM sanpham WHERE MaSP = ? AND is_active = 1 FOR UPDATE");
+            $update = $conn->prepare("UPDATE sanpham SET SoLuong = SoLuong + ? WHERE MaSP = ?");
+
             $success_count = 0;
             $messages = [];
-            $ma_phieu_gop = 'PN_' . date('YmdHis') . '_' . rand(1000, 9999);
 
             foreach ($items as $item) {
                 $san_pham = (int)($item['san_pham'] ?? 0);
@@ -146,32 +147,25 @@ switch ($action) {
 
                 if ($san_pham <= 0 || $so_luong <= 0) continue;
 
-                // Khóa dòng sản phẩm
-                $lock = $conn->prepare("SELECT MaSP, TenSP FROM sanpham WHERE MaSP = ? AND is_active = 1 FOR UPDATE");
                 $lock->bind_param("i", $san_pham);
                 $lock->execute();
                 $locked_product = $lock->get_result()->fetch_assoc();
-                $lock->close();
 
                 if (!$locked_product) continue;
 
-                // Insert phiếu nhập
-                $stmt = $conn->prepare(
-                    "INSERT INTO phieu_nhap (san_pham, so_luong, ghi_chu, nguoi_tao, ngay_tao, ma_phieu_gop) VALUES (?, ?, ?, ?, NOW(), ?)"
-                );
-                $stmt->bind_param("iisis", $san_pham, $so_luong, $ghi_chu, $nguoi_tao, $ma_phieu_gop);
-                $stmt->execute();
-                $stmt->close();
+                $detail_stmt->bind_param("siis", $ma_phieu, $san_pham, $so_luong, $ghi_chu);
+                $detail_stmt->execute();
 
-                // Cập nhật tồn kho
-                $update = $conn->prepare("UPDATE sanpham SET SoLuong = SoLuong + ? WHERE MaSP = ?");
                 $update->bind_param("ii", $so_luong, $san_pham);
                 $update->execute();
-                $update->close();
 
                 $success_count++;
                 $messages[] = "{$locked_product['TenSP']}: +{$so_luong}";
             }
+
+            $detail_stmt->close();
+            $lock->close();
+            $update->close();
 
             if ($success_count === 0) {
                 $conn->rollback();
@@ -183,7 +177,8 @@ switch ($action) {
             $summary = implode(', ', $messages);
             echo json_encode([
                 'success' => true,
-                'message' => "Nhập kho thành công {$success_count} sản phẩm: {$summary}."
+                'message' => "Nhập kho thành công {$success_count} sản phẩm: {$summary}.",
+                'ma_phieu' => $ma_phieu
             ]);
         } catch (Exception $e) {
             $conn->rollback();
@@ -202,25 +197,25 @@ switch ($action) {
         $user_id = (int)($_SESSION['user_id'] ?? 0);
         $filter_sp = (int)($_GET['san_pham'] ?? 0);
 
-        // Xây dựng điều kiện WHERE
+        // Conditions on header
         $where = "1=1";
         $bind_types = "";
         $bind_values = [];
+        $allow_import_export = ($_SESSION['allow_import_export'] ?? 0) == 1;
 
-        if ($role !== 'admin' && $role !== 'store_manager') {
+        if ($role !== 'admin' && $role !== 'store_manager' && !($role === 'staff' && $allow_import_export)) {
             $where .= " AND pn.nguoi_tao = ?";
             $bind_types .= "i";
             $bind_values[] = $user_id;
         }
 
         if ($filter_sp > 0) {
-            $where .= " AND pn.san_pham = ?";
+            $where .= " AND EXISTS (SELECT 1 FROM chi_tiet_phieu_nhap ct WHERE ct.ma_phieu = pn.ma_phieu AND ct.san_pham = ?)";
             $bind_types .= "i";
             $bind_values[] = $filter_sp;
         }
 
-        // Đếm tổng
-        $count_sql = "SELECT COUNT(DISTINCT pn.ma_phieu_gop) as total FROM phieu_nhap pn WHERE $where";
+        $count_sql = "SELECT COUNT(*) as total FROM phieu_nhap pn WHERE $where";
         $count_stmt = $conn->prepare($count_sql);
         if ($bind_types !== "") {
             $count_stmt->bind_param($bind_types, ...$bind_values);
@@ -229,19 +224,19 @@ switch ($action) {
         $total = $count_stmt->get_result()->fetch_assoc()['total'];
         $count_stmt->close();
 
-        // Lấy dữ liệu
-        $sql = "SELECT pn.ma_phieu_gop as ma_phieu, 
-                       SUM(pn.so_luong) as so_luong, 
-                       GROUP_CONCAT(DISTINCT pn.ghi_chu SEPARATOR '; ') as ghi_chu, 
-                       MAX(pn.ngay_tao) as ngay_tao,
-                       GROUP_CONCAT(CONCAT(sp.TenSP, ' (', pn.so_luong, ')') SEPARATOR ', ') as TenSP,
-                       MAX(u.full_name) AS nguoi_tao_name
+        $sql = "SELECT pn.ma_phieu,
+                       COUNT(ct.san_pham) as so_loai_hang,
+                       SUM(ct.so_luong) as tong_so_luong,
+                       SUM(ct.so_luong * sp.Gia) as tong_gia_tien,
+                       pn.ngay_tao,
+                       u.full_name AS nguoi_tao_name
                 FROM phieu_nhap pn
-                JOIN sanpham sp ON pn.san_pham = sp.MaSP
+                JOIN chi_tiet_phieu_nhap ct ON ct.ma_phieu = pn.ma_phieu
+                JOIN sanpham sp ON ct.san_pham = sp.MaSP
                 JOIN users u ON pn.nguoi_tao = u.id
                 WHERE $where
-                GROUP BY pn.ma_phieu_gop
-                ORDER BY MAX(pn.ngay_tao) DESC
+                GROUP BY pn.ma_phieu, pn.ngay_tao, u.full_name
+                ORDER BY pn.ngay_tao DESC
                 LIMIT $limit OFFSET $offset";
 
         $stmt = $conn->prepare($sql);
@@ -267,38 +262,39 @@ switch ($action) {
 
     // ── Chi tiết phiếu nhập ───────────────────────────────────────────────
     case 'detail':
-        $ma_phieu_gop = trim($_GET['ma_phieu'] ?? '');
+        $ma_phieu = trim($_GET['ma_phieu'] ?? '');
 
-        if ($ma_phieu_gop === '') {
+        if ($ma_phieu === '') {
             echo json_encode(['success' => false, 'message' => 'Thiếu mã phiếu.']);
             exit;
         }
 
         $role = $_SESSION['role'] ?? '';
         $user_id = (int)($_SESSION['user_id'] ?? 0);
+        $allow_import_export = ($_SESSION['allow_import_export'] ?? 0) == 1;
         $where = "1=1";
         $bind_types = "";
         $bind_values = [];
 
-        if ($role !== 'admin' && $role !== 'store_manager') {
+        if ($role !== 'admin' && $role !== 'store_manager' && !($role === 'staff' && $allow_import_export)) {
             $where .= " AND pn.nguoi_tao = ?";
             $bind_types .= "i";
             $bind_values[] = $user_id;
         }
 
-        // Lấy tất cả dòng trong phiếu (batch hoặc đơn lẻ)
-        $sql = "SELECT pn.ma_phieu, pn.san_pham, sp.TenSP, sp.Gia,
-                       pn.so_luong, pn.ghi_chu, pn.ngay_tao,
-                       u.full_name AS nguoi_tao_name
+        $sql = "SELECT ct.san_pham, sp.TenSP, sp.Gia,
+                       ct.so_luong, ct.ghi_chu,
+                       pn.ngay_tao, u.full_name AS nguoi_tao_name
                 FROM phieu_nhap pn
-                JOIN sanpham sp ON pn.san_pham = sp.MaSP
+                JOIN chi_tiet_phieu_nhap ct ON ct.ma_phieu = pn.ma_phieu
+                JOIN sanpham sp ON ct.san_pham = sp.MaSP
                 JOIN users u ON pn.nguoi_tao = u.id
-                WHERE (pn.ma_phieu_gop = ? OR CAST(pn.ma_phieu AS CHAR) = ?)
+                WHERE pn.ma_phieu = ?
                 AND $where
-                ORDER BY pn.ma_phieu ASC";
+                ORDER BY ct.id ASC";
 
-        $bind_types = "ss" . $bind_types;
-        array_unshift($bind_values, $ma_phieu_gop, $ma_phieu_gop);
+        $bind_types = "s" . $bind_types;
+        array_unshift($bind_values, $ma_phieu);
 
         $stmt = $conn->prepare($sql);
         $stmt->bind_param($bind_types, ...$bind_values);
@@ -316,11 +312,11 @@ switch ($action) {
         }
 
         echo json_encode([
-            'success' => true,
-            'items'   => $items,
-            'ngay_tao'    => $items[0]['ngay_tao'],
-            'nguoi_tao'   => $items[0]['nguoi_tao_name'],
-            'ma_phieu'    => $ma_phieu_gop
+            'success'   => true,
+            'items'     => $items,
+            'ngay_tao'  => $items[0]['ngay_tao'],
+            'nguoi_tao' => $items[0]['nguoi_tao_name'],
+            'ma_phieu'  => $ma_phieu
         ]);
         break;
 
