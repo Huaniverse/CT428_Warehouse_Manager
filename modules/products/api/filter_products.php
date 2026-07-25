@@ -1,7 +1,7 @@
 <?php
 // shared/api/filter_products.php — API lấy danh sách sản phẩm (JSON)
-require_once __DIR__ . '/../db.php';
-require_once __DIR__ . '/../auth.php';
+require_once __DIR__ . '/../../../shared/db.php';
+require_once __DIR__ . '/../../../shared/auth.php';
 
 header('Content-Type: application/json; charset=utf-8');
 

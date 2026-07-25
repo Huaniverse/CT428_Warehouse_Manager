@@ -29,7 +29,7 @@ function fetchFilteredProducts(page = 1) {
     const tbody = document.getElementById('product_table_body');
     tbody.innerHTML = '<tr><td colspan="' + colspan + '" style="text-align: center; padding: 32px; color: #64748b;">Đang tải dữ liệu...</td></tr>';
 
-    apiFetch('shared/api/filter_products.php?' + params.toString())
+    apiFetch('modules/products/api/filter_products.php?' + params.toString())
         .then(data => {
             const totalPages = Math.ceil(data.total / data.per_page);
             renderProductPagination(totalPages, data.page);
@@ -117,7 +117,7 @@ if (searchInput) {
 
 // ─── Edit Product ────────────────────────────────────────────────────────
 function openEditProduct(maSp) {
-    apiFetch('shared/api/edit_product.php?action=get&id=' + maSp)
+    apiFetch('modules/products/api/edit_product.php?action=get&id=' + maSp)
         .then(data => {
             if (!data.success) { showToast(data.message, 'error'); return; }
             const p = data.product;
@@ -137,7 +137,7 @@ function toggleProductActive(maSp, newActive) {
     const fd = new FormData();
     fd.append('ma_sp', maSp);
     fd.append('is_active', newActive);
-    apiFetch('shared/api/edit_product.php?action=toggle_active', { method: 'POST', body: fd })
+    apiFetch('modules/products/api/edit_product.php?action=toggle_active', { method: 'POST', body: fd })
         .then(data => {
             showToast(data.message, data.success ? 'success' : 'error');
             if (data.success) fetchFilteredProducts();
@@ -167,7 +167,7 @@ if (editProdModal) {
         this.disabled = true;
         this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
 
-        apiFetch('shared/api/edit_product.php?action=update', { method: 'POST', body: fd })
+        apiFetch('modules/products/api/edit_product.php?action=update', { method: 'POST', body: fd })
             .then(data => {
                 this.disabled = false;
                 this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu thay đổi';
@@ -251,7 +251,7 @@ if (btnSubmitProd) {
         btnSubmitProd.disabled = true;
         btnSubmitProd.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
 
-        apiFetch('shared/api/add_product.php', { method: 'POST', body: fd })
+        apiFetch('modules/products/api/add_product.php', { method: 'POST', body: fd })
             .then(data => {
                 btnSubmitProd.disabled = false;
                 btnSubmitProd.innerHTML = '<span class="material-symbols-outlined">save</span> Thêm sản phẩm';
@@ -351,7 +351,7 @@ if (btnSubmitCat) {
         btnSubmitCat.disabled = true;
         btnSubmitCat.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
 
-        apiFetch('shared/api/add_category.php', { method: 'POST', body: fd })
+        apiFetch('modules/products/api/add_category.php', { method: 'POST', body: fd })
             .then(data => {
                 btnSubmitCat.disabled = false;
                 btnSubmitCat.innerHTML = '<span class="material-symbols-outlined">save</span> Thêm danh mục';

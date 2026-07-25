@@ -1,8 +1,8 @@
 <?php
 // shared/api/import_stock.php — API nhập kho (Admin + Store Manager + Staff có quyền)
 
-require_once __DIR__ . '/../db.php';
-require_once __DIR__ . '/../auth.php';
+require_once __DIR__ . '/../../../shared/db.php';
+require_once __DIR__ . '/../../../shared/auth.php';
 
 header('Content-Type: application/json; charset=utf-8');
 

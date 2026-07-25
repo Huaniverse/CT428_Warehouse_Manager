@@ -2,8 +2,8 @@
 // shared/api/add_category.php — API thêm danh mục mới (chỉ dành cho Admin)
 // Response trả về dạng JSON chứa danh sách danh mục đã cập nhật
 
-require_once __DIR__ . '/../db.php';
-require_once __DIR__ . '/../auth.php';
+require_once __DIR__ . '/../../../shared/db.php';
+require_once __DIR__ . '/../../../shared/auth.php';
 requireAdmin(); // Yêu cầu quyền Admin
 
 header('Content-Type: application/json; charset=utf-8');

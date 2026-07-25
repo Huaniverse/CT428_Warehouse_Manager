@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
         btnSubmit.disabled = true;
         btnSubmit.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang tạo...';
 
-        apiFetch('admin/api/users.php?action=create', { method: 'POST', body: fd })
+        apiFetch('modules/users/api/users.php?action=create', { method: 'POST', body: fd })
             .then(data => {
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = '<span class="material-symbols-outlined">save</span> Tạo tài khoản';
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fd.append('allow_import_export', document.getElementById('perm_import_export').checked ? 1 : 0);
             this.disabled = true;
             this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
-            apiFetch('admin/api/users.php?action=update_permissions', { method: 'POST', body: fd })
+            apiFetch('modules/users/api/users.php?action=update_permissions', { method: 'POST', body: fd })
                 .then(data => {
                     this.disabled = false;
                     this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu quyền';
@@ -76,7 +76,7 @@ function loadUsers() {
     const tbody = document.getElementById('usersTableBody');
     tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Đang tải...</td></tr>';
 
-    apiFetch('admin/api/users.php?action=list')
+    apiFetch('modules/users/api/users.php?action=list')
         .then(data => {
             if (!data.success) { tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Lỗi tải dữ liệu.</td></tr>'; return; }
             if (data.users.length === 0) {
@@ -125,7 +125,7 @@ function toggleUser(id, newStatus) {
     const fd = new FormData();
     fd.append('id', id);
     fd.append('is_active', newStatus);
-    apiFetch('admin/api/users.php?action=toggle', { method: 'POST', body: fd })
+    apiFetch('modules/users/api/users.php?action=toggle', { method: 'POST', body: fd })
         .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadUsers(); })
         .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
 }
@@ -134,7 +134,7 @@ function deleteUser(id, name) {
     if (!confirm(`Bạn có chắc muốn xóa tài khoản "${name}"? Hành động này không thể hoàn tác.`)) return;
     const fd = new FormData();
     fd.append('id', id);
-    apiFetch('admin/api/users.php?action=delete', { method: 'POST', body: fd })
+    apiFetch('modules/users/api/users.php?action=delete', { method: 'POST', body: fd })
         .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadUsers(); })
         .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
 }
@@ -150,7 +150,7 @@ function loadSessions() {
     const list = document.getElementById('sessionList');
     list.innerHTML = '<div class="table_loading">Đang tải...</div>';
 
-    apiFetch('admin/api/users.php?action=sessions')
+    apiFetch('modules/users/api/users.php?action=sessions')
         .then(data => {
             if (!data.success || data.sessions.length === 0) {
                 list.innerHTML = '<div class="empty_state"><span class="material-symbols-outlined">sensors_off</span><p>Không có phiên hoạt động nào.</p></div>';
@@ -181,7 +181,7 @@ function kickUser(userId) {
     if (!confirm('Đăng xuất người dùng này khỏi tất cả phiên?')) return;
     const fd = new FormData();
     fd.append('user_id', userId);
-    apiFetch('admin/api/users.php?action=kick', { method: 'POST', body: fd })
+    apiFetch('modules/users/api/users.php?action=kick', { method: 'POST', body: fd })
         .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadSessions(); })
         .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
 }

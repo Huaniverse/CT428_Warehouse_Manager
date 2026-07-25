@@ -2,9 +2,9 @@
 // admin/users.php — API quản lý tài khoản (chỉ Admin)
 // Tất cả response trả về JSON
 
-require_once __DIR__ . '/../../shared/db.php';
-require_once __DIR__ . '/../../shared/auth.php';
-require_once __DIR__ . '/../../shared/helpers.php';
+require_once __DIR__ . '/../../../shared/db.php';
+require_once __DIR__ . '/../../../shared/auth.php';
+require_once __DIR__ . '/../helpers.php';
 requireAdminOrStoreManager();
 
 header('Content-Type: application/json; charset=utf-8');

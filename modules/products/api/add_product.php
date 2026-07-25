@@ -2,8 +2,8 @@
 // shared/api/add_product.php — API thêm sản phẩm mới (chỉ dành cho Admin)
 // Response trả về dạng JSON
 
-require_once __DIR__ . '/../db.php';
-require_once __DIR__ . '/../auth.php';
+require_once __DIR__ . '/../../../shared/db.php';
+require_once __DIR__ . '/../../../shared/auth.php';
 require_once __DIR__ . '/../helpers.php';
 requireAdmin(); // Yêu cầu quyền Admin
 

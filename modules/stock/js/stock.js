@@ -91,7 +91,7 @@ if (importModal) {
         this.disabled = true;
         this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang xử lý...';
 
-        apiFetch('shared/api/import_stock.php?action=create_batch', { method: 'POST', body: fd })
+        apiFetch('modules/stock/api/import_stock.php?action=create_batch', { method: 'POST', body: fd })
             .then(data => {
                 this.disabled = false;
                 this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận nhập kho (<span id="importBatchCount">' + importBatchItems.length + '</span> sản phẩm)';
@@ -167,7 +167,7 @@ if (exportModal) {
         const spId = document.getElementById('export_product_id').value;
         const infoDiv = document.getElementById('export_stock_info');
         if (!spId) { infoDiv.style.display = 'none'; return; }
-        apiFetch('shared/api/edit_product.php?action=get&id=' + spId)
+        apiFetch('modules/products/api/edit_product.php?action=get&id=' + spId)
             .then(data => {
                 if (data.success) {
                     document.getElementById('export_current_stock').textContent = data.product.SoLuong;
@@ -232,7 +232,7 @@ if (exportModal) {
         this.disabled = true;
         this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang xử lý...';
 
-        apiFetch('shared/api/export_stock.php?action=create_batch', { method: 'POST', body: fd })
+        apiFetch('modules/stock/api/export_stock.php?action=create_batch', { method: 'POST', body: fd })
             .then(data => {
                 this.disabled = false;
                 this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận xuất kho (<span id="exportBatchCount">' + exportBatchItems.length + '</span> sản phẩm)';
@@ -258,7 +258,7 @@ function loadImportHistory(page = 1) {
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Đang tải...</td></tr>';
 
-    apiFetch('shared/api/import_stock.php?action=list&page=' + page)
+    apiFetch('modules/stock/api/import_stock.php?action=list&page=' + page)
         .then(data => {
             if (!data.success || data.records.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6"><div class="empty_state"><span class="material-symbols-outlined">inventory_2</span><p>Chưa có phiếu nhập kho nào.</p></div></td></tr>';
@@ -297,7 +297,7 @@ function loadExportHistory(page = 1) {
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Đang tải...</td></tr>';
 
-    apiFetch('shared/api/export_stock.php?action=list&page=' + page)
+    apiFetch('modules/stock/api/export_stock.php?action=list&page=' + page)
         .then(data => {
             if (!data.success || data.records.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6"><div class="empty_state"><span class="material-symbols-outlined">inventory_2</span><p>Chưa có phiếu xuất kho nào.</p></div></td></tr>';
@@ -374,7 +374,7 @@ function openReceiptDetail(type, maPhieu) {
     infoDiv.innerHTML = '<p style="color:#64748b;">Đang tải...</p>';
     itemsDiv.innerHTML = '';
 
-    const endpoint = type === 'import' ? 'shared/api/import_stock.php' : 'shared/api/export_stock.php';
+    const endpoint = type === 'import' ? 'modules/stock/api/import_stock.php' : 'modules/stock/api/export_stock.php';
     apiFetch(endpoint + '?action=detail&ma_phieu=' + encodeURIComponent(maPhieu))
         .then(data => {
             if (!data.success || !data.items || data.items.length === 0) {
