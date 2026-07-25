@@ -45,8 +45,7 @@ $categories_list  = $categories_list  ?? [];
             <span class="material-symbols-outlined form_icon">admin_panel_settings</span>
             <select id="new_role" class="form_input" style="cursor:pointer;">
               <option value="staff">Staff — Nhân viên kho</option>
-              <option value="store_manager">CH Trưởng — Quản lý cửa hàng</option>
-              <option value="admin">Admin — Quản trị viên</option>
+              <option value="store_manager">Cửa hàng trưởng</option>
             </select>
           </div>
         </div>
@@ -532,7 +531,7 @@ $categories_list  = $categories_list  ?? [];
   <!-- Modal chi tiết / sửa tài khoản -->
   <?php if ($is_admin || $is_store_manager): ?>
   <div class="modal_overlay" id="userDetailModal">
-    <div class="modal_card" style="width: 480px;">
+    <div class="modal_card" style="width: 560px;">
       <div class="modal_header">
         <h3>
           <span class="material-symbols-outlined">edit</span>
@@ -542,88 +541,80 @@ $categories_list  = $categories_list  ?? [];
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
-      <div class="modal_body">
+      <div class="modal_body" style="padding:20px 24px 16px;">
         <input type="hidden" id="detail_user_id">
         <div class="user_detail_info">
           <div class="detail_row">
             <span class="detail_label">Tên đăng nhập:</span>
             <span class="detail_value" id="detail_username"></span>
           </div>
-          <div class="detail_row" style="align-items:center;">
+          <div class="detail_row">
             <span class="detail_label">Họ và tên:</span>
-            <div class="form_input_wrapper" style="flex:1; max-width:260px;">
+            <div class="form_input_wrapper detail_input">
               <input type="text" id="detail_fullname" class="form_input" placeholder="Nhập họ và tên">
             </div>
           </div>
-          <div class="detail_row" id="detail_role_row" style="align-items:center;">
+          <div class="detail_row" id="detail_role_row">
             <span class="detail_label">Vai trò:</span>
-            <div id="detail_role_edit" style="display:none;">
-              <div class="form_input_wrapper" style="max-width:260px;">
+            <div id="detail_role_edit" class="detail_input" style="display:none;">
+              <div class="form_input_wrapper">
                 <select id="detail_role_select" class="form_input" style="cursor:pointer;">
-                  <option value="staff">Staff — Nhân viên kho</option>
+                  <option value="staff">Nhân viên kho</option>
                   <option value="store_manager">Cửa hàng trưởng</option>
                 </select>
               </div>
             </div>
-            <div id="detail_role_display"></div>
+            <div id="detail_role_display" class="detail_right"></div>
           </div>
           <div class="detail_row">
             <span class="detail_label">Trạng thái:</span>
             <span id="detail_status_badge"></span>
           </div>
-          <div class="detail_row" style="flex-direction:column; align-items:flex-start; gap:8px;">
+          <div class="detail_row" id="detail_perm_row" style="display:none;">
+            <span class="detail_label">Quyền nhập/xuất:</span>
+            <label id="detail_perm_label" style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+              <input type="checkbox" id="detail_allow_import_export" style="width:18px; height:18px; cursor:pointer;">
+              <span style="font-size:13px;">Cho phép</span>
+            </label>
+          </div>
+          <div class="detail_row" id="detail_sched_row">
             <span class="detail_label">Lịch truy cập:</span>
-            <div id="detail_schedule_edit" style="width:100%; display:none;">
-              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:8px;">
+            <div id="detail_schedule_edit" class="detail_right" style="display:flex; align-items:center; gap:8px;">
+              <label id="detail_sched_toggle_label" style="display:flex; align-items:center; gap:4px; cursor:pointer; flex-shrink:0;">
                 <input type="checkbox" id="detail_has_schedule" style="width:18px; height:18px; cursor:pointer;">
-                <span style="font-size:13px;">Bật giới hạn giờ truy cập</span>
+                <span style="font-size:13px;">Bật</span>
               </label>
-              <div id="detail_sched_time_fields" style="display:none;">
-                <div style="display:flex; gap:12px;">
-                  <div class="form_group" style="flex:1; margin-bottom:0;">
-                    <label for="detail_sched_start" style="font-size:12px;">Từ</label>
-                    <div class="form_input_wrapper">
-                      <span class="material-symbols-outlined form_icon">schedule</span>
-                      <input type="time" id="detail_sched_start" class="form_input" value="06:00">
-                    </div>
+              <div id="detail_sched_time_fields" style="display:none; flex:1 1 auto; min-width:0;">
+                <div style="display:flex; gap:6px; align-items:center; min-width:0;">
+                  <div class="form_input_wrapper" style="flex:1 1 0%; min-width:100px; min-height:38px;">
+                    <input type="time" id="detail_sched_start" class="form_input" value="06:00" style="padding-left:12px;">
                   </div>
-                  <div class="form_group" style="flex:1; margin-bottom:0;">
-                    <label for="detail_sched_end" style="font-size:12px;">Đến</label>
-                    <div class="form_input_wrapper">
-                      <span class="material-symbols-outlined form_icon">schedule</span>
-                      <input type="time" id="detail_sched_end" class="form_input" value="22:00">
-                    </div>
+                  <span style="color:#94a3b8; flex-shrink:0;">–</span>
+                  <div class="form_input_wrapper" style="flex:1 1 0%; min-width:100px; min-height:38px;">
+                    <input type="time" id="detail_sched_end" class="form_input" value="22:00" style="padding-left:12px;">
                   </div>
                 </div>
               </div>
+              <div id="detail_schedule_display"></div>
             </div>
-            <div id="detail_schedule_display"></div>
+          </div>
+          <div class="detail_row">
+            <span class="detail_label">Đặt lại MK:</span>
+            <div class="detail_right" style="display:flex; gap:6px; align-items:center;">
+              <div class="form_input_wrapper" style="flex:1; min-width:0;">
+                <input type="password" id="detail_new_password" class="form_input" placeholder="Tối thiểu 6 ký tự" style="padding-right:32px;">
+                <button type="button" class="toggle_password" onclick="toggleDetailPassword('detail_new_password')" tabindex="-1">
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+              </div>
+              <button type="button" class="btn_primary" id="btnSavePassword" style="background:#dc2626; white-space:nowrap; padding:0 14px; font-size:13px; height:38px; flex-shrink:0;">
+                Lưu
+              </button>
+            </div>
           </div>
           <div class="detail_row">
             <span class="detail_label">Đăng nhập cuối:</span>
             <span class="detail_value" id="detail_last_login"></span>
-          </div>
-        </div>
-
-        <hr class="detail_separator">
-
-        <h4 style="margin-bottom:12px; font-size:15px; color:#0f172a;">
-          <span class="material-symbols-outlined" style="font-size:18px; vertical-align:middle; color:#dc2626;">key</span>
-          Đặt lại mật khẩu
-        </h4>
-        <div class="form_group" style="margin-bottom:0;">
-          <div style="display:flex; gap:8px; align-items:flex-start;">
-            <div class="form_input_wrapper" style="flex:1;">
-              <span class="material-symbols-outlined form_icon">lock</span>
-              <input type="password" id="detail_new_password" class="form_input" placeholder="Tối thiểu 6 ký tự">
-              <button type="button" class="toggle_password" onclick="toggleDetailPassword('detail_new_password')" tabindex="-1">
-                <span class="material-symbols-outlined">visibility</span>
-              </button>
-            </div>
-            <button type="button" class="btn_primary" id="btnSavePassword" style="background:#dc2626; white-space:nowrap; padding:8px 14px; font-size:13px; height:42px;">
-              <span class="material-symbols-outlined" style="font-size:18px;">key</span>
-              Lưu
-            </button>
           </div>
         </div>
       </div>

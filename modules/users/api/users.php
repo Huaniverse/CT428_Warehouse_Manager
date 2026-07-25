@@ -72,7 +72,7 @@ switch ($action) {
             echo json_encode(['success' => false, 'message' => 'Mật khẩu phải có ít nhất 6 ký tự.']);
             exit;
         }
-        if (!in_array($new_role, ['admin', 'store_manager', 'staff'])) {
+        if (!in_array($new_role, ['store_manager', 'staff'])) {
             $new_role = 'staff';
         }
         // Store manager chỉ có thể tạo tài khoản staff
@@ -119,10 +119,11 @@ switch ($action) {
             }
         }
 
+        // Types: s(username) s(password) s(full_name) s(role) i(allow_ie) i(has_schedule) s(start) s(end) i(created_by)
         $stmt = $conn->prepare(
             "INSERT INTO users (username, password, full_name, role, allow_import_export, has_schedule, access_start, access_end, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
-        $stmt->bind_param("ssssiiissi", $new_username, $hash, $new_fullname, $new_role, $allow_ie, $has_schedule, $access_start, $access_end, $creator_id);
+        $stmt->bind_param("ssssiissi", $new_username, $hash, $new_fullname, $new_role, $allow_ie, $has_schedule, $access_start, $access_end, $creator_id);
 
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Tạo tài khoản thành công.', 'id' => $conn->insert_id]);
@@ -570,6 +571,7 @@ switch ($action) {
         $has_schedule = isset($_POST['has_schedule']) ? (int)$_POST['has_schedule'] : null;
         $access_start = $_POST['access_start'] ?? null;
         $access_end   = $_POST['access_end']   ?? null;
+        $allow_ie     = isset($_POST['allow_import_export']) ? (int)$_POST['allow_import_export'] : null;
 
         if ($target_id <= 0) {
             echo json_encode(['success' => false, 'message' => 'ID không hợp lệ.']);
@@ -645,11 +647,11 @@ switch ($action) {
                     exit;
                 }
             }
-            $stmt = $conn->prepare("UPDATE users SET full_name = ?, role = ?, has_schedule = ?, access_start = ?, access_end = ? WHERE id = ?");
-            $stmt->bind_param("ssissi", $new_fullname, $new_role, $has_schedule, $access_start, $access_end, $target_id);
+            $stmt = $conn->prepare("UPDATE users SET full_name = ?, role = ?, has_schedule = ?, access_start = ?, access_end = ?, allow_import_export = ? WHERE id = ?");
+            $stmt->bind_param("ssissii", $new_fullname, $new_role, $has_schedule, $access_start, $access_end, $allow_ie, $target_id);
         } else {
-            $stmt = $conn->prepare("UPDATE users SET full_name = ?, role = ? WHERE id = ?");
-            $stmt->bind_param("ssi", $new_fullname, $new_role, $target_id);
+            $stmt = $conn->prepare("UPDATE users SET full_name = ?, role = ?, allow_import_export = ? WHERE id = ?");
+            $stmt->bind_param("ssii", $new_fullname, $new_role, $allow_ie, $target_id);
         }
 
         if ($stmt->execute()) {

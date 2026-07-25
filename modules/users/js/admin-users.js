@@ -175,16 +175,60 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('btnCancelUserDetail')?.addEventListener('click', () => detailModal.classList.remove('open'));
         detailModal.addEventListener('click', e => { if (e.target === detailModal) detailModal.classList.remove('open'); });
 
-        // Toggle lịch truy cập
+        // Toggle lịch truy cập — làm mờ khi chưa check
         const detailSchedToggle = document.getElementById('detail_has_schedule');
         const detailSchedTime   = document.getElementById('detail_sched_time_fields');
+        const detailSchedEdit   = document.getElementById('detail_schedule_edit');
         if (detailSchedToggle) {
             detailSchedToggle.addEventListener('change', function() {
-                detailSchedTime.style.display = this.checked ? 'block' : 'none';
+                detailSchedEdit.style.opacity = this.checked ? '1' : '0.45';
+                detailSchedTime.style.pointerEvents = this.checked ? 'auto' : 'none';
             });
         }
 
-        // Lưu thông tin (full_name + role + schedule)
+        // Khi đổi vai trò → staff bắt buộc lịch, hiện/ẩn quyền
+        const detailRoleSelect = document.getElementById('detail_role_select');
+        if (detailRoleSelect) {
+            detailRoleSelect.addEventListener('change', function() {
+                const isStaff = this.value === 'staff';
+                const isAdmin = this.value === 'admin';
+                const permRow = document.getElementById('detail_perm_row');
+                permRow.style.display = isStaff ? 'flex' : 'none';
+                // Schedule
+                const schedRow       = document.getElementById('detail_sched_row');
+                const schedEdit      = document.getElementById('detail_schedule_edit');
+                const schedDisplay   = document.getElementById('detail_schedule_display');
+                const schedToggleLbl = document.getElementById('detail_sched_toggle_label');
+                const schedToggle    = document.getElementById('detail_has_schedule');
+                const schedTimeFields = document.getElementById('detail_sched_time_fields');
+                schedRow.style.display = 'flex';
+                schedTimeFields.style.display = 'block';
+                if (isAdmin) {
+                    schedEdit.style.display = 'none';
+                    schedDisplay.innerHTML = '<span class="schedule_badge none">Không áp dụng</span>';
+                } else if (isStaff) {
+                    schedEdit.style.display = 'flex';
+                    schedDisplay.innerHTML = '';
+                    schedToggle.disabled = true;
+                    schedToggle.checked = true;
+                    schedEdit.style.opacity = '1';
+                    schedTimeFields.style.pointerEvents = 'auto';
+                    schedToggleLbl.style.opacity = '0.6';
+                    schedToggleLbl.style.cursor = 'default';
+                } else {
+                    schedEdit.style.display = 'flex';
+                    schedDisplay.innerHTML = '';
+                    schedToggle.disabled = false;
+                    const checked = schedToggle.checked;
+                    schedEdit.style.opacity = checked ? '1' : '0.45';
+                    schedTimeFields.style.pointerEvents = checked ? 'auto' : 'none';
+                    schedToggleLbl.style.opacity = '1';
+                    schedToggleLbl.style.cursor = 'pointer';
+                }
+            });
+        }
+
+        // Lưu thông tin (full_name + role + schedule + permissions)
         document.getElementById('btnSaveUserInfo')?.addEventListener('click', function() {
             const fd = new FormData();
             fd.append('id',        document.getElementById('detail_user_id').value);
@@ -193,6 +237,10 @@ document.addEventListener('DOMContentLoaded', function() {
             fd.append('has_schedule', detailSchedToggle.checked ? 1 : 0);
             fd.append('access_start', document.getElementById('detail_sched_start').value);
             fd.append('access_end',   document.getElementById('detail_sched_end').value);
+            const permCb = document.getElementById('detail_allow_import_export');
+            if (permCb && permCb.offsetParent !== null) {
+                fd.append('allow_import_export', permCb.checked ? 1 : 0);
+            }
 
             this.disabled = true;
             this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
@@ -263,8 +311,8 @@ function loadUsers() {
                 const safeCreatedBy = escapeHtml(u.created_by_name || '');
                 const initials    = safeName.replace(/&amp;|&lt;|&gt;|&quot;|&#039;/g, '').split(' ').map(w => w[0]).filter(Boolean).slice(-2).join('').toUpperCase();
                 const statusBadge = u.is_active == 1
-                    ? '<span class="status_badge active">● Hoạt động</span>'
-                    : '<span class="status_badge inactive">● Vô hiệu hóa</span>';
+                    ? '<span class="status_badge active">Hoạt động</span>'
+                    : '<span class="status_badge inactive">Vô hiệu hóa</span>';
                 const roleBadge   = u.role === 'admin'
                     ? '<span class="user_role_badge admin">Admin</span>'
                     : u.role === 'store_manager'
@@ -294,10 +342,8 @@ function loadUsers() {
                 const actions = isSelf
                     ? '<span style="font-size:12px;color:#94a3b8;">Tài khoản của bạn</span>'
                     : `<div class="action_group">
-                        <button class="btn_icon" title="Xem / Sửa thông tin" onclick="openUserDetail(${u.id})"><span class="material-symbols-outlined">visibility</span></button>
-                        ${canManage ? `<button class="btn_icon" title="Lịch truy cập" onclick="openScheduleModal(${u.id}, '${safeName}', '${u.role}', ${u.has_schedule || 0}, '${u.access_start || ''}', '${u.access_end || ''}')"><span class="material-symbols-outlined">schedule</span></button>` : ''}
+                        <button class="btn_icon" title="Xem / Sửa thông tin" onclick="openUserDetail(${u.id})"><span class="material-symbols-outlined">edit</span></button>
                         ${canManage ? `<button class="btn_icon" title="${toggleTitle}" onclick="toggleUser(${u.id}, ${toggleStatus})"><span class="material-symbols-outlined">${toggleIcon}</span></button>` : ''}
-                        ${u.role === 'staff' ? `<button class="btn_icon" title="Quyền nhập/xuất kho" onclick="openPermissionsModal(${u.id}, '${safeName}', ${u.allow_import_export || 0})"><span class="material-symbols-outlined">admin_panel_settings</span></button>` : ''}
                         ${canManage ? `<button class="btn_icon danger" title="Xóa tài khoản" onclick="deleteUser(${u.id}, '${safeName}')"><span class="material-symbols-outlined">delete</span></button>` : ''}
                        </div>`;
                 return `<tr>
@@ -376,7 +422,7 @@ function openUserDetail(userId) {
             if (!data.success) { showToast(data.message, 'error'); return; }
             const u = data.user;
             document.getElementById('detail_user_id').value = u.id;
-            document.getElementById('detail_username').textContent = '@' + escapeHtml(u.username);
+            document.getElementById('detail_username').textContent = escapeHtml(u.username);
 
             // Họ và tên — editable input
             document.getElementById('detail_fullname').value = u.full_name;
@@ -400,24 +446,53 @@ function openUserDetail(userId) {
             }
 
             const statusBadge = u.is_active == 1
-                ? '<span class="status_badge active">● Hoạt động</span>'
-                : '<span class="status_badge inactive">● Vô hiệu hóa</span>';
+                ? '<span class="status_badge active">Hoạt động</span>'
+                : '<span class="status_badge inactive">Vô hiệu hóa</span>';
             document.getElementById('detail_status_badge').innerHTML = statusBadge;
 
-            // Lịch truy cập — editable cho admin, readonly cho store_manager
-            const schedEdit   = document.getElementById('detail_schedule_edit');
-            const schedDisplay = document.getElementById('detail_schedule_display');
+            // Quyền nhập/xuất — chỉ hiện cho staff
+            const permRow = document.getElementById('detail_perm_row');
+            if (u.role === 'staff') {
+                permRow.style.display = 'flex';
+                document.getElementById('detail_allow_import_export').checked = u.allow_import_export == 1;
+            } else {
+                permRow.style.display = 'none';
+            }
+
+            // Lịch truy cập — luôn hiển thị, làm mờ khi chưa bật
+            const schedRow       = document.getElementById('detail_sched_row');
+            const schedEdit      = document.getElementById('detail_schedule_edit');
+            const schedDisplay   = document.getElementById('detail_schedule_display');
+            const schedToggleLbl = document.getElementById('detail_sched_toggle_label');
+            const schedToggle    = document.getElementById('detail_has_schedule');
+            const schedTimeFields = document.getElementById('detail_sched_time_fields');
+            schedRow.style.display = 'flex';
             if (u.role === 'admin') {
                 schedEdit.style.display = 'none';
                 schedDisplay.innerHTML = '<span class="schedule_badge none">Không áp dụng</span>';
             } else if (window.APP_CONFIG?.isAdmin) {
-                schedEdit.style.display = 'block';
+                schedEdit.style.display = 'flex';
                 schedDisplay.innerHTML = '';
                 const hasSched = u.has_schedule == 1;
-                document.getElementById('detail_has_schedule').checked = hasSched;
-                document.getElementById('detail_sched_time_fields').style.display = hasSched ? 'block' : 'none';
+                schedToggle.checked = hasSched;
+                schedTimeFields.style.display = 'block';
                 document.getElementById('detail_sched_start').value = u.access_start ? u.access_start.substring(0,5) : '06:00';
                 document.getElementById('detail_sched_end').value   = u.access_end   ? u.access_end.substring(0,5)   : '22:00';
+                // Làm mờ khi chưa check
+                schedEdit.style.opacity = hasSched ? '1' : '0.45';
+                schedTimeFields.style.pointerEvents = hasSched ? 'auto' : 'none';
+                if (u.role === 'staff') {
+                    schedToggle.disabled = true;
+                    schedToggle.checked = true;
+                    schedEdit.style.opacity = '1';
+                    schedTimeFields.style.pointerEvents = 'auto';
+                    schedToggleLbl.style.opacity = '0.6';
+                    schedToggleLbl.style.cursor = 'default';
+                } else {
+                    schedToggle.disabled = false;
+                    schedToggleLbl.style.opacity = '1';
+                    schedToggleLbl.style.cursor = 'pointer';
+                }
             } else {
                 schedEdit.style.display = 'none';
                 if (u.has_schedule == 1 && u.access_start && u.access_end) {

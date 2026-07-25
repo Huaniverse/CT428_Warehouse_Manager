@@ -1279,6 +1279,8 @@ aside {
     max-width: 95vw;
     box-shadow: 0 24px 48px rgba(30, 50, 80, 0.18), 0 0 0 1px rgba(60, 80, 120, 0.06);
     animation: modal_slide_in 0.2s ease;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 @keyframes modal_slide_in {
@@ -1684,6 +1686,23 @@ aside {
         width: 95vw !important;
         padding: 24px 16px;
     }
+
+    /* Modal chi tiết tài khoản: responsive đồng bộ cạnh phải */
+    .user_detail_info {
+        --detail-label-min-w: 100px;
+        --detail-right-max: 260px;
+    }
+
+    .detail_row {
+        gap: 8px;
+    }
+
+    /* Thu nhỏ padding nút footer trên mobile để tránh tràn */
+    .modal_footer .btn_primary,
+    .modal_footer .btn_secondary {
+        padding: 7px 12px;
+        font-size: 12.5px;
+    }
 }
 
 /* ── Small mobile (≤ 480px) ─────────────────────────────────────────────── */
@@ -1719,6 +1738,32 @@ aside {
     .session_item {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    /* Modal chi tiết tài khoản — small mobile */
+    .user_detail_info {
+        --detail-label-min-w: 84px;
+        --detail-right-max: 100%;
+    }
+
+    /* Trên màn hình rất nhỏ, cho phép hàng detail wrap xuống dòng nếu cần */
+    #userDetailModal .detail_row {
+        flex-wrap: wrap;
+    }
+
+    #userDetailModal .detail_label {
+        min-width: 84px;
+    }
+
+    /* Nút footer nhỏ hơn */
+    .modal_footer .btn_primary,
+    .modal_footer .btn_secondary {
+        padding: 7px 10px;
+        font-size: 12px;
+    }
+
+    .modal_footer .btn_primary .material-symbols-outlined {
+        font-size: 16px;
     }
 }
 
@@ -1876,6 +1921,7 @@ aside {
 .modal_card select,
 .modal_card input[type="text"],
 .modal_card input[type="number"],
+.modal_card input[type="time"],
 .modal_card textarea {
     width: 100%;
     padding: 8px 12px;
@@ -1891,17 +1937,20 @@ aside {
 .modal_card .form_input_wrapper input[type="text"],
 .modal_card .form_input_wrapper input[type="number"],
 .modal_card .form_input_wrapper input[type="password"],
+.modal_card .form_input_wrapper input[type="time"],
 .modal_card .form_input_wrapper textarea,
 .modal_card select.form_input,
 .modal_card input[type="text"].form_input,
 .modal_card input[type="number"].form_input,
 .modal_card input[type="password"].form_input,
+.modal_card input[type="time"].form_input,
 .modal_card textarea.form_input {
     border: none;
     border-radius: 0;
     padding: 11px 10px;
     box-shadow: none;
     background: transparent;
+    min-width: 0;
 }
 
 .modal_card .form_input_wrapper textarea.form_input {
@@ -1913,14 +1962,25 @@ aside {
 .modal_card .form_input_wrapper input[type="text"]:focus,
 .modal_card .form_input_wrapper input[type="number"]:focus,
 .modal_card .form_input_wrapper input[type="password"]:focus,
+.modal_card .form_input_wrapper input[type="time"]:focus,
 .modal_card .form_input_wrapper textarea:focus,
 .modal_card select.form_input:focus,
 .modal_card input[type="text"].form_input:focus,
 .modal_card input[type="number"].form_input:focus,
 .modal_card input[type="password"].form_input:focus,
+.modal_card input[type="time"].form_input:focus,
 .modal_card textarea.form_input:focus {
     border-color: transparent;
     box-shadow: none;
+}
+
+.modal_card input[type="time"] {
+    overflow: hidden;
+}
+
+.modal_card .form_input_wrapper input[type="time"] {
+    height: 38px;
+    min-height: 38px;
 }
 
 .modal_card textarea {
@@ -1931,10 +1991,14 @@ aside {
 .modal_footer {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
     gap: 10px;
     margin-top: 18px;
     padding-top: 14px;
     border-top: 1px solid #e8ecf0;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .modal_footer .btn_primary,
@@ -1945,6 +2009,10 @@ aside {
     cursor: pointer;
     border: none;
     font-weight: 500;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 .modal_footer .btn_primary {
@@ -2033,17 +2101,57 @@ aside {
     align-items: center;
     gap: 10px;
     font-size: 14px;
+    min-height: 38px;
+}
+
+/* Responsive chi tiết tài khoản: các khối bên phải dùng chung 1 max-width để đồng bộ cạnh phải */
+.user_detail_info {
+    --detail-label-min-w: 120px;
+    --detail-right-max: 340px;
 }
 
 .detail_label {
     font-weight: 600;
     color: #475569;
-    min-width: 120px;
+    min-width: var(--detail-label-min-w, 120px);
     flex-shrink: 0;
 }
 
 .detail_value {
     color: #0f172a;
+}
+
+/* Khối giá trị bên phải mỗi hàng — đồng bộ max-width + flex behavior */
+.detail_input,
+.detail_right {
+    flex: 1 1 auto;
+    max-width: var(--detail-right-max, 340px);
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.user_detail_info .form_input {
+    height: 38px;
+    min-height: 38px;
+    max-height: 38px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    letter-spacing: normal;
+    box-sizing: border-box;
+}
+
+.user_detail_info .form_input::placeholder {
+    font-family: inherit;
+    font-size: 14px;
+    letter-spacing: normal;
+    opacity: 1;
+}
+
+.user_detail_info .form_input_wrapper {
+    min-height: 38px;
+    max-height: 38px;
+    box-sizing: border-box;
 }
 
 .detail_separator {
@@ -2053,7 +2161,7 @@ aside {
 }
 
 /* ── Toggle password button in modals ────────────────────────────────────── */
-.toggle_password {
+.modal_body .form_input_wrapper .toggle_password {
     position: absolute;
     right: 8px;
     top: 50%;
@@ -2067,15 +2175,96 @@ aside {
     align-items: center;
 }
 
-.toggle_password:hover {
+.modal_body .form_input_wrapper .toggle_password:hover {
     color: #475569;
 }
 
 .modal_body .form_input_wrapper {
     position: relative;
+    overflow: visible;
 }
 
-.modal_body .form_input_wrapper .form_input {
+/* Chỉ ô password mới có padding-right để dành chỗ nút mắt (toggle_password) */
+.modal_body .form_input_wrapper input[type="password"].form_input,
+.modal_body .form_input_wrapper .form_input[type="password"] {
     padding-right: 36px;
+}
+
+/* Wrapper khi có toggle_password thì mới có position relative (đã có) */
+.modal_body .form_input_wrapper:has(.toggle_password) {
+    position: relative;
+}
+
+/* ── User detail schedule row layout ─────────────────────────────────────── */
+
+#detail_schedule_edit {
+    min-width: 0;
+}
+
+#detail_sched_time_fields,
+#detail_sched_time_fields > div {
+    min-width: 0;
+    flex-wrap: nowrap;
+}
+
+/* Bỏ icon native của input time — display:none để không chiếm không gian (fix lỗi cắt chữ SA/CH) */
+.modal_card .form_input_wrapper input[type="time"]::-webkit-calendar-picker-indicator {
+    display: none !important;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    background: none;
+    color: transparent;
+    pointer-events: none;
+}
+
+.modal_card .form_input_wrapper input[type="time"]::-webkit-datetime-edit,
+.modal_card .form_input_wrapper input[type="time"]::-webkit-datetime-edit-fields-wrapper,
+.modal_card .form_input_wrapper input[type="time"]::-webkit-datetime-edit-hour-field,
+.modal_card .form_input_wrapper input[type="time"]::-webkit-datetime-edit-minute-field,
+.modal_card .form_input_wrapper input[type="time"]::-webkit-datetime-edit-ampm-field,
+.modal_card .form_input_wrapper input[type="time"]::-webkit-datetime-edit-text {
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+    line-height: normal;
+}
+
+.modal_card .form_input_wrapper input[type="time"]::-moz-calendar-picker-indicator {
+    display: none;
+}
+
+/* Đảm bảo select / input trong detail modal không bị cắt dưới phần descender */
+.modal_card .form_input_wrapper select.form_input,
+.modal_card .form_input_wrapper input.form_input,
+.user_detail_info .form_input_wrapper select.form_input,
+.user_detail_info .form_input_wrapper input.form_input {
+    line-height: 1.4;
+    overflow: visible;
+    height: auto;
+    min-height: 38px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+}
+
+.user_detail_info .form_input_wrapper {
+    overflow: visible;
+    min-height: 38px;
+}
+
+.user_detail_info .form_input_wrapper select.form_input {
+    padding-right: 28px;
+}
+
+/* Đảm bảo flex-row không bị tràn và không cắt nội dung */
+.detail_row {
+    flex-wrap: nowrap;
+    overflow: visible;
+    width: 100%;
+    box-sizing: border-box;
 }
 /*===========================================================================*/
