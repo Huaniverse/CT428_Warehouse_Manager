@@ -1,19 +1,12 @@
 <?php
-// admin/export_stock.php — API xuất kho (Admin + Store Manager + Staff có quyền)
+// shared/api/export_stock.php — API xuất kho (Admin + Store Manager + Staff có quyền)
 
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../auth.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Kiểm tra quyền nhập/xuất kho
-$role = $_SESSION['role'] ?? '';
-$allow_import_export = ($_SESSION['allow_import_export'] ?? 0) == 1;
-if ($role !== 'admin' && $role !== 'store_manager' && !($role === 'staff' && $allow_import_export)) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Bạn không có quyền thực hiện thao tác này.']);
-    exit;
-}
+requireCanImportExport();
 
 $action = $_REQUEST['action'] ?? '';
 
@@ -116,7 +109,6 @@ switch ($action) {
         }
         break;
 
-
     // ── Tạo phiếu xuất hàng loạt ─────────────────────────────────────────
     case 'create_batch':
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -212,26 +204,23 @@ switch ($action) {
         }
         break;
 
-
     // ── Danh sách phiếu xuất ──────────────────────────────────────────────
     case 'list':
         $page   = max(1, (int)($_GET['page'] ?? 1));
         $limit  = 10;
         $offset = ($page - 1) * $limit;
 
-        $role = $_SESSION['role'] ?? '';
-        $user_id = (int)($_SESSION['user_id'] ?? 0);
         $filter_sp = (int)($_GET['san_pham'] ?? 0);
 
         $where = "1=1";
         $bind_types = "";
         $bind_values = [];
-        $allow_import_export = ($_SESSION['allow_import_export'] ?? 0) == 1;
 
-        if ($role !== 'admin' && $role !== 'store_manager' && !($role === 'staff' && $allow_import_export)) {
+        $scope_user_id = staffViewScope();
+        if ($scope_user_id !== null) {
             $where .= " AND px.nguoi_tao = ?";
             $bind_types .= "i";
-            $bind_values[] = $user_id;
+            $bind_values[] = $scope_user_id;
         }
 
         if ($filter_sp > 0) {
@@ -294,17 +283,15 @@ switch ($action) {
             exit;
         }
 
-        $role = $_SESSION['role'] ?? '';
-        $user_id = (int)($_SESSION['user_id'] ?? 0);
-        $allow_import_export = ($_SESSION['allow_import_export'] ?? 0) == 1;
+        $scope_user_id = staffViewScope();
         $where = "1=1";
         $bind_types = "";
         $bind_values = [];
 
-        if ($role !== 'admin' && $role !== 'store_manager' && !($role === 'staff' && $allow_import_export)) {
+        if ($scope_user_id !== null) {
             $where .= " AND px.nguoi_tao = ?";
             $bind_types .= "i";
-            $bind_values[] = $user_id;
+            $bind_values[] = $scope_user_id;
         }
 
         $sql = "SELECT ct.san_pham, sp.TenSP, sp.Gia,

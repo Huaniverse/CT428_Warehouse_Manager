@@ -1,5 +1,5 @@
 # [SEC-08] Bảo vệ các file cấu hình và auth khỏi truy cập trực tiếp
-<FilesMatch "^(config\.php|config\.local\.php|config\.local\.example\.php|db\.php|auth\.php)$">
+<FilesMatch "^(config\.php|config\.local\.php|config\.local\.example\.php|db\.php|auth\.php|helpers\.php)$">
     Order allow,deny
     Deny from all
 </FilesMatch>

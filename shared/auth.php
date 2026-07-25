@@ -54,18 +54,23 @@ function isAjaxRequest(): bool {
 // Hàm chuyển hướng thống nhất: AJAX → JSON, trang thường → redirect
 function redirectToLogin(string $reason = 'expired'): void {
     if (isAjaxRequest()) {
+        $page_depth = substr_count(trim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/'), '/');
+        $prefix = str_repeat('../', $page_depth + 1);
+        $login_url = $prefix . 'login.php?expired=1';
         http_response_code(401);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode([
             'success'  => false,
-            'redirect' => 'login.php?expired=1',
+            'redirect' => $login_url,
             'message'  => $reason === 'expired'
                 ? 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
                 : 'Bạn chưa đăng nhập.',
         ]);
         exit;
     }
-    header('Location: login.php?expired=1');
+    $dir_depth = substr_count(trim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/'), '/');
+    $rel = str_repeat('../', $dir_depth);
+    header('Location: ' . $rel . 'login.php?expired=1');
     exit;
 }
 
@@ -108,7 +113,6 @@ if ($conn) {
 // Sinh CSRF token cho session (dùng ở mọi trang cần bảo vệ)
 generateCsrfToken();
 
-
 // ── Tiện ích kiểm tra quyền ──────────────────────────────────────────────────
 
 function isAdmin(): bool {
@@ -126,28 +130,41 @@ function canImportExport(): bool {
     return false;
 }
 
+// ── Gate Functions (die with 403 if unauthorized) ────────────────────────────
+
+function deny403(): void {
+    http_response_code(403);
+    header('Content-Type: application/json; charset=utf-8');
+    die(json_encode(['success' => false, 'message' => 'Bạn không có quyền thực hiện thao tác này.']));
+}
+
 function requireAdmin(): void {
-    if (!isAdmin()) {
-        http_response_code(403);
-        header('Content-Type: application/json; charset=utf-8');
-        die(json_encode(['success' => false, 'message' => 'Bạn không có quyền thực hiện thao tác này.']));
-    }
+    if (!isAdmin()) deny403();
 }
 
 function requireAdminOrStoreManager(): void {
-    $role = $_SESSION['role'] ?? '';
-    if ($role !== 'admin' && $role !== 'store_manager') {
-        http_response_code(403);
-        header('Content-Type: application/json; charset=utf-8');
-        die(json_encode(['success' => false, 'message' => 'Bạn không có quyền thực hiện thao tác này.']));
-    }
+    if (!isAdmin() && !isStoreManager()) deny403();
 }
 
-function requireLogin(): void {
-    if (!isset($_SESSION['user_id']) || !isset($_SESSION['session_token'])) {
-        redirectToLogin('unauthenticated');
-    }
+function requireCanImportExport(): void {
+    if (!canImportExport()) deny403();
 }
+
+// ── Data-scope Helpers ───────────────────────────────────────────────────────
+
+/**
+ * Xác định staff có quyền xem tất cả hay chỉ phiếu của mình.
+ * @return int|null User ID nếu bị giới hạn, null nếu xem tất cả
+ */
+function staffViewScope(): ?int {
+    $role = $_SESSION['role'] ?? '';
+    if ($role === 'staff' && !($_SESSION['allow_import_export'] ?? 0)) {
+        return (int)$_SESSION['user_id'];
+    }
+    return null;
+}
+
+// ── User Helpers ─────────────────────────────────────────────────────────────
 
 function getCurrentUser(): array {
     return [

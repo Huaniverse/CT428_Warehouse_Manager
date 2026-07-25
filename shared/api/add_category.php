@@ -1,5 +1,5 @@
 <?php
-// admin/add_category.php — API thêm danh mục mới (chỉ dành cho Admin)
+// shared/api/add_category.php — API thêm danh mục mới (chỉ dành cho Admin)
 // Response trả về dạng JSON chứa danh sách danh mục đã cập nhật
 
 require_once __DIR__ . '/../db.php';
@@ -15,7 +15,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // [SEC-01] Xác minh CSRF token — chống CSRF attack
 verifyCsrfToken();
-
 
 if (!$conn) {
     echo json_encode(['success' => false, 'message' => 'Lỗi kết nối cơ sở dữ liệu.']);
@@ -66,7 +65,7 @@ if ($stmt->execute()) {
         while ($row = $result->fetch_assoc()) {
             $categories[] = $row;
         }
-    }
+}
 
     echo json_encode([
         'success'    => true,

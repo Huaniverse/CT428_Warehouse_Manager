@@ -1,10 +1,10 @@
 <?php
-// admin/edit_product.php — API sửa sản phẩm / soft delete / restore (Admin only)
+// shared/api/edit_product.php — API sửa sản phẩm / soft delete / restore (Admin only)
 
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../auth.php';
-require_once __DIR__ . '/helpers.php'; // [FIX-07] Dùng helper validation
-requireAdmin();
+require_once __DIR__ . '/../helpers.php';
+requireAdminOrStoreManager();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -26,8 +26,7 @@ switch ($action) {
         }
 
         $stmt = $conn->prepare(
-            // [FIX-05] Chỉ lấy sản phẩm đang active — ngăn edit sản phẩm đã ẩn
-            "SELECT MaSP, TenSP, MoTa, Gia, SoLuong, DanhMuc, is_active FROM sanpham WHERE MaSP = ? AND is_active = 1"
+            "SELECT MaSP, TenSP, MoTa, Gia, SoLuong, DanhMuc, is_active FROM sanpham WHERE MaSP = ?"
         );
 
         $stmt->bind_param("i", $ma_sp);
@@ -51,7 +50,6 @@ switch ($action) {
         // [SEC-01] Xác minh CSRF token
         verifyCsrfToken();
 
-
         $ma_sp = (int)($_POST['ma_sp'] ?? 0);
         if ($ma_sp <= 0) {
             echo json_encode(['success' => false, 'message' => 'Mã sản phẩm không hợp lệ.']);
@@ -71,7 +69,6 @@ switch ($action) {
         $danhmuc  = $data['danhmuc'];
         $mota     = $data['mota'];
         $gia      = $data['gia'];
-
 
         // Kiểm tra sản phẩm tồn tại
         $check_sp = $conn->prepare("SELECT MaSP FROM sanpham WHERE MaSP = ?");
@@ -105,7 +102,6 @@ switch ($action) {
         }
         // [SEC-01] Xác minh CSRF token
         verifyCsrfToken();
-
 
         $ma_sp     = (int)($_POST['ma_sp'] ?? 0);
         $new_state = (int)($_POST['is_active'] ?? 0) ? 1 : 0;

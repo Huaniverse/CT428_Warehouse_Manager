@@ -1,10 +1,10 @@
 <?php
-// admin/add_product.php — API thêm sản phẩm mới (chỉ dành cho Admin)
+// shared/api/add_product.php — API thêm sản phẩm mới (chỉ dành cho Admin)
 // Response trả về dạng JSON
 
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../auth.php';
-require_once __DIR__ . '/helpers.php'; // [FIX-07] Dùng helper validation
+require_once __DIR__ . '/../helpers.php';
 requireAdmin(); // Yêu cầu quyền Admin
 
 header('Content-Type: application/json; charset=utf-8');
@@ -16,7 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // [SEC-01] Xác minh CSRF token — chống CSRF attack
 verifyCsrfToken();
-
 
 if (!$conn) {
     echo json_encode(['success' => false, 'message' => 'Lỗi kết nối cơ sở dữ liệu.']);

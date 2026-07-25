@@ -49,22 +49,6 @@ header {
     gap: 16px;
 }
 
-.display_right {
-    display: flex;
-    align-items: center;
-    background-color: #eef1f5;
-    border: 1px solid #e8ecf0;
-    border-radius: 8px;
-    padding: 6px 12px;
-    transition: all 0.2s ease-in-out;
-}
-
-.display_right:focus-within {
-    background-color: #ffffff;
-    border-color: #3b6fd4;
-    box-shadow: 0 0 0 3px rgba(59, 111, 212, 0.15);
-}
-
 .input_find {
     border: none;
     outline: none;
@@ -94,34 +78,6 @@ header {
 
 .search_button .material-symbols-outlined {
     font-size: 20px;
-}
-
-.action_button {
-    border: none;
-    background: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    color: #6b7a8d;
-    transition: all 0.2s ease;
-}
-
-.action_button:hover {
-    background-color: #eef1f5;
-    color: #1a1d23;
-    transform: scale(1.05);
-}
-
-.action_button:active {
-    transform: scale(0.92);
-}
-
-.action_button .material-symbols-outlined {
-    font-size: 24px;
 }
 
 /*===========================================================================*/
@@ -506,6 +462,63 @@ aside {
 
 .filter_button .material-symbols-outlined {
     font-size: 20px;
+}
+
+/* ── History tab buttons (phiếu nhập / xuất) ──────────────────────────── */
+.history_tab_btn {
+    background: #ffffff !important;
+    color: #3d4555 !important;
+    border: 1.5px solid #e8ecf0 !important;
+    padding: 8px 16px !important;
+    min-height: 40px !important;
+    height: auto !important;
+    min-width: 140px !important;
+    justify-content: center !important;
+    opacity: 1 !important;
+    transition: all 0.2s ease;
+    box-shadow: none !important;
+}
+
+/* Hover state - 2 nút GIỐNG HỆT NHAU */
+.history_tab_btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06) !important;
+    background: #f8fafc !important;
+}
+
+/* Icon - 2 nút cùng font-size, cùng độ tương phản ở trạng thái thường */
+.history_tab_btn .material-symbols-outlined {
+    font-size: 20px;
+    transition: color 0.2s ease;
+}
+
+.history_tab_btn#hist_tab_import .material-symbols-outlined { color: #16a34a; }
+.history_tab_btn#hist_tab_export .material-symbols-outlined { color: #ea580c; }
+
+/* ⭐ ACTIVE state - 2 nút NỔI BẬT BẰNG NHAU */
+.history_tab_btn.active {
+    color: #ffffff !important;
+    border-color: transparent !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px -4px rgba(0,0,0,0.18) !important;
+    opacity: 1 !important;
+    font-weight: 500;
+}
+
+/* Mỗi nút một màu chủ đạo, nhưng TÍNH NĂNG NỔI BẬT (shadow + translate + weight) = nhau */
+.history_tab_btn#hist_tab_import.active { background: #16a34a !important; }
+.history_tab_btn#hist_tab_export.active { background: #ea580c !important; }
+
+/* Active thì icon đổi trắng - 2 nút như nhau */
+.history_tab_btn.active .material-symbols-outlined { color: #ffffff !important; }
+
+/* Không active - 2 nút CÙNG opacity (không nút nào "yếu" hơn nút kia) */
+.history_tab_btn:not(.active) {
+    opacity: 0.85 !important;
+}
+
+.history_tab_btn:not(.active):hover {
+    opacity: 1 !important;
 }
 
 /*====================================LOGIN PAGE==============================*/
@@ -1408,6 +1421,74 @@ aside {
     font-size: 18px;
 }
 
+/* ── Pagination ───────────────────────────────────────────────────── */
+.pagination_btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid #e8ecf0;
+    background: #ffffff;
+    color: #3d4555;
+    box-sizing: border-box;
+    user-select: none;
+    line-height: 1;
+}
+
+.pagination_btn + .pagination_btn {
+    margin-left: 6px;
+}
+
+.pagination_btn:hover:not(:disabled) {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #1e293b;
+}
+
+.pagination_btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.pagination_btn.btn_primary {
+    background: #3b6fd4;
+    color: #ffffff;
+    border-color: #3b6fd4;
+    box-shadow: 0 2px 6px rgba(59, 111, 212, 0.25);
+}
+
+.pagination_btn.btn_primary:hover:not(:disabled) {
+    background: #2e5cb8;
+    border-color: #2e5cb8;
+}
+
+.pagination_btn:disabled,
+.pagination_btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: grayscale(0.3);
+}
+
+.pagination_ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 36px;
+    color: #94a3b8;
+    font-weight: 600;
+    margin: 0 2px;
+    user-select: none;
+}
+
 /* Empty state */
 .empty_state {
     text-align: center;
@@ -1784,12 +1865,40 @@ aside {
     transition: border 0.2s;
 }
 
-.modal_card select:focus,
-.modal_card input[type="text"]:focus,
-.modal_card input[type="number"]:focus,
-.modal_card textarea:focus {
-    border-color: #3b6fd4;
-    box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
+.modal_card .form_input_wrapper select,
+.modal_card .form_input_wrapper input[type="text"],
+.modal_card .form_input_wrapper input[type="number"],
+.modal_card .form_input_wrapper input[type="password"],
+.modal_card .form_input_wrapper textarea,
+.modal_card select.form_input,
+.modal_card input[type="text"].form_input,
+.modal_card input[type="number"].form_input,
+.modal_card input[type="password"].form_input,
+.modal_card textarea.form_input {
+    border: none;
+    border-radius: 0;
+    padding: 11px 10px;
+    box-shadow: none;
+    background: transparent;
+}
+
+.modal_card .form_input_wrapper textarea.form_input {
+    padding: 6px 0;
+    min-height: auto;
+}
+
+.modal_card .form_input_wrapper select:focus,
+.modal_card .form_input_wrapper input[type="text"]:focus,
+.modal_card .form_input_wrapper input[type="number"]:focus,
+.modal_card .form_input_wrapper input[type="password"]:focus,
+.modal_card .form_input_wrapper textarea:focus,
+.modal_card select.form_input:focus,
+.modal_card input[type="text"].form_input:focus,
+.modal_card input[type="number"].form_input:focus,
+.modal_card input[type="password"].form_input:focus,
+.modal_card textarea.form_input:focus {
+    border-color: transparent;
+    box-shadow: none;
 }
 
 .modal_card textarea {
