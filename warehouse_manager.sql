@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th7 24, 2026 lúc 07:50 PM
+-- Thời gian đã tạo: Th7 25, 2026 lúc 05:36 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -64,7 +64,23 @@ INSERT INTO `chi_tiet_phieu_nhap` (`id`, `ma_phieu`, `san_pham`, `so_luong`, `gh
 (22, 'PN_20260610103000_1022', 44, 200, 'Nhập bổ sung kính cường lực'),
 (23, 'PN_20260610110000_1023', 59, 190, 'Nhập bổ sung gia dụng'),
 (24, 'PN_20260610113000_1024', 61, 100, 'Nhập bổ sung lò vi sóng'),
-(25, 'PN_20260610120000_1025', 161, 190, 'Nhập bổ sung nồi chiên');
+(25, 'PN_20260610120000_1025', 161, 190, 'Nhập bổ sung nồi chiên'),
+(26, 'PN_20260725142954_6282', 1, 5, ''),
+(27, 'PN_20260725142954_6282', 5, 67, ''),
+(28, 'PN_20260725143054_6103', 21, 4, ''),
+(29, 'PN_20260725143054_6103', 57, 5, ''),
+(30, 'PN_20260725143054_6103', 90, 6, ''),
+(31, 'PN_20260725143106_2711', 2, 6, ''),
+(32, 'PN_20260725143140_4137', 2, 4, ''),
+(33, 'PN_20260725143140_4137', 63, 6, ''),
+(34, 'PN_20260725154624_6512', 5, 2, ''),
+(35, 'PN_20260725154624_6512', 39, 2, ''),
+(36, 'PN_20260725154624_6512', 90, 2, ''),
+(37, 'PN_20260725171835_2557', 5, 3, ''),
+(38, 'PN_20260725171835_2557', 7, 5, ''),
+(39, 'PN_20260725171835_2557', 15, 5, ''),
+(40, 'PN_20260725171835_2557', 79, 6, ''),
+(41, 'PN_20260725171835_2557', 109, 3, '');
 
 -- --------------------------------------------------------
 
@@ -161,7 +177,13 @@ INSERT INTO `phieu_nhap` (`ma_phieu`, `nguoi_tao`, `ngay_tao`) VALUES
 ('PN_20260610103000_1022', 1, '2026-06-10 10:30:00'),
 ('PN_20260610110000_1023', 1, '2026-06-10 11:00:00'),
 ('PN_20260610113000_1024', 1, '2026-06-10 11:30:00'),
-('PN_20260610120000_1025', 1, '2026-06-10 12:00:00');
+('PN_20260610120000_1025', 1, '2026-06-10 12:00:00'),
+('PN_20260725142954_6282', 1, '2026-07-25 12:29:54'),
+('PN_20260725143054_6103', 1, '2026-07-25 12:30:54'),
+('PN_20260725143106_2711', 1, '2026-07-25 12:31:06'),
+('PN_20260725143140_4137', 1, '2026-07-25 12:31:40'),
+('PN_20260725154624_6512', 3, '2026-07-25 13:46:24'),
+('PN_20260725171835_2557', 1, '2026-07-25 15:18:35');
 
 -- --------------------------------------------------------
 
@@ -214,13 +236,13 @@ CREATE TABLE `sanpham` (
 --
 
 INSERT INTO `sanpham` (`MaSP`, `TenSP`, `MoTa`, `Gia`, `SoLuong`, `DanhMuc`, `is_active`) VALUES
-(1, 'iPhone 15 Pro Max 256GB', 'Điện thoại Apple chính hãng, màu Titan tự nhiên', 30990000, 45, 'DTH', 1),
-(2, 'Samsung Galaxy S24 Ultra', 'Điện thoại kèm bút S-Pen, hỗ trợ Galaxy AI', 27490000, 30, 'DTH', 1),
+(1, 'iPhone 15 Pro Max 256GB', 'Điện thoại Apple chính hãng, màu Titan tự nhiên', 30990000, 50, 'DTH', 1),
+(2, 'Samsung Galaxy S24 Ultra', 'Điện thoại kèm bút S-Pen, hỗ trợ Galaxy AI', 27490000, 40, 'DTH', 1),
 (3, 'iPad Air 6 M2', 'Máy tính bảng Apple hiệu năng cao, màn hình 11 inch', 16290000, 15, 'DTH', 0),
 (4, 'MacBook Air M3 8GB/256GB', 'Laptop mỏng nhẹ, pin trâu, màu Midnight', 27990000, 25, 'LAP', 0),
-(5, 'Asus ROG Strix G16', 'Laptop gaming cấu hình cao, RTX 4060, Intel i7', 34500000, 8, 'LAP', 1),
+(5, 'Asus ROG Strix G16', 'Laptop gaming cấu hình cao, RTX 4060, Intel i7', 34500000, 80, 'LAP', 1),
 (6, 'Dell Inspiron 14 5430', 'Laptop văn phòng vỏ nhôm, core i5 đời mới', 16800000, 40, 'LAP', 1),
-(7, 'Sạc dự phòng Anker 20000mAh', 'Sạc nhanh PowerIQ 22.5W, 2 cổng USB-C', 650000, 150, 'PKI', 1),
+(7, 'Sạc dự phòng Anker 20000mAh', 'Sạc nhanh PowerIQ 22.5W, 2 cổng USB-C', 650000, 155, 'PKI', 1),
 (8, 'Chuột không dây Logitech MX Master 3S', 'Chuột công thái học cao cấp cho lập trình viên', 2490000, 60, 'PKI', 1),
 (9, 'Bàn phím cơ Keychron K2 V2', 'Bàn phím Bluetooth, Gateron Brown Switch', 1850000, 35, 'PKI', 1),
 (10, 'Cáp sạc Baseus USB-C to Lightning', 'Cáp bọc dù siêu bền, hỗ trợ sạc nhanh PD 20W', 120000, 300, 'PKI', 1),
@@ -228,13 +250,13 @@ INSERT INTO `sanpham` (`MaSP`, `TenSP`, `MoTa`, `Gia`, `SoLuong`, `DanhMuc`, `is
 (12, 'Loa Bluetooth JBL Charge 5', 'Loa kháng nước IP67, pin dùng 20 giờ liên tục', 3850000, 5, 'ATH', 1),
 (13, 'Tai nghe AirPods Pro Gen 2', 'Tai nghe True Wireless chip H2, chống ồn tốt hơn', 5590000, 85, 'ATH', 1),
 (14, 'Robot hút bụi Xiaomi Vacuum X20', 'Robot hút bụi lau nhà thông minh, lực hút 5000Pa', 7200000, 18, 'GDG', 1),
-(15, 'Nồi chiên không dầu Philips HD9252', 'Dung tích 4.1L, công nghệ Rapid Air', 2350000, 22, 'GDG', 1),
+(15, 'Nồi chiên không dầu Philips HD9252', 'Dung tích 4.1L, công nghệ Rapid Air', 2350000, 27, 'GDG', 1),
 (16, 'Thẻ quà tặng Got It', 'Thẻ mua sắm điện tử mệnh giá 500k', 500000, 100, 'QUA', 1),
 (17, 'Oppo Reno11 Pro 5G', 'Điện thoại chụp ảnh chân dung chuyên nghiệp', 11990000, 168, 'DTH', 1),
 (18, 'Xiaomi 14 Ultra', 'Điện thoại cao cấp camera Leica ống kính lớn', 29990000, 33, 'DTH', 1),
 (19, 'Samsung Galaxy Z Fold5', 'Điện thoại màn hình gập cao cấp, đa nhiệm tốt', 33990000, 11, 'DTH', 1),
 (20, 'iPhone 13 128GB', 'Điện thoại Apple quốc dân, hiệu năng ổn định', 13500000, 194, 'DTH', 1),
-(21, 'iPad Pro 11 M4', 'Máy tính bảng màn hình Tandem OLED siêu mỏng', 28990000, 75, 'DTH', 1),
+(21, 'iPad Pro 11 M4', 'Máy tính bảng màn hình Tandem OLED siêu mỏng', 28990000, 79, 'DTH', 1),
 (22, 'Samsung Galaxy Tab S9', 'Máy tính bảng chống nước IP68 kèm bút S-Pen', 17490000, 67, 'DTH', 1),
 (23, 'Xiaomi Pad 6', 'Máy tính bảng phân khúc tầm trung giải trí tốt', 7990000, 62, 'DTH', 1),
 (24, 'Vivo V30 5G', 'Điện thoại thiết kế mỏng nhẹ, camera vòng sáng Aura', 10490000, 40, 'DTH', 1),
@@ -252,7 +274,7 @@ INSERT INTO `sanpham` (`MaSP`, `TenSP`, `MoTa`, `Gia`, `SoLuong`, `DanhMuc`, `is
 (36, 'Acer Predator Helios 16', 'Laptop gaming phân khúc cao cấp hiệu năng cực khủng', 42000000, 28, 'LAP', 1),
 (37, 'Chuột Logitech G304 Wireless', 'Chuột gaming không dây pin lâu, mắt đọc HERO', 790000, 60, 'PKI', 1),
 (38, 'Bàn phím Akko 3098B', 'Bàn phím cơ layout 98 phím, keycap PBT chất lượng', 165000, 64, 'PKI', 1),
-(39, 'Củ sạc Ugreen GaN 65W', 'Củ sạc nhanh 3 cổng, công nghệ GaN nhỏ gọn', 480000, 134, 'PKI', 1),
+(39, 'Củ sạc Ugreen GaN 65W', 'Củ sạc nhanh 3 cổng, công nghệ GaN nhỏ gọn', 480000, 136, 'PKI', 1),
 (40, 'Ổ cứng di động SSD Samsung T7 1TB', 'Ổ cứng tốc độ cao, vỏ kim loại chống va đập', 2550000, 159, 'PKI', 1),
 (41, 'Lót chuột cỡ lớn 80x30cm', 'Bàn di chuột may bo viền dày dặn chống trượt', 120000, 11, 'PKI', 1),
 (42, 'Hub chuyển đổi Type-C Baseus 6 in 1', 'Mở rộng cổng HDMI, USB 3.0 và khe đọc thẻ', 390000, 148, 'PKI', 1),
@@ -270,13 +292,13 @@ INSERT INTO `sanpham` (`MaSP`, `TenSP`, `MoTa`, `Gia`, `SoLuong`, `DanhMuc`, `is
 (54, 'Loa Bluetooth Huawei Sound Joy', 'Loa đồng thiết kế Devialet âm bass uy lực', 2390000, 227, 'ATH', 1),
 (55, 'Tai nghe Gaming Kingston HyperX Cloud II', 'Tai nghe giả lập âm thanh 7.1 chơi game chuẩn', 1890000, 6, 'ATH', 1),
 (56, 'Loa vi tính Logitech Z313', 'Hệ thống loa 2.1 có trầm cho máy tính để bàn', 950000, 199, 'ATH', 1),
-(57, 'Máy lọc không khí Xiaomi 4 Pro', 'Lọc bụi mịn PM2.5, khử mùi hiệu quả phòng lớn', 4150000, 211, 'GDG', 1),
+(57, 'Máy lọc không khí Xiaomi 4 Pro', 'Lọc bụi mịn PM2.5, khử mùi hiệu quả phòng lớn', 4150000, 216, 'GDG', 1),
 (58, 'Quạt cây thông minh Xiaomi Gen 3', 'Quạt biến tần DC chạy êm, có pin tích điện dự phòng', 1950000, 45, 'GDG', 1),
 (59, 'Bình đun siêu tốc giữ nhiệt Philips', 'Dung tích 1.7L, ruột inox 314 an toàn sức khỏe', 850000, 183, 'GDG', 1),
 (60, 'Máy hút bụi cầm tay Deerma DX700', 'Thiết kế nhỏ gọn, lực hút mạnh đa năng', 650000, 113, 'GDG', 1),
 (61, 'Lò vi sóng Sharp 20L', 'Lò vi sóng có chức năng nướng tiện lợi dễ dùng', 1750000, 92, 'GDG', 1),
 (62, 'Nồi cơm điện cao tần Toshiba 1L', 'Công nghệ cao tần IH nấu cơm chín đều thơm ngon', 2890000, 76, 'GDG', 1),
-(63, 'Máy tăm nước Panasonic EW1511', 'Công nghệ siêu âm làm sạch răng nướu nhẹ nhàng', 2400000, 44, 'GDG', 1),
+(63, 'Máy tăm nước Panasonic EW1511', 'Công nghệ siêu âm làm sạch răng nướu nhẹ nhàng', 2400000, 50, 'GDG', 1),
 (64, 'Bàn là hơi nước cầm tay Tefal', 'Thiết kế gấp gọn tiện mang đi du lịch, là nhanh', 790000, 60, 'GDG', 1),
 (65, 'Máy pha cà phê Delonghi Dedica', 'Máy pha Espresso bán tự động bằng vỏ kim loại', 6800000, 250, 'GDG', 1),
 (66, 'Máy xay sinh tố cầm tay Braun', 'Công suất lớn xay mịn đá và thực phẩm ăn dặm', 1590000, 200, 'GDG', 1),
@@ -292,7 +314,7 @@ INSERT INTO `sanpham` (`MaSP`, `TenSP`, `MoTa`, `Gia`, `SoLuong`, `DanhMuc`, `is
 (76, 'Huawei MatePad 11.5', 'Máy tính bảng màn hình 120Hz mượt mà, hỗ trợ bàn phím', 6990000, 139, 'DTH', 1),
 (77, 'iPhone 15 Pro 128GB', 'Điện thoại cao cấp vỏ Titan, chip A17 Pro mạnh mẽ', 24990000, 38, 'DTH', 1),
 (78, 'Samsung Galaxy S23 FE', 'Điện thoại cấu hình cao cấp giá hợp lý cho giới trẻ', 12490000, 146, 'DTH', 1),
-(79, 'Xiaomi Poco X6 Pro', 'Điện thoại chuyên game cấu hình cực khủng trong tầm giá', 8490000, 41, 'DTH', 1),
+(79, 'Xiaomi Poco X6 Pro', 'Điện thoại chuyên game cấu hình cực khủng trong tầm giá', 8490000, 47, 'DTH', 1),
 (80, 'Oppo A3 5G', 'Điện thoại phân khúc phổ thông độ bền chuẩn quân đội', 4990000, 30, 'DTH', 1),
 (81, 'Vivo V40 Lite', 'Điện thoại chụp ảnh đêm đẹp, thiết kế mỏng nhẹ', 8290000, 198, 'DTH', 1),
 (82, 'Honor 200 5G', 'Điện thoại màn hình cong, camera chụp chân dung cao cấp', 11990000, 126, 'DTH', 1),
@@ -303,7 +325,7 @@ INSERT INTO `sanpham` (`MaSP`, `TenSP`, `MoTa`, `Gia`, `SoLuong`, `DanhMuc`, `is
 (87, 'Asus Vivobook 14 OLED', 'Laptop văn phòng màn hình OLED màu sắc chuẩn xác', 15990000, 62, 'LAP', 1),
 (88, 'HP Envy x360 14', 'Laptop xoay gập 360 độ cảm ứng, vỏ nhôm mỏng nhẹ', 21800000, 95, 'LAP', 1),
 (89, 'Lenovo IdeaPad Slim 3', 'Laptop phân khúc học sinh sinh viên giá tốt bền bỉ', 11200000, 68, 'LAP', 1),
-(90, 'Acer Swift Go 14', 'Laptop mỏng nhẹ chuẩn Intel Evo, màn hình siêu đẹp', 17990000, 89, 'LAP', 1),
+(90, 'Acer Swift Go 14', 'Laptop mỏng nhẹ chuẩn Intel Evo, màn hình siêu đẹp', 17990000, 97, 'LAP', 1),
 (91, 'MSI Thin 15', 'Laptop gaming mỏng nhẹ, card đồ họa rời GTX series', 16500000, 62, 'LAP', 1),
 (92, 'Dell Vostro 3430', 'Laptop văn phòng phân khúc phổ thông siêu bền bỉ', 13400000, 55, 'LAP', 1),
 (93, 'MacBook Pro 16 M3 Max', 'Máy trạm đồ họa Apple đỉnh cao cho nhà làm phim', 79990000, 46, 'LAP', 1),
@@ -322,7 +344,7 @@ INSERT INTO `sanpham` (`MaSP`, `TenSP`, `MoTa`, `Gia`, `SoLuong`, `DanhMuc`, `is
 (106, 'LG Gram Pro 16', 'Laptop siêu cao cấp trọng lượng dưới 1.2kg pin trâu', 38900000, 176, 'LAP', 1),
 (107, 'Sạc nhanh Anker Nano 30W', 'Củ sạc siêu nhỏ gọn dùng công nghệ GaN cho iPhone', 320000, 173, 'PKI', 1),
 (108, 'Chuột Gaming Razer DeathAdder V2', 'Chuột chơi game công thái học mắt đọc chính xác', 1250000, 41, 'PKI', 1),
-(109, 'Bàn phím cơ Asus ROG Strix Scope', 'Bàn phím cơ chuyên game đèn LED RGB rực rỡ', 2890000, 56, 'PKI', 1),
+(109, 'Bàn phím cơ Asus ROG Strix Scope', 'Bàn phím cơ chuyên game đèn LED RGB rực rỡ', 2890000, 59, 'PKI', 1),
 (110, 'Cáp HDMI Ugreen 2.0 dài 2m', 'Cáp truyền hình ảnh âm thanh độ phân giải 4K', 150000, 11, 'PKI', 1),
 (111, 'Túi chống sốc Laptop Tomtoc', 'Túi đựng bảo vệ laptop chống va đập tiêu chuẩn Mỹ', 550000, 164, 'PKI', 1),
 (112, 'Ổ cứng SSD Kingston NV2 512GB', 'Ổ cứng lưu trữ SSD M.2 NVMe tốc độ đọc ghi cao', 980000, 111, 'PKI', 1),
@@ -401,9 +423,9 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`session_token`, `user_id`, `ip_address`, `user_agent`, `created_at`, `expires_at`) VALUES
-('285ee61f10abcc4eae8c63c31c525aa18c19b6fb72e19dd4169565cb5f82a7b86da5bcc717c53b2b6b83713364b3aca78b4427325bb8f6b5e26659c0fbd9477a', 3, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 OPR/133.0.0.0', '2026-07-24 17:49:58', '2026-07-25 03:49:58'),
-('6092a4bb17f8ea3b33474757d76bbdeefde2755c627e9bda648c238a9786c87750684521e202768e17aa8e13f4a9738d4a85b65dd57414e7ffc841b5b87661c7', 2, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36', '2026-07-24 17:48:50', '2026-07-25 03:48:50'),
-('e2e33571c1d56db9c82a0f8bd0455ade123e8976ed0f6cd2fb6ed7c0b0073337ef5336dd8968000e9e31a1297d5680e479111fb6860ca70a3e5f96738d0574ae', 1, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36 Edg/150.0.0.0', '2026-07-24 17:35:14', '2026-07-25 03:35:14');
+('0c1b3481fd8d1da3403461c6637ccdbb5f4febf65c2256488234675a8b496dac93eb10e0d77314534bcc2845e09d87c01ee60c92703ab55edfbc0f54e32e5157', 2, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36', '2026-07-25 12:22:20', '2026-07-25 22:22:20'),
+('438276dd4a413880be3bf78c22d5fcea0633a9b0e6de1a59d9bbaa68f4dc183860d48ac36c145e480afe90df3107c2750b2aeed940aa53c2ee5dfcf7b061a5ad', 3, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 OPR/133.0.0.0', '2026-07-25 12:22:40', '2026-07-25 22:22:40'),
+('72e2956d75d4c3779241c6845dc7c917d89be63500eb7b8d642f051538dfc9427b7df4a606397447f7d3d98e2c29254bc77444d149a0b4754da272ecf1100884', 1, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36 Edg/150.0.0.0', '2026-07-25 13:32:44', '2026-07-25 23:32:44');
 
 -- --------------------------------------------------------
 
@@ -429,9 +451,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `role`, `is_active`, `allow_import_export`, `created_by`, `created_at`, `last_login`) VALUES
-(1, 'admin', '$2y$12$tLxN.y5yFOlS4i676dUWJulxHF3T3imvv0VteXiNx7MphW6qhGjqW', 'Quản trị viên', 'admin', 1, 1, 1, '2026-07-15 16:06:35', '2026-07-24 17:35:14'),
-(2, 'nv1', '$2y$12$Ty.RlU5SMnWGXZ.nL1tWe.rWUhEuvtD6OHm9w9rA8qM8E/6uxeWCK', 'nv1', 'staff', 1, 1, 1, '2026-07-17 07:24:39', '2026-07-24 17:48:50'),
-(3, 'chtruong1', '$2y$12$/o3yao3oowPI6Te1Y0wYT.aWMRO73CEpD0aaPKyhS8.TARzXAPhR2', 'a', 'store_manager', 1, 0, 1, '2026-07-24 14:17:06', '2026-07-24 17:49:58');
+(1, 'admin', '$2y$12$tLxN.y5yFOlS4i676dUWJulxHF3T3imvv0VteXiNx7MphW6qhGjqW', 'Quản trị viên', 'admin', 1, 1, 1, '2026-07-15 16:06:35', '2026-07-25 13:32:44'),
+(2, 'nv1', '$2y$12$Ty.RlU5SMnWGXZ.nL1tWe.rWUhEuvtD6OHm9w9rA8qM8E/6uxeWCK', 'nv1', 'staff', 1, 1, 1, '2026-07-17 07:24:39', '2026-07-25 12:22:20'),
+(3, 'chtruong1', '$2y$12$/o3yao3oowPI6Te1Y0wYT.aWMRO73CEpD0aaPKyhS8.TARzXAPhR2', 'a', 'store_manager', 1, 0, 1, '2026-07-24 14:17:06', '2026-07-25 12:22:40');
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -507,7 +529,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT cho bảng `chi_tiet_phieu_nhap`
 --
 ALTER TABLE `chi_tiet_phieu_nhap`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT cho bảng `chi_tiet_phieu_xuat`

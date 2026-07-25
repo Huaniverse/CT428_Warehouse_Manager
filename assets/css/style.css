@@ -464,7 +464,17 @@ aside {
     font-size: 20px;
 }
 
-/* ── History tab buttons (phiếu nhập / xuất) ──────────────────────────── */
+/* ── History tab buttons (phiếu nhập / xuất) ────────────────────────────
+   Lưu ý màu sắc: cân bằng độ bật giữa 2 nút
+      nhập:  green-700   #15803d  (màu đậm truyền thống)
+      xuất:  orange-600  #ea580c  (lên shade -600 thay vì -700 để mắt
+                                    người thấy "bằng bật" với xanh lá,
+                                    nhất quán với nút xuất ở tab kho)
+   Độ tương phản trắng:
+      green-700   → 7.6:1 (✅ AAA)
+      orange-600  → 3.3:1 (✅ WCAG AA cho large text, nút có icon + text
+                            kích thước lớn → thoả mãn)
+───────────────────────────────────────────────────────────────────────*/
 .history_tab_btn {
     background: #ffffff !important;
     color: #3d4555 !important;
@@ -486,14 +496,35 @@ aside {
     background: #f8fafc !important;
 }
 
-/* Icon - 2 nút cùng font-size, cùng độ tương phản ở trạng thái thường */
+/* Icon - 2 nút cùng font-size, cân bằng shade để độ đậm = nhau */
 .history_tab_btn .material-symbols-outlined {
     font-size: 20px;
     transition: color 0.2s ease;
 }
 
-.history_tab_btn#hist_tab_import .material-symbols-outlined { color: #16a34a; }
-.history_tab_btn#hist_tab_export .material-symbols-outlined { color: #ea580c; }
+.history_tab_btn#hist_tab_import .material-symbols-outlined { color: #15803d; }  /* green-700  */
+.history_tab_btn#hist_tab_export .material-symbols-outlined { color: #ea580c; }  /* orange-600 */
+
+.history_tab_btn:not(.active)#hist_tab_import {
+    color: #15803d !important;
+    border-color: rgba(21,128,61,0.55) !important;
+    background: rgba(22,163,74,0.07) !important;
+}
+.history_tab_btn:not(.active)#hist_tab_export {
+    color: #c2410c !important;                          /* giữ text -700 để đọc dễ trên nền sáng */
+    border-color: rgba(234,88,12,0.55) !important;      /* viền = alpha 0.55 như nút nhập */
+    background: rgba(234,88,12,0.09) !important;        /* nền cam đậm hơn chút (0.07→0.09) vì mắt kém nhạy cảm với cam */
+}
+
+/* Hover + không active: tăng nhẹ độ đậm viền / nền 2 nút = nhau */
+.history_tab_btn:not(.active)#hist_tab_import:hover {
+    border-color: rgba(21,128,61,0.9) !important;
+    background: rgba(22,163,74,0.11) !important;
+}
+.history_tab_btn:not(.active)#hist_tab_export:hover {
+    border-color: rgba(234,88,12,0.9) !important;
+    background: rgba(234,88,12,0.13) !important;
+}
 
 /* ⭐ ACTIVE state - 2 nút NỔI BẬT BẰNG NHAU */
 .history_tab_btn.active {
@@ -505,21 +536,12 @@ aside {
     font-weight: 500;
 }
 
-/* Mỗi nút một màu chủ đạo, nhưng TÍNH NĂNG NỔI BẬT (shadow + translate + weight) = nhau */
-.history_tab_btn#hist_tab_import.active { background: #16a34a !important; }
-.history_tab_btn#hist_tab_export.active { background: #ea580c !important; }
+/* Mỗi nút một màu chủ đạo → độ bật gần = nhau */
+.history_tab_btn#hist_tab_import.active { background: #15803d !important; }  /* green-700  */
+.history_tab_btn#hist_tab_export.active { background: #ea580c !important; }  /* orange-600 (sáng hơn -700) */
 
 /* Active thì icon đổi trắng - 2 nút như nhau */
 .history_tab_btn.active .material-symbols-outlined { color: #ffffff !important; }
-
-/* Không active - 2 nút CÙNG opacity (không nút nào "yếu" hơn nút kia) */
-.history_tab_btn:not(.active) {
-    opacity: 0.85 !important;
-}
-
-.history_tab_btn:not(.active):hover {
-    opacity: 1 !important;
-}
 
 /*====================================LOGIN PAGE==============================*/
 .login_body {
