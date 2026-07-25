@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btnRefreshSessions')?.addEventListener('click', loadSessions);
 
+    // ── Modal tạo tài khoản ────────────────────────────────────────────────
     const createModal    = document.getElementById('createUserModal');
     const btnOpenModal   = document.getElementById('btnOpenCreateModal');
     const btnCloseModal  = document.getElementById('btnCloseModal');
@@ -14,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('new_fullname').value  = '';
         document.getElementById('new_password').value  = '';
         document.getElementById('new_role').value      = 'staff';
+        resetCreateScheduleFields();
     }
 
     if (btnOpenModal) btnOpenModal.addEventListener('click', openModal);
@@ -21,12 +23,67 @@ document.addEventListener('DOMContentLoaded', function() {
     if (btnCancelModal) btnCancelModal.addEventListener('click', closeModal);
     if (createModal) createModal.addEventListener('click', e => { if (e.target === createModal) closeModal(); });
 
+    // Toggle schedule fields trong modal tạo tài khoản
+    const newRole = document.getElementById('new_role');
+    const createSchedToggle = document.getElementById('create_has_schedule');
+    const createTimeFields = document.getElementById('create_time_fields');
+    const createSchedNote  = document.getElementById('create_staff_note');
+    if (newRole) {
+        newRole.addEventListener('change', function() {
+            updateCreateScheduleUI(this.value);
+        });
+        updateCreateScheduleUI(newRole.value);
+    }
+    if (createSchedToggle) {
+        createSchedToggle.addEventListener('change', function() {
+            createTimeFields.style.display = this.checked ? 'block' : 'none';
+        });
+    }
+
+    function updateCreateScheduleUI(role) {
+        if (role === 'staff') {
+            createSchedNote.style.display = 'block';
+            document.getElementById('create_sched_toggle_group').style.display = 'none';
+            createSchedToggle.checked = true;
+            createTimeFields.style.display = 'block';
+        } else if (role === 'store_manager') {
+            createSchedNote.style.display = 'none';
+            document.getElementById('create_sched_toggle_group').style.display = 'flex';
+            createTimeFields.style.display = createSchedToggle.checked ? 'block' : 'none';
+        } else {
+            createSchedNote.style.display = 'none';
+            document.getElementById('create_sched_toggle_group').style.display = 'none';
+            createTimeFields.style.display = 'none';
+            createSchedToggle.checked = false;
+        }
+    }
+
+    function resetCreateScheduleFields() {
+        if (createSchedToggle) createSchedToggle.checked = false;
+        if (createTimeFields) createTimeFields.style.display = 'none';
+        if (createSchedNote) createSchedNote.style.display = 'none';
+        const ctg = document.getElementById('create_sched_toggle_group');
+        if (ctg) ctg.style.display = 'none';
+        const cs = document.getElementById('create_start');
+        const ce = document.getElementById('create_end');
+        if (cs) cs.value = '06:00';
+        if (ce) ce.value = '22:00';
+    }
+
     if (btnSubmit) btnSubmit.addEventListener('click', function() {
         const fd = new FormData();
         fd.append('username',  document.getElementById('new_username').value.trim());
         fd.append('full_name', document.getElementById('new_fullname').value.trim());
         fd.append('password',  document.getElementById('new_password').value);
         fd.append('role',      document.getElementById('new_role').value);
+        const role = document.getElementById('new_role').value;
+        if (role === 'staff' || (role === 'store_manager' && createSchedToggle.checked)) {
+            fd.append('has_schedule', 1);
+            fd.append('access_start', document.getElementById('create_start').value);
+            fd.append('access_end',   document.getElementById('create_end').value);
+        } else if (role === 'store_manager') {
+            fd.append('has_schedule', 0);
+        }
 
         btnSubmit.disabled = true;
         btnSubmit.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang tạo...';
@@ -45,6 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     });
 
+    // ── Modal quyền ────────────────────────────────────────────────────────
     const permModal = document.getElementById('permissionsModal');
     if (permModal) {
         document.getElementById('btnClosePermissionsModal')?.addEventListener('click', () => permModal.classList.remove('open'));
@@ -70,17 +128,133 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     }
+
+    // ── Modal lịch truy cập ───────────────────────────────────────────────
+    const schedModal = document.getElementById('scheduleModal');
+    if (schedModal) {
+        document.getElementById('btnCloseScheduleModal')?.addEventListener('click', () => schedModal.classList.remove('open'));
+        document.getElementById('btnCancelScheduleModal')?.addEventListener('click', () => schedModal.classList.remove('open'));
+        schedModal.addEventListener('click', e => { if (e.target === schedModal) schedModal.classList.remove('open'); });
+
+        const schedToggle = document.getElementById('sched_has_schedule');
+        const schedTimeFields = document.getElementById('sched_time_fields');
+        if (schedToggle) {
+            schedToggle.addEventListener('change', function() {
+                schedTimeFields.style.display = this.checked ? 'block' : 'none';
+            });
+        }
+
+        document.getElementById('btnSubmitSchedule')?.addEventListener('click', function() {
+            const fd = new FormData();
+            fd.append('id',           document.getElementById('sched_user_id').value);
+            fd.append('has_schedule', schedToggle.checked ? 1 : 0);
+            fd.append('access_start', document.getElementById('sched_start').value);
+            fd.append('access_end',   document.getElementById('sched_end').value);
+
+            this.disabled = true;
+            this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
+            apiFetch('modules/users/api/users.php?action=update_schedule', { method: 'POST', body: fd })
+                .then(data => {
+                    this.disabled = false;
+                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu lịch';
+                    showToast(data.message, data.success ? 'success' : 'error');
+                    if (data.success) { schedModal.classList.remove('open'); loadUsers(); }
+                })
+                .catch(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu lịch';
+                    showToast('Lỗi kết nối máy chủ.', 'error');
+                });
+        });
+    }
+
+    // ── Modal chi tiết / sửa tài khoản ─────────────────────────────────────
+    const detailModal = document.getElementById('userDetailModal');
+    if (detailModal) {
+        document.getElementById('btnCloseUserDetail')?.addEventListener('click', () => detailModal.classList.remove('open'));
+        document.getElementById('btnCancelUserDetail')?.addEventListener('click', () => detailModal.classList.remove('open'));
+        detailModal.addEventListener('click', e => { if (e.target === detailModal) detailModal.classList.remove('open'); });
+
+        // Toggle lịch truy cập
+        const detailSchedToggle = document.getElementById('detail_has_schedule');
+        const detailSchedTime   = document.getElementById('detail_sched_time_fields');
+        if (detailSchedToggle) {
+            detailSchedToggle.addEventListener('change', function() {
+                detailSchedTime.style.display = this.checked ? 'block' : 'none';
+            });
+        }
+
+        // Lưu thông tin (full_name + role + schedule)
+        document.getElementById('btnSaveUserInfo')?.addEventListener('click', function() {
+            const fd = new FormData();
+            fd.append('id',        document.getElementById('detail_user_id').value);
+            fd.append('full_name', document.getElementById('detail_fullname').value.trim());
+            fd.append('role',      document.getElementById('detail_role_select').value);
+            fd.append('has_schedule', detailSchedToggle.checked ? 1 : 0);
+            fd.append('access_start', document.getElementById('detail_sched_start').value);
+            fd.append('access_end',   document.getElementById('detail_sched_end').value);
+
+            this.disabled = true;
+            this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
+            apiFetch('modules/users/api/users.php?action=update', { method: 'POST', body: fd })
+                .then(data => {
+                    this.disabled = false;
+                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu thay đổi';
+                    showToast(data.message, data.success ? 'success' : 'error');
+                    if (data.success) { detailModal.classList.remove('open'); loadUsers(); }
+                })
+                .catch(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu thay đổi';
+                    showToast('Lỗi kết nối máy chủ.', 'error');
+                });
+        });
+
+        // Đặt lại mật khẩu (nút nhỏ bên cạnh input)
+        document.getElementById('btnSavePassword')?.addEventListener('click', function() {
+            const userId  = document.getElementById('detail_user_id').value;
+            const newPass = document.getElementById('detail_new_password').value;
+
+            if (newPass.length < 6) {
+                showToast('Mật khẩu phải có ít nhất 6 ký tự.', 'error');
+                return;
+            }
+
+            const fd = new FormData();
+            fd.append('user_id',          userId);
+            fd.append('new_password',     newPass);
+            fd.append('confirm_password', newPass);
+
+            this.disabled = true;
+            this.innerHTML = '<span class="material-symbols-outlined spin_icon" style="font-size:18px;">autorenew</span>';
+            apiFetch('modules/users/api/users.php?action=reset_password', { method: 'POST', body: fd })
+                .then(data => {
+                    this.disabled = false;
+                    this.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">key</span> Lưu';
+                    showToast(data.message, data.success ? 'success' : 'error');
+                    if (data.success) {
+                        document.getElementById('detail_new_password').value = '';
+                    }
+                })
+                .catch(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">key</span> Lưu';
+                    showToast('Lỗi kết nối máy chủ.', 'error');
+                });
+        });
+    }
 });
 
+// ── Hàm tải danh sách users ──────────────────────────────────────────────
 function loadUsers() {
     const tbody = document.getElementById('usersTableBody');
-    tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Đang tải...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="table_loading">Đang tải...</td></tr>';
 
     apiFetch('modules/users/api/users.php?action=list')
         .then(data => {
-            if (!data.success) { tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Lỗi tải dữ liệu.</td></tr>'; return; }
+            if (!data.success) { tbody.innerHTML = '<tr><td colspan="7" class="table_loading">Lỗi tải dữ liệu.</td></tr>'; return; }
             if (data.users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6"><div class="empty_state"><span class="material-symbols-outlined">group_off</span><p>Chưa có tài khoản nào.</p></div></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7"><div class="empty_state"><span class="material-symbols-outlined">group_off</span><p>Chưa có tài khoản nào.</p></div></td></tr>';
                 return;
             }
             tbody.innerHTML = data.users.map(u => {
@@ -94,11 +268,25 @@ function loadUsers() {
                 const roleBadge   = u.role === 'admin'
                     ? '<span class="user_role_badge admin">Admin</span>'
                     : u.role === 'store_manager'
-                    ? '<span class="user_role_badge store_manager">Quản lý kho</span>'
+                    ? '<span class="user_role_badge store_manager">Cửa hàng trưởng</span>'
                     : '<span class="user_role_badge staff">Nhân viên</span>';
                 const lastLogin   = u.last_login ? new Date(u.last_login).toLocaleString('vi-VN') : '— Chưa đăng nhập';
                 const createdBy   = safeCreatedBy || '— Hệ thống';
                 const isSelf      = u.id == window.APP_CONFIG?.currentUserId;
+
+                // Lịch truy cập
+                let schedBadge = '';
+                if (u.role === 'admin') {
+                    schedBadge = '<span class="schedule_badge none">Không áp dụng</span>';
+                } else if (u.has_schedule == 1 && u.access_start && u.access_end) {
+                    schedBadge = '<span class="schedule_badge active">'
+                        + '<span class="material-symbols-outlined" style="font-size:14px; vertical-align:middle;">schedule</span> '
+                        + escapeHtml(u.access_start.substring(0,5)) + ' – ' + escapeHtml(u.access_end.substring(0,5))
+                        + '</span>';
+                } else {
+                    schedBadge = '<span class="schedule_badge none">Không giới hạn</span>';
+                }
+
                 const toggleTitle  = u.is_active == 1 ? 'Vô hiệu hóa' : 'Kích hoạt';
                 const toggleIcon   = u.is_active == 1 ? 'block' : 'check_circle';
                 const toggleStatus = u.is_active == 1 ? 0 : 1;
@@ -106,6 +294,8 @@ function loadUsers() {
                 const actions = isSelf
                     ? '<span style="font-size:12px;color:#94a3b8;">Tài khoản của bạn</span>'
                     : `<div class="action_group">
+                        <button class="btn_icon" title="Xem / Sửa thông tin" onclick="openUserDetail(${u.id})"><span class="material-symbols-outlined">visibility</span></button>
+                        ${canManage ? `<button class="btn_icon" title="Lịch truy cập" onclick="openScheduleModal(${u.id}, '${safeName}', '${u.role}', ${u.has_schedule || 0}, '${u.access_start || ''}', '${u.access_end || ''}')"><span class="material-symbols-outlined">schedule</span></button>` : ''}
                         ${canManage ? `<button class="btn_icon" title="${toggleTitle}" onclick="toggleUser(${u.id}, ${toggleStatus})"><span class="material-symbols-outlined">${toggleIcon}</span></button>` : ''}
                         ${u.role === 'staff' ? `<button class="btn_icon" title="Quyền nhập/xuất kho" onclick="openPermissionsModal(${u.id}, '${safeName}', ${u.allow_import_export || 0})"><span class="material-symbols-outlined">admin_panel_settings</span></button>` : ''}
                         ${canManage ? `<button class="btn_icon danger" title="Xóa tài khoản" onclick="deleteUser(${u.id}, '${safeName}')"><span class="material-symbols-outlined">delete</span></button>` : ''}
@@ -113,14 +303,16 @@ function loadUsers() {
                 return `<tr>
                     <td><div class="user_info_cell"><div class="user_avatar">${initials}</div><div><div class="u_fullname">${safeName}</div><div class="u_username">@${safeUsername}</div></div></div></td>
                     <td>${roleBadge}</td><td>${statusBadge}</td>
+                    <td>${schedBadge}</td>
                     <td style="font-size:13px;">${lastLogin}</td>
                     <td style="font-size:13px;">${createdBy}</td>
                     <td>${actions}</td></tr>`;
             }).join('');
         })
-        .catch(() => { tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Lỗi kết nối.</td></tr>'; });
+        .catch(() => { tbody.innerHTML = '<tr><td colspan="7" class="table_loading">Lỗi kết nối.</td></tr>'; });
 }
 
+// ── Vô hiệu hóa / Kích hoạt ─────────────────────────────────────────────
 function toggleUser(id, newStatus) {
     const fd = new FormData();
     fd.append('id', id);
@@ -130,6 +322,7 @@ function toggleUser(id, newStatus) {
         .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
 }
 
+// ── Xóa tài khoản ────────────────────────────────────────────────────────
 function deleteUser(id, name) {
     if (!confirm(`Bạn có chắc muốn xóa tài khoản "${name}"? Hành động này không thể hoàn tác.`)) return;
     const fd = new FormData();
@@ -139,6 +332,7 @@ function deleteUser(id, name) {
         .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
 }
 
+// ── Modal quyền ──────────────────────────────────────────────────────────
 function openPermissionsModal(userId, userName, currentVal) {
     document.getElementById('perm_user_id').value = userId;
     document.getElementById('perm_user_name').textContent = userName;
@@ -146,6 +340,124 @@ function openPermissionsModal(userId, userName, currentVal) {
     document.getElementById('permissionsModal').classList.add('open');
 }
 
+// ── Modal lịch truy cập ──────────────────────────────────────────────────
+function openScheduleModal(userId, userName, role, hasSchedule, startTime, endTime) {
+    document.getElementById('sched_user_id').value   = userId;
+    document.getElementById('sched_user_role').value = role;
+    document.getElementById('sched_user_name').textContent = userName;
+
+    const schedToggle = document.getElementById('sched_has_schedule');
+    const timeFields  = document.getElementById('sched_time_fields');
+    const toggleGroup = document.getElementById('sched_toggle_group');
+    const staffNote   = document.getElementById('sched_staff_note');
+
+    if (role === 'staff') {
+        toggleGroup.style.display = 'none';
+        staffNote.style.display   = 'block';
+        schedToggle.checked       = true;
+        timeFields.style.display  = 'block';
+    } else {
+        toggleGroup.style.display = 'flex';
+        staffNote.style.display   = 'none';
+        schedToggle.checked       = hasSchedule == 1;
+        timeFields.style.display  = hasSchedule == 1 ? 'block' : 'none';
+    }
+
+    document.getElementById('sched_start').value = startTime ? startTime.substring(0, 5) : '06:00';
+    document.getElementById('sched_end').value   = endTime   ? endTime.substring(0, 5)   : '22:00';
+
+    document.getElementById('scheduleModal').classList.add('open');
+}
+
+// ── Modal chi tiết / sửa tài khoản ───────────────────────────────────────
+function openUserDetail(userId) {
+    apiFetch('modules/users/api/users.php?action=get_detail&id=' + userId)
+        .then(data => {
+            if (!data.success) { showToast(data.message, 'error'); return; }
+            const u = data.user;
+            document.getElementById('detail_user_id').value = u.id;
+            document.getElementById('detail_username').textContent = '@' + escapeHtml(u.username);
+
+            // Họ và tên — editable input
+            document.getElementById('detail_fullname').value = u.full_name;
+
+            // Vai trò — admin thấy select, store_manager thấy badge readonly
+            const roleEdit    = document.getElementById('detail_role_edit');
+            const roleDisplay = document.getElementById('detail_role_display');
+            if (window.APP_CONFIG?.isAdmin) {
+                roleEdit.style.display = 'block';
+                roleDisplay.style.display = 'none';
+                document.getElementById('detail_role_select').value = u.role;
+            } else {
+                roleEdit.style.display = 'none';
+                roleDisplay.style.display = 'block';
+                const badge = u.role === 'admin'
+                    ? '<span class="user_role_badge admin">Admin</span>'
+                    : u.role === 'store_manager'
+                    ? '<span class="user_role_badge store_manager">Cửa hàng trưởng</span>'
+                    : '<span class="user_role_badge staff">Nhân viên</span>';
+                roleDisplay.innerHTML = badge;
+            }
+
+            const statusBadge = u.is_active == 1
+                ? '<span class="status_badge active">● Hoạt động</span>'
+                : '<span class="status_badge inactive">● Vô hiệu hóa</span>';
+            document.getElementById('detail_status_badge').innerHTML = statusBadge;
+
+            // Lịch truy cập — editable cho admin, readonly cho store_manager
+            const schedEdit   = document.getElementById('detail_schedule_edit');
+            const schedDisplay = document.getElementById('detail_schedule_display');
+            if (u.role === 'admin') {
+                schedEdit.style.display = 'none';
+                schedDisplay.innerHTML = '<span class="schedule_badge none">Không áp dụng</span>';
+            } else if (window.APP_CONFIG?.isAdmin) {
+                schedEdit.style.display = 'block';
+                schedDisplay.innerHTML = '';
+                const hasSched = u.has_schedule == 1;
+                document.getElementById('detail_has_schedule').checked = hasSched;
+                document.getElementById('detail_sched_time_fields').style.display = hasSched ? 'block' : 'none';
+                document.getElementById('detail_sched_start').value = u.access_start ? u.access_start.substring(0,5) : '06:00';
+                document.getElementById('detail_sched_end').value   = u.access_end   ? u.access_end.substring(0,5)   : '22:00';
+            } else {
+                schedEdit.style.display = 'none';
+                if (u.has_schedule == 1 && u.access_start && u.access_end) {
+                    schedDisplay.innerHTML = '<span class="schedule_badge active">'
+                        + '<span class="material-symbols-outlined" style="font-size:14px; vertical-align:middle;">schedule</span> '
+                        + escapeHtml(u.access_start.substring(0,5)) + ' – ' + escapeHtml(u.access_end.substring(0,5))
+                        + '</span>';
+                } else {
+                    schedDisplay.innerHTML = '<span class="schedule_badge none">Không giới hạn</span>';
+                }
+            }
+
+            document.getElementById('detail_last_login').textContent = u.last_login
+                ? new Date(u.last_login).toLocaleString('vi-VN')
+                : '— Chưa đăng nhập';
+
+            document.getElementById('detail_new_password').value = '';
+
+            document.getElementById('userDetailModal').classList.add('open');
+            document.getElementById('detail_fullname').focus();
+        })
+        .catch(() => showToast('Lỗi kết nối máy chủ.', 'error'));
+}
+
+// ── Toggle hiện/ẩn mật khẩu trong modal chi tiết ────────────────────────
+function toggleDetailPassword(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const btn = input.parentElement.querySelector('.toggle_password');
+    const icon = btn?.querySelector('.material-symbols-outlined');
+    if (input.type === 'password') {
+        input.type = 'text';
+        if (icon) icon.textContent = 'visibility_off';
+    } else {
+        input.type = 'password';
+        if (icon) icon.textContent = 'visibility';
+    }
+}
+
+// ── Phiên đăng nhập ─────────────────────────────────────────────────────
 function loadSessions() {
     const list = document.getElementById('sessionList');
     list.innerHTML = '<div class="table_loading">Đang tải...</div>';
@@ -163,7 +475,7 @@ function loadSessions() {
                 const currentTag   = s.is_current ? '<span class="current_tag">Phiên này</span>' : '';
                 const loginTime    = new Date(s.created_at).toLocaleString('vi-VN');
                 const expireTime   = new Date(s.expires_at).toLocaleString('vi-VN');
-                const roleLabel    = s.role === 'admin' ? 'Admin' : s.role === 'store_manager' ? 'Quản lý kho' : 'Staff';
+                const roleLabel    = s.role === 'admin' ? 'Admin' : s.role === 'store_manager' ? 'Cửa hàng trưởng' : 'Nhân viên';
                 const kickBtn      = !s.is_current
                     ? `<button class="btn_icon danger" title="Kick user" onclick="kickUser(${s.user_id})"><span class="material-symbols-outlined">logout</span></button>`
                     : '';

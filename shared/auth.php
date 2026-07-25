@@ -51,12 +51,10 @@ function isAjaxRequest(): bool {
     return str_contains($accept, 'application/json');
 }
 
-// Hàm chuyển hướng thống nhất: AJAX → JSON, trang thường → redirect
 function redirectToLogin(string $reason = 'expired'): void {
+    $login_url = (defined('BASE_URL') ? BASE_URL : '') . '/login.php?expired=1';
+
     if (isAjaxRequest()) {
-        $page_depth = substr_count(trim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/'), '/');
-        $prefix = str_repeat('../', $page_depth + 1);
-        $login_url = $prefix . 'login.php?expired=1';
         http_response_code(401);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode([
@@ -68,9 +66,7 @@ function redirectToLogin(string $reason = 'expired'): void {
         ]);
         exit;
     }
-    $dir_depth = substr_count(trim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/'), '/');
-    $rel = str_repeat('../', $dir_depth);
-    header('Location: ' . $rel . 'login.php?expired=1');
+    header('Location: ' . $login_url);
     exit;
 }
 
@@ -83,7 +79,8 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['session_token'])) {
 if ($conn) {
     $token = $_SESSION['session_token'];
     $stmt = $conn->prepare(
-        "SELECT s.user_id, s.expires_at, u.is_active, u.role, u.full_name, u.allow_import_export
+        "SELECT s.user_id, s.expires_at, u.is_active, u.role, u.full_name, u.allow_import_export,
+                u.has_schedule, u.access_start, u.access_end
          FROM sessions s
          JOIN users u ON s.user_id = u.id
          WHERE s.session_token = ? AND s.expires_at > NOW() AND u.is_active = 1"
@@ -100,6 +97,27 @@ if ($conn) {
             $_SESSION = [];
             session_destroy();
             redirectToLogin('expired');
+        }
+
+        // Kiểm tra lịch truy cập — admin luôn được phép
+        if (($session_data['role'] ?? '') !== 'admin' && !empty($session_data['has_schedule'])) {
+            $now   = (new DateTime())->format('H:i:s');
+            $start = $session_data['access_start'];
+            $end   = $session_data['access_end'];
+            if ($start && $end) {
+                $inRange = ($start <= $end)
+                    ? ($now >= $start && $now <= $end)
+                    : ($now >= $start || $now <= $end);
+                if (!$inRange) {
+                    $del = $conn->prepare("DELETE FROM sessions WHERE session_token = ?");
+                    $del->bind_param("s", $token);
+                    $del->execute();
+                    $del->close();
+                    $_SESSION = [];
+                    session_destroy();
+                    redirectToLogin('expired');
+                }
+            }
         }
 
         // Đồng bộ dữ liệu role và quyền (phòng trường hợp thay đổi)

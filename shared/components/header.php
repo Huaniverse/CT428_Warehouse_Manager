@@ -12,7 +12,7 @@
           <span class="user_name_display"><?php echo htmlspecialchars($current_user['name']); ?></span>
           <span class="user_role_badge <?php echo $current_user['role']; ?>">
             <?php
-              $role_labels = ['admin' => 'Admin', 'store_manager' => 'CH Trưởng', 'staff' => 'Staff'];
+              $role_labels = ['admin' => 'Admin', 'store_manager' => 'Cửa hàng trưởng', 'staff' => 'Nhân viên'];
               echo $role_labels[$current_user['role']] ?? 'Staff';
             ?>
           </span>

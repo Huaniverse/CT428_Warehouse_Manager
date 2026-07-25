@@ -1995,4 +1995,87 @@ aside {
         padding: 4px 8px;
     }
 }
+
+/* ── Schedule badge ──────────────────────────────────────────────────────── */
+.schedule_badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.schedule_badge.active {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+.schedule_badge.none {
+    background: #f1f5f9;
+    color: #94a3b8;
+    border: 1px solid #e2e8f0;
+}
+
+/* ── User detail modal ───────────────────────────────────────────────────── */
+.user_detail_info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+.detail_row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.detail_label {
+    font-weight: 600;
+    color: #475569;
+    min-width: 120px;
+    flex-shrink: 0;
+}
+
+.detail_value {
+    color: #0f172a;
+}
+
+.detail_separator {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 18px 0;
+}
+
+/* ── Toggle password button in modals ────────────────────────────────────── */
+.toggle_password {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+}
+
+.toggle_password:hover {
+    color: #475569;
+}
+
+.modal_body .form_input_wrapper {
+    position: relative;
+}
+
+.modal_body .form_input_wrapper .form_input {
+    padding-right: 36px;
+}
 /*===========================================================================*/

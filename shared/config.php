@@ -21,6 +21,8 @@ if (file_exists(__DIR__ . '/config.local.php')) {
 
 define('ROOT_PATH', dirname(__DIR__));
 
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 // Tự động phát hiện URL base path (hỗ trợ chạy trong subfolder如 XAMPP)
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host     = $_SERVER['HTTP_HOST'] ?? 'localhost';

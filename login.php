@@ -8,7 +8,9 @@ if (isset($_SESSION['user_id'])) {
     exit;
 }
 
+require_once __DIR__ . '/shared/config.php';
 require_once __DIR__ . '/shared/db.php';
+require_once __DIR__ . '/modules/users/helpers.php';
 
 $error   = '';
 $success = '';
@@ -42,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!$conn) {
         $error = 'Không thể kết nối cơ sở dữ liệu. Vui lòng thử lại sau.';
     } else {
-        $stmt = $conn->prepare("SELECT id, username, password, full_name, role, is_active FROM users WHERE username = ?");
+        $stmt = $conn->prepare("SELECT id, username, password, full_name, role, is_active, has_schedule, access_start, access_end FROM users WHERE username = ?");
         $stmt->bind_param("s", $username);
         $stmt->execute();
         $user = $stmt->get_result()->fetch_assoc();
@@ -59,6 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['login_last_attempt'] = time();
             $error = 'Tên đăng nhập hoặc mật khẩu không đúng.';
         } else {
+            // Kiểm tra lịch truy cập
+            $schedCheck = checkAccessSchedule($user);
+            if (!$schedCheck['allowed']) {
+                $error = $schedCheck['message'];
+            } else {
             // Xác thực thành công — reset bộ đếm
             $_SESSION['login_attempts']     = 0;
             $_SESSION['login_last_attempt'] = 0;
@@ -104,6 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $conn->close();
             header('Location: index.php');
             exit;
+            }
         }
     }
 }

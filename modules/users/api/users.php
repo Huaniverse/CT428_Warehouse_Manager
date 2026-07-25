@@ -22,6 +22,7 @@ switch ($action) {
 
         $caller_role = $_SESSION['role'] ?? '';
         $sql = "SELECT u.id, u.username, u.full_name, u.role, u.is_active, u.allow_import_export,
+                       u.has_schedule, u.access_start, u.access_end,
                        u.created_at, u.last_login,
                        creator.full_name AS created_by_name
                 FROM users u
@@ -84,10 +85,44 @@ switch ($action) {
         $hash = password_hash($new_password, PASSWORD_BCRYPT, ['cost' => 12]);
         $allow_ie = (int)($_POST['allow_import_export'] ?? 0);
 
+        // Xử lý lịch truy cập (staff bắt buộc, store_manager tùy chọn, admin bỏ qua)
+        $has_schedule = 0;
+        $access_start = null;
+        $access_end   = null;
+        if ($new_role === 'staff') {
+            $has_schedule = 1;
+            $access_start = $_POST['access_start'] ?? null;
+            $access_end   = $_POST['access_end']   ?? null;
+            if (!$access_start || !$access_end) {
+                echo json_encode(['success' => false, 'message' => 'Nhân viên phải có giờ truy cập.']);
+                exit;
+            }
+            if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $access_start) ||
+                !preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $access_end)) {
+                echo json_encode(['success' => false, 'message' => 'Định dạng giờ không hợp lệ.']);
+                exit;
+            }
+        } elseif ($new_role === 'store_manager') {
+            $has_schedule = (int)($_POST['has_schedule'] ?? 0);
+            if ($has_schedule) {
+                $access_start = $_POST['access_start'] ?? null;
+                $access_end   = $_POST['access_end']   ?? null;
+                if (!$access_start || !$access_end) {
+                    echo json_encode(['success' => false, 'message' => 'Vui lòng nhập đầy đủ giờ truy cập.']);
+                    exit;
+                }
+                if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $access_start) ||
+                    !preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $access_end)) {
+                    echo json_encode(['success' => false, 'message' => 'Định dạng giờ không hợp lệ.']);
+                    exit;
+                }
+            }
+        }
+
         $stmt = $conn->prepare(
-            "INSERT INTO users (username, password, full_name, role, allow_import_export, created_by) VALUES (?, ?, ?, ?, ?, ?)"
+            "INSERT INTO users (username, password, full_name, role, allow_import_export, has_schedule, access_start, access_end, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
-        $stmt->bind_param("ssssii", $new_username, $hash, $new_fullname, $new_role, $allow_ie, $creator_id);
+        $stmt->bind_param("ssssiiissi", $new_username, $hash, $new_fullname, $new_role, $allow_ie, $has_schedule, $access_start, $access_end, $creator_id);
 
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Tạo tài khoản thành công.', 'id' => $conn->insert_id]);
@@ -326,6 +361,301 @@ switch ($action) {
             echo json_encode(['success' => true, 'message' => "Đã $label quyền nhập/xuất kho."]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Không tìm thấy tài khoản hoặc không có thay đổi.']);
+        }
+        $stmt->close();
+        break;
+
+    // ── Lấy chi tiết tài khoản ─────────────────────────────────────────────
+    case 'get_detail':
+        if (!$conn) {
+            echo json_encode(['success' => false, 'message' => 'Lỗi kết nối DB']);
+            exit;
+        }
+
+        $target_id = (int)($_GET['id'] ?? 0);
+        if ($target_id <= 0) {
+            echo json_encode(['success' => false, 'message' => 'ID không hợp lệ.']);
+            exit;
+        }
+
+        $stmt = $conn->prepare(
+            "SELECT u.id, u.username, u.full_name, u.role, u.is_active, u.allow_import_export,
+                    u.has_schedule, u.access_start, u.access_end,
+                    u.created_at, u.last_login,
+                    creator.full_name AS created_by_name
+             FROM users u
+             LEFT JOIN users creator ON u.created_by = creator.id
+             WHERE u.id = ?"
+        );
+        $stmt->bind_param("i", $target_id);
+        $stmt->execute();
+        $user = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$user) {
+            echo json_encode(['success' => false, 'message' => 'Không tìm thấy tài khoản.']);
+            exit;
+        }
+
+        // Store manager chỉ xem được staff
+        $caller_role = $_SESSION['role'] ?? '';
+        if ($caller_role === 'store_manager' && $user['role'] !== 'staff') {
+            echo json_encode(['success' => false, 'message' => 'Bạn không có quyền xem tài khoản này.']);
+            exit;
+        }
+
+        echo json_encode(['success' => true, 'user' => $user]);
+        break;
+
+    // ── Cập nhật lịch truy cập ─────────────────────────────────────────────
+    case 'update_schedule':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']);
+            exit;
+        }
+        verifyCsrfToken();
+        if (!$conn) {
+            echo json_encode(['success' => false, 'message' => 'Lỗi kết nối DB']);
+            exit;
+        }
+
+        $target_id   = (int)($_POST['id'] ?? 0);
+        $has_sched   = (int)($_POST['has_schedule'] ?? 0);
+        $sched_start = $_POST['access_start'] ?? null;
+        $sched_end   = $_POST['access_end']   ?? null;
+
+        if ($target_id <= 0) {
+            echo json_encode(['success' => false, 'message' => 'ID không hợp lệ.']);
+            exit;
+        }
+
+        // Kiểm tra target role
+        $check = $conn->prepare("SELECT role FROM users WHERE id = ?");
+        $check->bind_param("i", $target_id);
+        $check->execute();
+        $target_user = $check->get_result()->fetch_assoc();
+        $check->close();
+
+        if (!$target_user) {
+            echo json_encode(['success' => false, 'message' => 'Không tìm thấy tài khoản.']);
+            exit;
+        }
+
+        // Admin không bị áp dụng lịch
+        if ($target_user['role'] === 'admin') {
+            echo json_encode(['success' => false, 'message' => 'Admin không bị áp dụng lịch truy cập.']);
+            exit;
+        }
+
+        // Store manager chỉ thao tác staff
+        $caller_role = $_SESSION['role'] ?? '';
+        if ($caller_role === 'store_manager' && $target_user['role'] !== 'staff') {
+            echo json_encode(['success' => false, 'message' => 'Chỉ được thao tác tài khoản Staff.']);
+            exit;
+        }
+
+        // Staff bắt buộc phải có lịch
+        if ($target_user['role'] === 'staff') {
+            $has_sched = 1;
+        }
+
+        // Validate giờ
+        if ($has_sched) {
+            if (!$sched_start || !$sched_end) {
+                echo json_encode(['success' => false, 'message' => 'Vui lòng nhập đầy đủ giờ truy cập.']);
+                exit;
+            }
+            if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $sched_start) ||
+                !preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $sched_end)) {
+                echo json_encode(['success' => false, 'message' => 'Định dạng giờ không hợp lệ.']);
+                exit;
+            }
+        }
+
+        $stmt = $conn->prepare("UPDATE users SET has_schedule = ?, access_start = ?, access_end = ? WHERE id = ?");
+        $stmt->bind_param("issi", $has_sched, $sched_start, $sched_end, $target_id);
+        if ($stmt->execute()) {
+            // Nếu tắt lịch cho user đang đăng nhập ngoài giờ → kick
+            if (!$has_sched || $target_user['role'] === 'staff') {
+                echo json_encode(['success' => true, 'message' => 'Đã cập nhật lịch truy cập.']);
+            } else {
+                echo json_encode(['success' => true, 'message' => 'Đã cập nhật lịch truy cập.']);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Lỗi cập nhật: ' . $stmt->error]);
+        }
+        $stmt->close();
+        break;
+
+    // ── Đặt lại mật khẩu ──────────────────────────────────────────────────
+    case 'reset_password':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']);
+            exit;
+        }
+        verifyCsrfToken();
+        if (!$conn) {
+            echo json_encode(['success' => false, 'message' => 'Lỗi kết nối DB']);
+            exit;
+        }
+
+        $target_id     = (int)($_POST['user_id'] ?? 0);
+        $new_password  = $_POST['new_password']  ?? '';
+        $confirm_pass  = $_POST['confirm_password'] ?? '';
+
+        if ($target_id <= 0) {
+            echo json_encode(['success' => false, 'message' => 'ID không hợp lệ.']);
+            exit;
+        }
+        if (strlen($new_password) < 6) {
+            echo json_encode(['success' => false, 'message' => 'Mật khẩu phải có ít nhất 6 ký tự.']);
+            exit;
+        }
+        if ($new_password !== $confirm_pass) {
+            echo json_encode(['success' => false, 'message' => 'Mật khẩu xác nhận không khớp.']);
+            exit;
+        }
+
+        // Kiểm tra target
+        $check = $conn->prepare("SELECT role FROM users WHERE id = ?");
+        $check->bind_param("i", $target_id);
+        $check->execute();
+        $target_user = $check->get_result()->fetch_assoc();
+        $check->close();
+
+        if (!$target_user) {
+            echo json_encode(['success' => false, 'message' => 'Không tìm thấy tài khoản.']);
+            exit;
+        }
+
+        // Store manager chỉ reset staff
+        $caller_role = $_SESSION['role'] ?? '';
+        if ($caller_role === 'store_manager' && $target_user['role'] !== 'staff') {
+            echo json_encode(['success' => false, 'message' => 'Chỉ được đặt lại mật khẩu tài khoản Staff.']);
+            exit;
+        }
+
+        $hash = password_hash($new_password, PASSWORD_BCRYPT, ['cost' => 12]);
+        $stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
+        $stmt->bind_param("si", $hash, $target_id);
+
+        if ($stmt->execute()) {
+            // Xóa sessions → buộc đăng nhập lại
+            $del = $conn->prepare("DELETE FROM sessions WHERE user_id = ?");
+            $del->bind_param("i", $target_id);
+            $del->execute();
+            $del->close();
+            echo json_encode(['success' => true, 'message' => 'Đã đặt lại mật khẩu. Người dùng sẽ phải đăng nhập lại.']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Lỗi đặt lại mật khẩu: ' . $stmt->error]);
+        }
+        $stmt->close();
+        break;
+
+    // ── Cập nhật thông tin tài khoản ───────────────────────────────────────
+    case 'update':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']);
+            exit;
+        }
+        verifyCsrfToken();
+        if (!$conn) {
+            echo json_encode(['success' => false, 'message' => 'Lỗi kết nối DB']);
+            exit;
+        }
+
+        $target_id    = (int)($_POST['id'] ?? 0);
+        $new_fullname = trim($_POST['full_name'] ?? '');
+        $new_role     = $_POST['role'] ?? '';
+        $has_schedule = isset($_POST['has_schedule']) ? (int)$_POST['has_schedule'] : null;
+        $access_start = $_POST['access_start'] ?? null;
+        $access_end   = $_POST['access_end']   ?? null;
+
+        if ($target_id <= 0) {
+            echo json_encode(['success' => false, 'message' => 'ID không hợp lệ.']);
+            exit;
+        }
+        if ($new_fullname === '') {
+            echo json_encode(['success' => false, 'message' => 'Họ và tên không được để trống.']);
+            exit;
+        }
+
+        // Không cho sửa bản thân
+        if ($target_id === (int)$_SESSION['user_id']) {
+            echo json_encode(['success' => false, 'message' => 'Không thể sửa thông tin tài khoản của chính mình.']);
+            exit;
+        }
+
+        // Lấy thông tin target
+        $check = $conn->prepare("SELECT role FROM users WHERE id = ?");
+        $check->bind_param("i", $target_id);
+        $check->execute();
+        $target_user = $check->get_result()->fetch_assoc();
+        $check->close();
+
+        if (!$target_user) {
+            echo json_encode(['success' => false, 'message' => 'Không tìm thấy tài khoản.']);
+            exit;
+        }
+
+        // Store manager chỉ sửa được staff
+        $caller_role = $_SESSION['role'] ?? '';
+        if ($caller_role === 'store_manager' && $target_user['role'] !== 'staff') {
+            echo json_encode(['success' => false, 'message' => 'Bạn chỉ có thể sửa tài khoản Staff.']);
+            exit;
+        }
+
+        // Store manager chỉ đổi được full_name, không đổi role
+        if ($caller_role === 'store_manager') {
+            $new_role = $target_user['role'];
+        }
+
+        // Validate role
+        if (!in_array($new_role, ['admin', 'store_manager', 'staff'])) {
+            echo json_encode(['success' => false, 'message' => 'Vai trò không hợp lệ.']);
+            exit;
+        }
+
+        // Không cho phép set quyền admin qua form sửa
+        if ($new_role === 'admin') {
+            echo json_encode(['success' => false, 'message' => 'Không được phép cấp quyền Admin từ form sửa.']);
+            exit;
+        }
+
+        // Xử lý lịch truy cập
+        if ($has_schedule !== null) {
+            // Admin không bị áp dụng lịch
+            if ($new_role === 'admin') {
+                $has_schedule = 0;
+                $access_start = null;
+                $access_end   = null;
+            }
+            // Staff bắt buộc phải có lịch
+            if ($new_role === 'staff') {
+                $has_schedule = 1;
+            }
+            if ($has_schedule) {
+                if (!$access_start || !$access_end) {
+                    echo json_encode(['success' => false, 'message' => 'Vui lòng nhập đầy đủ giờ truy cập.']);
+                    exit;
+                }
+                if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $access_start) ||
+                    !preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $access_end)) {
+                    echo json_encode(['success' => false, 'message' => 'Định dạng giờ không hợp lệ.']);
+                    exit;
+                }
+            }
+            $stmt = $conn->prepare("UPDATE users SET full_name = ?, role = ?, has_schedule = ?, access_start = ?, access_end = ? WHERE id = ?");
+            $stmt->bind_param("ssissi", $new_fullname, $new_role, $has_schedule, $access_start, $access_end, $target_id);
+        } else {
+            $stmt = $conn->prepare("UPDATE users SET full_name = ?, role = ? WHERE id = ?");
+            $stmt->bind_param("ssi", $new_fullname, $new_role, $target_id);
+        }
+
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Đã cập nhật thông tin tài khoản.']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Lỗi cập nhật: ' . $stmt->error]);
         }
         $stmt->close();
         break;

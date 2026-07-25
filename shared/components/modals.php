@@ -39,7 +39,7 @@ $categories_list  = $categories_list  ?? [];
             <input type="password" id="new_password" class="form_input" placeholder="Tối thiểu 6 ký tự">
           </div>
         </div>
-        <div class="form_group">
+          <div class="form_group">
           <label for="new_role">Vai trò</label>
           <div class="form_input_wrapper">
             <span class="material-symbols-outlined form_icon">admin_panel_settings</span>
@@ -48,6 +48,35 @@ $categories_list  = $categories_list  ?? [];
               <option value="store_manager">CH Trưởng — Quản lý cửa hàng</option>
               <option value="admin">Admin — Quản trị viên</option>
             </select>
+          </div>
+        </div>
+        <!-- Lịch truy cập khi tạo tài khoản -->
+        <div id="create_staff_note" style="display:none; background:#fef3c7; border:1px solid #fbbf24; border-radius:8px; padding:10px 14px; margin-bottom:12px; font-size:13px; color:#92400e;">
+          <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">info</span>
+          Nhân viên bắt buộc phải có lịch truy cập.
+        </div>
+        <div class="form_group" id="create_sched_toggle_group" style="display:none;">
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+            <input type="checkbox" id="create_has_schedule" style="width:18px; height:18px; cursor:pointer;">
+            <span>Bật giới hạn giờ truy cập</span>
+          </label>
+        </div>
+        <div id="create_time_fields" style="display:none;">
+          <div style="display:flex; gap:12px;">
+            <div class="form_group" style="flex:1;">
+              <label for="create_start">Giờ bắt đầu</label>
+              <div class="form_input_wrapper">
+                <span class="material-symbols-outlined form_icon">schedule</span>
+                <input type="time" id="create_start" class="form_input" value="06:00">
+              </div>
+            </div>
+            <div class="form_group" style="flex:1;">
+              <label for="create_end">Giờ kết thúc</label>
+              <div class="form_input_wrapper">
+                <span class="material-symbols-outlined form_icon">schedule</span>
+                <input type="time" id="create_end" class="form_input" value="22:00">
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -435,6 +464,174 @@ $categories_list  = $categories_list  ?? [];
         <button class="btn_primary" id="btnSubmitPermissions">
           <span class="material-symbols-outlined">save</span>
           Lưu quyền
+        </button>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <!-- Modal lịch truy cập -->
+  <?php if ($is_admin || $is_store_manager): ?>
+  <div class="modal_overlay" id="scheduleModal">
+    <div class="modal_card" style="width: 420px;">
+      <div class="modal_header">
+        <h3>
+          <span class="material-symbols-outlined">schedule</span>
+          Lịch truy cập
+        </h3>
+        <button class="modal_close" id="btnCloseScheduleModal" aria-label="Đóng modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal_body">
+        <input type="hidden" id="sched_user_id">
+        <input type="hidden" id="sched_user_role">
+        <p style="font-size:14px; color:#475569; margin-bottom:16px;">
+          Thiết lập lịch cho: <strong id="sched_user_name"></strong>
+        </p>
+        <div id="sched_staff_note" style="display:none; background:#fef3c7; border:1px solid #fbbf24; border-radius:8px; padding:10px 14px; margin-bottom:12px; font-size:13px; color:#92400e;">
+          <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">info</span>
+          Nhân viên bắt buộc phải có lịch truy cập.
+        </div>
+        <div class="form_group" id="sched_toggle_group">
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+            <input type="checkbox" id="sched_has_schedule" style="width:18px; height:18px; cursor:pointer;">
+            <span>Bật giới hạn giờ truy cập</span>
+          </label>
+        </div>
+        <div id="sched_time_fields" style="display:none;">
+          <div style="display:flex; gap:12px;">
+            <div class="form_group" style="flex:1;">
+              <label for="sched_start">Giờ bắt đầu</label>
+              <div class="form_input_wrapper">
+                <span class="material-symbols-outlined form_icon">schedule</span>
+                <input type="time" id="sched_start" class="form_input" value="06:00">
+              </div>
+            </div>
+            <div class="form_group" style="flex:1;">
+              <label for="sched_end">Giờ kết thúc</label>
+              <div class="form_input_wrapper">
+                <span class="material-symbols-outlined form_icon">schedule</span>
+                <input type="time" id="sched_end" class="form_input" value="22:00">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal_footer">
+        <button class="btn_secondary" id="btnCancelScheduleModal">Hủy</button>
+        <button class="btn_primary" id="btnSubmitSchedule">
+          <span class="material-symbols-outlined">save</span>
+          Lưu lịch
+        </button>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <!-- Modal chi tiết / sửa tài khoản -->
+  <?php if ($is_admin || $is_store_manager): ?>
+  <div class="modal_overlay" id="userDetailModal">
+    <div class="modal_card" style="width: 480px;">
+      <div class="modal_header">
+        <h3>
+          <span class="material-symbols-outlined">edit</span>
+          Chi tiết tài khoản
+        </h3>
+        <button class="modal_close" id="btnCloseUserDetail" aria-label="Đóng modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal_body">
+        <input type="hidden" id="detail_user_id">
+        <div class="user_detail_info">
+          <div class="detail_row">
+            <span class="detail_label">Tên đăng nhập:</span>
+            <span class="detail_value" id="detail_username"></span>
+          </div>
+          <div class="detail_row" style="align-items:center;">
+            <span class="detail_label">Họ và tên:</span>
+            <div class="form_input_wrapper" style="flex:1; max-width:260px;">
+              <input type="text" id="detail_fullname" class="form_input" placeholder="Nhập họ và tên">
+            </div>
+          </div>
+          <div class="detail_row" id="detail_role_row" style="align-items:center;">
+            <span class="detail_label">Vai trò:</span>
+            <div id="detail_role_edit" style="display:none;">
+              <div class="form_input_wrapper" style="max-width:260px;">
+                <select id="detail_role_select" class="form_input" style="cursor:pointer;">
+                  <option value="staff">Staff — Nhân viên kho</option>
+                  <option value="store_manager">Cửa hàng trưởng</option>
+                </select>
+              </div>
+            </div>
+            <div id="detail_role_display"></div>
+          </div>
+          <div class="detail_row">
+            <span class="detail_label">Trạng thái:</span>
+            <span id="detail_status_badge"></span>
+          </div>
+          <div class="detail_row" style="flex-direction:column; align-items:flex-start; gap:8px;">
+            <span class="detail_label">Lịch truy cập:</span>
+            <div id="detail_schedule_edit" style="width:100%; display:none;">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:8px;">
+                <input type="checkbox" id="detail_has_schedule" style="width:18px; height:18px; cursor:pointer;">
+                <span style="font-size:13px;">Bật giới hạn giờ truy cập</span>
+              </label>
+              <div id="detail_sched_time_fields" style="display:none;">
+                <div style="display:flex; gap:12px;">
+                  <div class="form_group" style="flex:1; margin-bottom:0;">
+                    <label for="detail_sched_start" style="font-size:12px;">Từ</label>
+                    <div class="form_input_wrapper">
+                      <span class="material-symbols-outlined form_icon">schedule</span>
+                      <input type="time" id="detail_sched_start" class="form_input" value="06:00">
+                    </div>
+                  </div>
+                  <div class="form_group" style="flex:1; margin-bottom:0;">
+                    <label for="detail_sched_end" style="font-size:12px;">Đến</label>
+                    <div class="form_input_wrapper">
+                      <span class="material-symbols-outlined form_icon">schedule</span>
+                      <input type="time" id="detail_sched_end" class="form_input" value="22:00">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="detail_schedule_display"></div>
+          </div>
+          <div class="detail_row">
+            <span class="detail_label">Đăng nhập cuối:</span>
+            <span class="detail_value" id="detail_last_login"></span>
+          </div>
+        </div>
+
+        <hr class="detail_separator">
+
+        <h4 style="margin-bottom:12px; font-size:15px; color:#0f172a;">
+          <span class="material-symbols-outlined" style="font-size:18px; vertical-align:middle; color:#dc2626;">key</span>
+          Đặt lại mật khẩu
+        </h4>
+        <div class="form_group" style="margin-bottom:0;">
+          <div style="display:flex; gap:8px; align-items:flex-start;">
+            <div class="form_input_wrapper" style="flex:1;">
+              <span class="material-symbols-outlined form_icon">lock</span>
+              <input type="password" id="detail_new_password" class="form_input" placeholder="Tối thiểu 6 ký tự">
+              <button type="button" class="toggle_password" onclick="toggleDetailPassword('detail_new_password')" tabindex="-1">
+                <span class="material-symbols-outlined">visibility</span>
+              </button>
+            </div>
+            <button type="button" class="btn_primary" id="btnSavePassword" style="background:#dc2626; white-space:nowrap; padding:8px 14px; font-size:13px; height:42px;">
+              <span class="material-symbols-outlined" style="font-size:18px;">key</span>
+              Lưu
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal_footer">
+        <button class="btn_secondary" id="btnCancelUserDetail">Đóng</button>
+        <button class="btn_primary" id="btnSaveUserInfo">
+          <span class="material-symbols-outlined">save</span>
+          Lưu thay đổi
         </button>
       </div>
     </div>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th7 25, 2026 lúc 05:36 PM
+-- Thời gian đã tạo: Th7 25, 2026 lúc 08:01 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -40,47 +40,54 @@ CREATE TABLE `chi_tiet_phieu_nhap` (
 --
 
 INSERT INTO `chi_tiet_phieu_nhap` (`id`, `ma_phieu`, `san_pham`, `so_luong`, `ghi_chu`) VALUES
-(1, 'PN_20260501090000_1001', 20, 200, 'Nhập kho đợt đầu — lô hàng iPhone 13'),
-(2, 'PN_20260501091500_1002', 27, 200, 'Nhập kho đợt đầu — laptop học tập'),
-(3, 'PN_20260501093000_1003', 28, 200, 'Nhập kho đợt đầu — laptop gaming'),
-(4, 'PN_20260501094500_1004', 29, 250, 'Nhập kho đợt đầu — laptop giá rẻ'),
-(5, 'PN_20260501100000_1005', 32, 170, 'Nhập kho đợt đầu — MacBook Pro'),
-(6, 'PN_20260501101500_1006', 10, 350, 'Nhập lô phụ kiện bán chạy'),
-(7, 'PN_20260501101500_1006', 13, 100, 'Nhập lô phụ kiện bán chạy'),
-(8, 'PN_20260501101500_1006', 53, 230, 'Nhập lô phụ kiện bán chạy'),
-(9, 'PN_20260501110000_1009', 57, 220, 'Nhập kho đợt đầu — gia dụng'),
-(10, 'PN_20260501111500_1010', 65, 260, 'Nhập kho đợt đầu — gia dụng cao cấp'),
-(11, 'PN_20260515090000_1011', 1, 50, 'Nhập bổ sung đợt 2'),
-(12, 'PN_20260515090000_1011', 25, 200, 'Nhập bổ sung đợt 2'),
-(13, 'PN_20260515090000_1011', 33, 120, 'Nhập bổ sung đợt 2'),
-(14, 'PN_20260515090000_1011', 37, 70, 'Nhập bổ sung đợt 2'),
-(15, 'PN_20260515110000_1015', 42, 160, 'Nhập bổ sung hub chuyển đổi'),
-(16, 'PN_20260515113000_1016', 48, 120, 'Nhập bổ sung tai nghe giá rẻ'),
-(17, 'PN_20260515120000_1017', 51, 160, 'Nhập bổ sung mic chuyên nghiệp'),
-(18, 'PN_20260515123000_1018', 66, 210, 'Nhập bổ sung gia dụng'),
-(19, 'PN_20260610090000_1019', 7, 160, 'Nhập lô mùa hè'),
-(20, 'PN_20260610090000_1019', 30, 150, 'Nhập lô mùa hè'),
-(21, 'PN_20260610090000_1019', 38, 70, 'Nhập lô mùa hè'),
-(22, 'PN_20260610103000_1022', 44, 200, 'Nhập bổ sung kính cường lực'),
-(23, 'PN_20260610110000_1023', 59, 190, 'Nhập bổ sung gia dụng'),
-(24, 'PN_20260610113000_1024', 61, 100, 'Nhập bổ sung lò vi sóng'),
-(25, 'PN_20260610120000_1025', 161, 190, 'Nhập bổ sung nồi chiên'),
-(26, 'PN_20260725142954_6282', 1, 5, ''),
-(27, 'PN_20260725142954_6282', 5, 67, ''),
-(28, 'PN_20260725143054_6103', 21, 4, ''),
-(29, 'PN_20260725143054_6103', 57, 5, ''),
-(30, 'PN_20260725143054_6103', 90, 6, ''),
-(31, 'PN_20260725143106_2711', 2, 6, ''),
-(32, 'PN_20260725143140_4137', 2, 4, ''),
-(33, 'PN_20260725143140_4137', 63, 6, ''),
-(34, 'PN_20260725154624_6512', 5, 2, ''),
-(35, 'PN_20260725154624_6512', 39, 2, ''),
-(36, 'PN_20260725154624_6512', 90, 2, ''),
-(37, 'PN_20260725171835_2557', 5, 3, ''),
-(38, 'PN_20260725171835_2557', 7, 5, ''),
-(39, 'PN_20260725171835_2557', 15, 5, ''),
-(40, 'PN_20260725171835_2557', 79, 6, ''),
-(41, 'PN_20260725171835_2557', 109, 3, '');
+(1, 'PN_20260501090000_1001', 1, 50, 'Nhập iPhone 15 Pro Max — lô đầu'),
+(2, 'PN_20260501090000_1001', 2, 40, 'Nhập Samsung S24 Ultra — lô đầu'),
+(3, 'PN_20260501090000_1001', 17, 60, 'Nhập Oppo Reno11 Pro — lô đầu'),
+(4, 'PN_20260501090000_1001', 18, 30, 'Nhập Xiaomi 14 Ultra — lô đầu'),
+(5, 'PN_20260501090000_1001', 20, 100, 'Nhập iPhone 13 — lô đầu'),
+(6, 'PN_20260501103000_1002', 5, 40, 'Nhập Asus ROG Strix — lô gaming'),
+(7, 'PN_20260501103000_1002', 6, 50, 'Nhập Dell Inspiron 14 — lô văn phòng'),
+(8, 'PN_20260501103000_1002', 27, 80, 'Nhập HP Pavilion 15 — lô học tập'),
+(9, 'PN_20260501103000_1002', 28, 60, 'Nhập Lenovo Legion 5 — lô gaming'),
+(10, 'PN_20260501103000_1002', 29, 70, 'Nhập Acer Aspire 7 — lô giá rẻ'),
+(11, 'PN_20260501140000_1003', 7, 100, 'Nhập sạc dự phòng Anker'),
+(12, 'PN_20260501140000_1003', 10, 200, 'Nhập cáp sạc Baseus'),
+(13, 'PN_20260501140000_1003', 42, 80, 'Nhập hub Type-C Baseus'),
+(14, 'PN_20260501140000_1003', 11, 10, 'Nhập tai nghe Sony XM5'),
+(15, 'PN_20260501140000_1003', 13, 50, 'Nhập AirPods Pro Gen 2'),
+(16, 'PN_20260515090000_1004', 14, 20, 'Nhập robot hút bụi Xiaomi'),
+(17, 'PN_20260515090000_1004', 15, 30, 'Nhập nồi chiên Philips'),
+(18, 'PN_20260515090000_1004', 57, 100, 'Nhập máy lọc không khí Xiaomi'),
+(19, 'PN_20260515090000_1004', 59, 80, 'Nhập bình đun Philips'),
+(20, 'PN_20260515090000_1004', 65, 50, 'Nhập máy pha cà phê Delonghi'),
+(21, 'PN_20260515140000_1005', 32, 30, 'Nhập MacBook Pro 14 M3 Pro'),
+(22, 'PN_20260515140000_1005', 33, 40, 'Nhập Asus Zenbook OLED'),
+(23, 'PN_20260515140000_1005', 31, 15, 'Nhập Dell XPS 13 Plus'),
+(24, 'PN_20260515140000_1005', 34, 10, 'Nhập LG Gram 16'),
+(25, 'PN_20260610090000_1006', 67, 50, 'Nhập Samsung A55'),
+(26, 'PN_20260610090000_1006', 68, 60, 'Nhập Oppo Reno12 F'),
+(27, 'PN_20260610090000_1006', 69, 80, 'Nhập Xiaomi Redmi Note 13 Pro'),
+(28, 'PN_20260610090000_1006', 71, 100, 'Nhập Realme C65'),
+(29, 'PN_20260610140000_1007', 87, 30, 'Nhập Asus Vivobook OLED'),
+(30, 'PN_20260610140000_1007', 88, 25, 'Nhập HP Envy x360'),
+(31, 'PN_20260610140000_1007', 89, 40, 'Nhập Lenovo IdeaPad Slim 3'),
+(32, 'PN_20260610140000_1007', 90, 35, 'Nhập Acer Swift Go 14'),
+(33, 'PN_20260610140000_1007', 102, 20, 'Nhập PC Asus ROG Strix G10'),
+(34, 'PN_20260701090000_1008', 107, 100, 'Nhập sạc nhanh Anker Nano'),
+(35, 'PN_20260701090000_1008', 108, 30, 'Nhập chuột Razer DeathAdder'),
+(36, 'PN_20260701090000_1008', 109, 40, 'Nhập bàn phím ROG Strix Scope'),
+(37, 'PN_20260701090000_1008', 111, 80, 'Nhập túi chống sốc Tomtoc'),
+(38, 'PN_20260701090000_1008', 112, 60, 'Nhập SSD Kingston NV2 512GB'),
+(39, 'PN_20260715090000_1009', 21, 40, 'Nhập iPad Pro 11 M4'),
+(40, 'PN_20260715090000_1009', 22, 35, 'Nhập Samsung Galaxy Tab S9'),
+(41, 'PN_20260715090000_1009', 85, 50, 'Nhập Samsung Tab S9 FE'),
+(42, 'PN_20260715090000_1009', 86, 45, 'Nhập Xiaomi Pad 6 Pro'),
+(43, 'PN_20260715090000_1009', 77, 20, 'Nhập iPhone 15 Pro 128GB'),
+(44, 'PN_20260725090000_1010', 61, 40, 'Nhập lò vi sóng Sharp'),
+(45, 'PN_20260725090000_1010', 62, 35, 'Nhập nồi cơm Toshiba'),
+(46, 'PN_20260725090000_1010', 161, 60, 'Nhập nồi chiên Cosori'),
+(47, 'PN_20260725090000_1010', 47, 30, 'Nhập loa Marshall Emberton II'),
+(48, 'PN_20260725090000_1010', 53, 50, 'Nhập tai nghe JBL Tune 230NC');
 
 -- --------------------------------------------------------
 
@@ -101,24 +108,47 @@ CREATE TABLE `chi_tiet_phieu_xuat` (
 --
 
 INSERT INTO `chi_tiet_phieu_xuat` (`id`, `ma_phieu`, `san_pham`, `so_luong`, `ghi_chu`) VALUES
-(1, 'PX_20260510140000_2001', 20, 8, 'Xuất bán — đơn hàng khách lẻ'),
-(2, 'PX_20260510143000_2002', 27, 15, 'Xuất bán — đơn hàng học sinh SV'),
-(3, 'PX_20260510150000_2003', 29, 10, 'Xuất bán — đơn hàng online'),
-(4, 'PX_20260510153000_2004', 13, 12, 'Xuất lô phụ kiện kèm điện thoại'),
-(5, 'PX_20260510153000_2004', 53, 15, 'Xuất lô phụ kiện kèm điện thoại'),
-(6, 'PX_20260510153000_2004', 10, 40, 'Xuất lô phụ kiện kèm điện thoại'),
-(7, 'PX_20260525090000_2007', 1, 5, 'Xuất bán — đơn VIP'),
-(8, 'PX_20260525093000_2008', 28, 6, 'Xuất bán — đơn hàng gaming'),
-(9, 'PX_20260525100000_2009', 32, 10, 'Xuất lô doanh nghiệp'),
-(10, 'PX_20260525100000_2009', 48, 8, 'Xuất lô doanh nghiệp'),
-(11, 'PX_20260525100000_2009', 42, 12, 'Xuất lô doanh nghiệp'),
-(12, 'PX_20260525113000_2012', 66, 10, 'Xuất bán — đơn gia dụng'),
-(13, 'PX_20260615090000_2013', 25, 7, 'Xuất bán — đơn online'),
-(14, 'PX_20260615093000_2014', 33, 7, 'Xuất bán — đơn văn phòng'),
-(15, 'PX_20260615100000_2015', 7, 10, 'Xuất lô phụ kiện'),
-(16, 'PX_20260615100000_2015', 30, 6, 'Xuất lô phụ kiện'),
-(17, 'PX_20260615100000_2015', 44, 12, 'Xuất lô phụ kiện'),
-(18, 'PX_20260615113000_2018', 59, 7, 'Xuất bán — đơn gia dụng');
+(1, 'PX_20260505100000_2001', 1, 8, 'Xuất bán iPhone 15 Pro Max — đơn VIP'),
+(2, 'PX_20260505100000_2001', 2, 10, 'Xuất bán Samsung S24 Ultra — đơn online'),
+(3, 'PX_20260505100000_2001', 20, 15, 'Xuất bán iPhone 13 — đơn lẻ'),
+(4, 'PX_20260505100000_2001', 17, 5, 'Xuất bán Oppo Reno11 Pro — đơn online'),
+(5, 'PX_20260512140000_2002', 27, 12, 'Xuất bán HP Pavilion — đơn học sinh'),
+(6, 'PX_20260512140000_2002', 29, 8, 'Xuất bán Acer Aspire 7 — đơn online'),
+(7, 'PX_20260512140000_2002', 6, 10, 'Xuất bán Dell Inspiron — đơn văn phòng'),
+(8, 'PX_20260512140000_2002', 28, 6, 'Xuất bán Lenovo Legion — đơn gaming'),
+(9, 'PX_20260520090000_2003', 10, 30, 'Xuất cáp sạc Baseus — kèm điện thoại'),
+(10, 'PX_20260520090000_2003', 7, 15, 'Xuất sạc dự phòng Anker — đơn online'),
+(11, 'PX_20260520090000_2003', 13, 20, 'Xuất AirPods Pro — đơn lẻ'),
+(12, 'PX_20260520090000_2003', 42, 10, 'Xuất hub Baseus — kèm laptop'),
+(13, 'PX_20260528100000_2004', 15, 8, 'Xuất nồi chiên Philips — đơn online'),
+(14, 'PX_20260528100000_2004', 57, 10, 'Xuất máy lọc không khí — đơn đại lý'),
+(15, 'PX_20260528100000_2004', 65, 5, 'Xuất máy pha cà phê — đơn quán'),
+(16, 'PX_20260528100000_2004', 14, 3, 'Xuất robot hút bụi — đơn VIP'),
+(17, 'PX_20260605140000_2005', 21, 10, 'Xuất iPad Pro 11 M4 — đơn doanh nghiệp'),
+(18, 'PX_20260605140000_2005', 22, 8, 'Xuất Samsung Tab S9 — đơn online'),
+(19, 'PX_20260605140000_2005', 24, 12, 'Xuất Vivo V30 — đơn đại lý'),
+(20, 'PX_20260605140000_2005', 25, 10, 'Xuất Realme 12 Pro+ — đơn online'),
+(21, 'PX_20260615090000_2006', 5, 6, 'Xuất Asus ROG — đơn gaming'),
+(22, 'PX_20260615090000_2006', 30, 8, 'Xuất MSI Cyborg — đơn online'),
+(23, 'PX_20260615090000_2006', 33, 5, 'Xuất Asus Zenbook OLED — đơn văn phòng'),
+(24, 'PX_20260615090000_2006', 89, 10, 'Xuất Lenovo IdeaPad — đơn học sinh'),
+(25, 'PX_20260625100000_2007', 108, 8, 'Xuất chuột Razer — đơn gaming'),
+(26, 'PX_20260625100000_2007', 109, 5, 'Xuất bàn phím ROG — đơn gaming'),
+(27, 'PX_20260625100000_2007', 111, 10, 'Xuất túi Tomtoc — kèm laptop'),
+(28, 'PX_20260625100000_2007', 112, 12, 'Xuất SSD Kingston — đơn online'),
+(29, 'PX_20260705090000_2008', 67, 15, 'Xuất Samsung A55 — đơn đại lý'),
+(30, 'PX_20260705090000_2008', 69, 12, 'Xuất Xiaomi Redmi Note 13 Pro — đơn online'),
+(31, 'PX_20260705090000_2008', 78, 8, 'Xuất Samsung S23 FE — đơn lẻ'),
+(32, 'PX_20260705090000_2008', 79, 10, 'Xuất Xiaomi Poco X6 Pro — đơn gaming'),
+(33, 'PX_20260715140000_2009', 32, 5, 'Xuất MacBook Pro 14 M3 Pro — đơn doanh nghiệp'),
+(34, 'PX_20260715140000_2009', 31, 3, 'Xuất Dell XPS 13 Plus — đơn VIP'),
+(35, 'PX_20260715140000_2009', 93, 2, 'Xuất MacBook Pro 16 M3 Max — đơn studio'),
+(36, 'PX_20260715140000_2009', 88, 4, 'Xuất HP Envy x360 — đơn online'),
+(37, 'PX_20260725100000_2010', 161, 10, 'Xuất nồi chiên Cosori — đơn online'),
+(38, 'PX_20260725100000_2010', 61, 5, 'Xuất lò vi sóng Sharp — đơn đại lý'),
+(39, 'PX_20260725100000_2010', 62, 6, 'Xuất nồi cơm Toshiba — đơn lẻ'),
+(40, 'PX_20260725100000_2010', 47, 4, 'Xuất loa Marshall — đơn online'),
+(41, 'PX_20260725100000_2010', 53, 8, 'Xuất tai nghe JBL — đơn lẻ');
 
 -- --------------------------------------------------------
 
@@ -161,29 +191,15 @@ CREATE TABLE `phieu_nhap` (
 
 INSERT INTO `phieu_nhap` (`ma_phieu`, `nguoi_tao`, `ngay_tao`) VALUES
 ('PN_20260501090000_1001', 1, '2026-05-01 09:00:00'),
-('PN_20260501091500_1002', 1, '2026-05-01 09:15:00'),
-('PN_20260501093000_1003', 1, '2026-05-01 09:30:00'),
-('PN_20260501094500_1004', 1, '2026-05-01 09:45:00'),
-('PN_20260501100000_1005', 1, '2026-05-01 10:00:00'),
-('PN_20260501101500_1006', 1, '2026-05-01 10:15:00'),
-('PN_20260501110000_1009', 1, '2026-05-01 11:00:00'),
-('PN_20260501111500_1010', 1, '2026-05-01 11:15:00'),
-('PN_20260515090000_1011', 1, '2026-05-15 09:00:00'),
-('PN_20260515110000_1015', 1, '2026-05-15 11:00:00'),
-('PN_20260515113000_1016', 1, '2026-05-15 11:30:00'),
-('PN_20260515120000_1017', 1, '2026-05-15 12:00:00'),
-('PN_20260515123000_1018', 1, '2026-05-15 12:30:00'),
-('PN_20260610090000_1019', 1, '2026-06-10 09:00:00'),
-('PN_20260610103000_1022', 1, '2026-06-10 10:30:00'),
-('PN_20260610110000_1023', 1, '2026-06-10 11:00:00'),
-('PN_20260610113000_1024', 1, '2026-06-10 11:30:00'),
-('PN_20260610120000_1025', 1, '2026-06-10 12:00:00'),
-('PN_20260725142954_6282', 1, '2026-07-25 12:29:54'),
-('PN_20260725143054_6103', 1, '2026-07-25 12:30:54'),
-('PN_20260725143106_2711', 1, '2026-07-25 12:31:06'),
-('PN_20260725143140_4137', 1, '2026-07-25 12:31:40'),
-('PN_20260725154624_6512', 3, '2026-07-25 13:46:24'),
-('PN_20260725171835_2557', 1, '2026-07-25 15:18:35');
+('PN_20260501103000_1002', 1, '2026-05-01 10:30:00'),
+('PN_20260501140000_1003', 1, '2026-05-01 14:00:00'),
+('PN_20260515090000_1004', 1, '2026-05-15 09:00:00'),
+('PN_20260515140000_1005', 1, '2026-05-15 14:00:00'),
+('PN_20260610090000_1006', 1, '2026-06-10 09:00:00'),
+('PN_20260610140000_1007', 1, '2026-06-10 14:00:00'),
+('PN_20260701090000_1008', 1, '2026-07-01 09:00:00'),
+('PN_20260715090000_1009', 1, '2026-07-15 09:00:00'),
+('PN_20260725090000_1010', 3, '2026-07-25 09:00:00');
 
 -- --------------------------------------------------------
 
@@ -202,18 +218,16 @@ CREATE TABLE `phieu_xuat` (
 --
 
 INSERT INTO `phieu_xuat` (`ma_phieu`, `nguoi_tao`, `ngay_tao`) VALUES
-('PX_20260510140000_2001', 1, '2026-05-10 14:00:00'),
-('PX_20260510143000_2002', 1, '2026-05-10 14:30:00'),
-('PX_20260510150000_2003', 1, '2026-05-10 15:00:00'),
-('PX_20260510153000_2004', 1, '2026-05-10 15:30:00'),
-('PX_20260525090000_2007', 1, '2026-05-25 09:00:00'),
-('PX_20260525093000_2008', 1, '2026-05-25 09:30:00'),
-('PX_20260525100000_2009', 1, '2026-05-25 10:00:00'),
-('PX_20260525113000_2012', 1, '2026-05-25 11:30:00'),
-('PX_20260615090000_2013', 1, '2026-06-15 09:00:00'),
-('PX_20260615093000_2014', 1, '2026-06-15 09:30:00'),
-('PX_20260615100000_2015', 1, '2026-06-15 10:00:00'),
-('PX_20260615113000_2018', 1, '2026-06-15 11:30:00');
+('PX_20260505100000_2001', 1, '2026-05-05 10:00:00'),
+('PX_20260512140000_2002', 1, '2026-05-12 14:00:00'),
+('PX_20260520090000_2003', 1, '2026-05-20 09:00:00'),
+('PX_20260528100000_2004', 1, '2026-05-28 10:00:00'),
+('PX_20260605140000_2005', 1, '2026-06-05 14:00:00'),
+('PX_20260615090000_2006', 1, '2026-06-15 09:00:00'),
+('PX_20260625100000_2007', 3, '2026-06-25 10:00:00'),
+('PX_20260705090000_2008', 1, '2026-07-05 09:00:00'),
+('PX_20260715140000_2009', 1, '2026-07-15 14:00:00'),
+('PX_20260725100000_2010', 3, '2026-07-25 10:00:00');
 
 -- --------------------------------------------------------
 
@@ -423,9 +437,8 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`session_token`, `user_id`, `ip_address`, `user_agent`, `created_at`, `expires_at`) VALUES
-('0c1b3481fd8d1da3403461c6637ccdbb5f4febf65c2256488234675a8b496dac93eb10e0d77314534bcc2845e09d87c01ee60c92703ab55edfbc0f54e32e5157', 2, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36', '2026-07-25 12:22:20', '2026-07-25 22:22:20'),
-('438276dd4a413880be3bf78c22d5fcea0633a9b0e6de1a59d9bbaa68f4dc183860d48ac36c145e480afe90df3107c2750b2aeed940aa53c2ee5dfcf7b061a5ad', 3, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 OPR/133.0.0.0', '2026-07-25 12:22:40', '2026-07-25 22:22:40'),
-('72e2956d75d4c3779241c6845dc7c917d89be63500eb7b8d642f051538dfc9427b7df4a606397447f7d3d98e2c29254bc77444d149a0b4754da272ecf1100884', 1, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36 Edg/150.0.0.0', '2026-07-25 13:32:44', '2026-07-25 23:32:44');
+('82af5a1ff18763f2205fc4d2ae628b6c07cbddb0faf07a6ea1c9b560f6cb76a180318e095f0ff4ac2a3ff7eefc2a187b1839dea41f2014d0890b25a77d3b2acf', 3, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 OPR/133.0.0.0', '2026-07-25 17:24:56', '2026-07-26 03:24:56'),
+('8bdf7be513cc93c051ef0a0fde1563e3363ab00763e8c03eb827ad0dfc5d152341ba7f484beeab69b9df604648e8edc17dcbec61eb179facf8dbc0e2f4891fc4', 1, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36 Edg/150.0.0.0', '2026-07-25 17:23:53', '2026-07-26 03:23:53');
 
 -- --------------------------------------------------------
 
@@ -441,6 +454,9 @@ CREATE TABLE `users` (
   `role` enum('admin','store_manager','staff') NOT NULL DEFAULT 'staff',
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `allow_import_export` tinyint(1) NOT NULL DEFAULT 0,
+  `has_schedule` tinyint(1) NOT NULL DEFAULT 0,
+  `access_start` time DEFAULT NULL,
+  `access_end` time DEFAULT NULL,
   `created_by` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `last_login` timestamp NULL DEFAULT NULL
@@ -450,10 +466,10 @@ CREATE TABLE `users` (
 -- Đang đổ dữ liệu cho bảng `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `role`, `is_active`, `allow_import_export`, `created_by`, `created_at`, `last_login`) VALUES
-(1, 'admin', '$2y$12$tLxN.y5yFOlS4i676dUWJulxHF3T3imvv0VteXiNx7MphW6qhGjqW', 'Quản trị viên', 'admin', 1, 1, 1, '2026-07-15 16:06:35', '2026-07-25 13:32:44'),
-(2, 'nv1', '$2y$12$Ty.RlU5SMnWGXZ.nL1tWe.rWUhEuvtD6OHm9w9rA8qM8E/6uxeWCK', 'nv1', 'staff', 1, 1, 1, '2026-07-17 07:24:39', '2026-07-25 12:22:20'),
-(3, 'chtruong1', '$2y$12$/o3yao3oowPI6Te1Y0wYT.aWMRO73CEpD0aaPKyhS8.TARzXAPhR2', 'a', 'store_manager', 1, 0, 1, '2026-07-24 14:17:06', '2026-07-25 12:22:40');
+INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `role`, `is_active`, `allow_import_export`, `has_schedule`, `access_start`, `access_end`, `created_by`, `created_at`, `last_login`) VALUES
+(1, 'admin', '$2y$12$tLxN.y5yFOlS4i676dUWJulxHF3T3imvv0VteXiNx7MphW6qhGjqW', 'Quản trị viên', 'admin', 1, 1, 0, NULL, NULL, 1, '2026-07-15 16:06:35', '2026-07-25 17:23:53'),
+(2, 'nv1', '$2y$12$Ty.RlU5SMnWGXZ.nL1tWe.rWUhEuvtD6OHm9w9rA8qM8E/6uxeWCK', 'Nhật Kim Anh', 'staff', 1, 1, 1, '06:00:00', '20:00:00', 1, '2026-07-17 07:24:39', '2026-07-25 17:24:47'),
+(3, 'chtruong1', '$2y$12$/o3yao3oowPI6Te1Y0wYT.aWMRO73CEpD0aaPKyhS8.TARzXAPhR2', 'Anh Đị Mixo', 'store_manager', 1, 0, 0, NULL, NULL, 1, '2026-07-24 14:17:06', '2026-07-25 17:24:56');
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -529,13 +545,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT cho bảng `chi_tiet_phieu_nhap`
 --
 ALTER TABLE `chi_tiet_phieu_nhap`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
 
 --
 -- AUTO_INCREMENT cho bảng `chi_tiet_phieu_xuat`
 --
 ALTER TABLE `chi_tiet_phieu_xuat`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT cho bảng `sanpham`

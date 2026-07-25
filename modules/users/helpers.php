@@ -82,3 +82,38 @@ function checkStoreManagerTarget(mysqli $conn, int $target_id): array
     }
     return ['allowed' => true];
 }
+
+/**
+ * Kiểm tra thời điểm hiện tại có nằm trong khoảng truy cập cho phép không.
+ * Admin luôn được phép truy cập (không áp dụng lịch).
+ * @return array ['allowed' => bool, 'message' => string]
+ */
+function checkAccessSchedule(array $user): array
+{
+    if (($user['role'] ?? '') === 'admin') {
+        return ['allowed' => true, 'message' => ''];
+    }
+    if (empty($user['has_schedule'])) {
+        return ['allowed' => true, 'message' => ''];
+    }
+    $now   = (new DateTime())->format('H:i:s');
+    $start = $user['access_start'] ?? null;
+    $end   = $user['access_end']   ?? null;
+    if (!$start || !$end) {
+        return ['allowed' => false, 'message' => 'Tài khoản chưa được cấu hình giờ truy cập.'];
+    }
+    $inRange = false;
+    if ($start <= $end) {
+        $inRange = ($now >= $start && $now <= $end);
+    } else {
+        $inRange = ($now >= $start || $now <= $end);
+    }
+    if (!$inRange) {
+        $label = substr($start, 0, 5) . ' – ' . substr($end, 0, 5);
+        return [
+            'allowed' => false,
+            'message' => 'Tài khoản của bạn chỉ được phép truy cập trong khoảng ' . $label . '.',
+        ];
+    }
+    return ['allowed' => true, 'message' => ''];
+}

@@ -28,13 +28,14 @@
                   <th>Người dùng</th>
                   <th>Vai trò</th>
                   <th>Trạng thái</th>
+                  <th>Lịch truy cập</th>
                   <th>Đăng nhập lần cuối</th>
                   <th>Người tạo</th>
-                  <th style="width:100px;">Thao tác</th>
+                  <th style="width:120px;">Thao tác</th>
                 </tr>
               </thead>
               <tbody id="usersTableBody">
-                <tr><td colspan="6" class="table_loading">Đang tải...</td></tr>
+                <tr><td colspan="7" class="table_loading">Đang tải...</td></tr>
               </tbody>
             </table>
           </div>
