@@ -43,6 +43,7 @@ if (importModal) {
         document.getElementById('import_note').value = '';
         importBatchItems = [];
         renderImportBatchTable();
+        renderImportListSuggestions();
         importModal.classList.add('open');
     });
     document.getElementById('btnCloseImportModal')?.addEventListener('click', () => importModal.classList.remove('open'));
@@ -156,6 +157,7 @@ if (exportModal) {
         document.getElementById('export_stock_info').style.display = 'none';
         exportBatchItems = [];
         renderExportBatchTable();
+        renderExportListSuggestions();
         exportModal.classList.add('open');
     });
     document.getElementById('btnCloseExportModal')?.addEventListener('click', () => exportModal.classList.remove('open'));
@@ -251,16 +253,27 @@ if (exportModal) {
 }
 
 // ─── Import History (tab-based) ──────────────────────────────────────────
+var __priceFilterDirty = false;
 function getHistoryFilterParams() {
     const search   = (document.getElementById('hist_search_product')?.value || '').trim();
     const dateFrom = document.getElementById('hist_date_from')?.value || '';
     const dateTo   = document.getElementById('hist_date_to')?.value || '';
     const category = document.getElementById('hist_category')?.value || '';
+    const userId   = document.getElementById('hist_user')?.value || '';
+    const elPriceMin = document.getElementById('hist_price_min');
+    const elPriceMax = document.getElementById('hist_price_max');
     const params = new URLSearchParams();
     if (search)   params.set('search', search);
     if (dateFrom) params.set('date_from', dateFrom);
     if (dateTo)   params.set('date_to', dateTo);
     if (category) params.set('category', category);
+    if (userId)   params.set('user_id', userId);
+    if (elPriceMin && elPriceMax && __priceFilterDirty) {
+        const minVal = Number(elPriceMin.value) || 0;
+        const maxVal = Number(elPriceMax.value) || 0;
+        params.set('price_min', minVal);
+        params.set('price_max', maxVal);
+    }
     return params.toString();
 }
 
@@ -500,18 +513,31 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
     const elDateFrom  = document.getElementById('hist_date_from');
     const elDateTo    = document.getElementById('hist_date_to');
     const elCategory  = document.getElementById('hist_category');
+    const elUser      = document.getElementById('hist_user');
+    const elPriceMin  = document.getElementById('hist_price_min');
+    const elPriceMax  = document.getElementById('hist_price_max');
     const btnClear    = document.getElementById('btnClearHistoryFilter');
+    const lblPriceMin = document.getElementById('hist_price_min_label');
+    const lblPriceMax = document.getElementById('hist_price_max_label');
+
+    const PRICE_MAX_CAP = elPriceMax ? (Number(elPriceMax.getAttribute('max')) || 0) : 0;
 
     function getCurrentHistoryTab() {
         const importBtn = document.getElementById('hist_tab_import');
         return importBtn?.classList.contains('active') ? 'import' : 'export';
     }
 
+    function getSliderMin() { return elPriceMin ? (Number(elPriceMin.value) || 0) : 0; }
+    function getSliderMax() { return elPriceMax ? (Number(elPriceMax.value) || 0) : 0; }
+
     function isFilterActive() {
         return (elSearch?.value || '').trim() !== ''
             || (elDateFrom?.value || '') !== ''
             || (elDateTo?.value || '') !== ''
-            || (elCategory?.value || '') !== '';
+            || (elCategory?.value || '') !== ''
+            || (elUser?.value || '') !== ''
+            || getSliderMin() > 0
+            || getSliderMax() < PRICE_MAX_CAP;
     }
 
     function toggleClearBtn() {
@@ -537,6 +563,31 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
         else loadExportHistory(1);
     }
 
+    function updatePriceRangeUI() {
+        if (!elPriceMin || !elPriceMax) return;
+        if (PRICE_MAX_CAP <= 0) return;
+        let minVal = Number(elPriceMin.value) || 0;
+        let maxVal = Number(elPriceMax.value) || 0;
+        if (minVal > maxVal) {
+            if (this === elPriceMin) {
+                elPriceMax.value = minVal;
+                maxVal = minVal;
+            } else {
+                elPriceMin.value = maxVal;
+                minVal = maxVal;
+            }
+        }
+        if (lblPriceMin) lblPriceMin.textContent = number_format(minVal) + 'đ';
+        if (lblPriceMax) lblPriceMax.textContent = number_format(maxVal) + 'đ';
+
+        const minPercent = (minVal / PRICE_MAX_CAP) * 100;
+        const maxPercent = (maxVal / PRICE_MAX_CAP) * 100;
+        const track = elPriceMin.closest('.price_range_track');
+        if (track) {
+            track.style.background = 'linear-gradient(to right, #e2e8f0 ' + minPercent + '%, #3b6fd4 ' + minPercent + '%, #3b6fd4 ' + maxPercent + '%, #e2e8f0 ' + maxPercent + '%)';
+        }
+    }
+
     elSearch?.addEventListener('input', function() {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(applyHistoryFilter, 400);
@@ -545,6 +596,20 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
     elDateFrom?.addEventListener('change', applyHistoryFilter);
     elDateTo?.addEventListener('change', applyHistoryFilter);
     elCategory?.addEventListener('change', applyHistoryFilter);
+    elUser?.addEventListener('change', applyHistoryFilter);
+
+    elPriceMin?.addEventListener('input', function() {
+        __priceFilterDirty = true;
+        updatePriceRangeUI.call(this);
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(applyHistoryFilter, 300);
+    });
+    elPriceMax?.addEventListener('input', function() {
+        __priceFilterDirty = true;
+        updatePriceRangeUI.call(this);
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(applyHistoryFilter, 300);
+    });
 
     if (btnClear) {
         btnClear.addEventListener('click', function() {
@@ -552,6 +617,11 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
             if (elDateFrom) elDateFrom.value = '';
             if (elDateTo)   elDateTo.value = '';
             if (elCategory) elCategory.value = '';
+            if (elUser)     elUser.value = '';
+            if (elPriceMin) elPriceMin.value = 0;
+            if (elPriceMax) elPriceMax.value = PRICE_MAX_CAP;
+            __priceFilterDirty = false;
+            updatePriceRangeUI();
             toggleClearBtn();
             const tab = getCurrentHistoryTab();
             if (tab === 'import') loadImportHistory(1);
@@ -559,5 +629,180 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
         });
     }
 
+    updatePriceRangeUI();
     toggleClearBtn();
 })();
+
+// ─── Import List (Danh sách hàng cần nhập — localStorage) ───────────────
+const IMPORT_LIST_KEY = 'warehouse_import_list';
+
+function getImportList() {
+    try { return JSON.parse(localStorage.getItem(IMPORT_LIST_KEY)) || []; }
+    catch { return []; }
+}
+
+function saveImportList(list) {
+    localStorage.setItem(IMPORT_LIST_KEY, JSON.stringify(list));
+}
+
+function addToImportList(productId, productName) {
+    const list = getImportList();
+    if (list.some(item => item.productId === String(productId))) {
+        showToast('Sản phẩm đã có trong danh sách.', 'error');
+        return false;
+    }
+    list.push({ productId: String(productId), productName });
+    saveImportList(list);
+    showToast('Đã thêm vào danh sách hàng cần nhập.', 'success');
+    return true;
+}
+
+function removeFromImportList(productId) {
+    const list = getImportList().filter(item => item.productId !== String(productId));
+    saveImportList(list);
+    renderImportListSuggestions();
+}
+
+function clearImportList() {
+    if (!confirm('Xóa toàn bộ danh sách hàng cần nhập?')) return;
+    saveImportList([]);
+    renderImportListSuggestions();
+    showToast('Đã xóa danh sách hàng cần nhập.', 'success');
+}
+
+function isInImportList(productId) {
+    return getImportList().some(item => item.productId === String(productId));
+}
+
+function renderImportListSuggestions() {
+    const container = document.getElementById('importListSuggestions');
+    const itemsDiv = document.getElementById('importListItems');
+    const countSpan = document.getElementById('importListCount');
+    if (!container || !itemsDiv) return;
+
+    const list = getImportList();
+    countSpan.textContent = list.length;
+
+    if (list.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+    container.style.display = '';
+
+    itemsDiv.innerHTML = list.map(item => `
+        <div class="import_list_chip" onclick="quickAddFromImportList('${item.productId}', '${escapeHtml(item.productName).replace(/'/g, "\\'")}')" title="Nhấn để thêm nhanh vào phiếu nhập">
+            <span class="material-symbols-outlined" style="font-size:16px; color:#ea580c;">add_circle</span>
+            <span class="chip_name">${escapeHtml(item.productName)}</span>
+            <button class="chip_remove" onclick="event.stopPropagation(); removeFromImportList('${item.productId}')" title="Xóa khỏi danh sách">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+    `).join('');
+}
+
+function quickAddFromImportList(productId, productName) {
+    const quantity = parseInt(prompt(`Nhập số lượng cần nhập cho "${productName}":`, '10'), 10);
+    if (!quantity || quantity <= 0) return;
+
+    const existing = importBatchItems.find(item => item.productId === productId);
+    if (existing) {
+        existing.quantity += quantity;
+        showToast(`Đã cộng thêm ${number_format(quantity)} vào "${productName}".`, 'success');
+    } else {
+        importBatchItems.push({ productId, productName, quantity, note: 'Thêm từ danh sách cần nhập' });
+        showToast(`Đã thêm "${productName}" (${number_format(quantity)}) vào phiếu.`, 'success');
+    }
+
+    renderImportBatchTable();
+    removeFromImportList(productId);
+}
+
+window.removeFromImportList = removeFromImportList;
+window.quickAddFromImportList = quickAddFromImportList;
+
+document.getElementById('btnClearImportList')?.addEventListener('click', clearImportList);
+
+// ─── Export List (Danh sách hàng cần xuất — localStorage) ───────────────
+const EXPORT_LIST_KEY = 'warehouse_export_list';
+
+function getExportList() {
+    try { return JSON.parse(localStorage.getItem(EXPORT_LIST_KEY)) || []; }
+    catch { return []; }
+}
+
+function saveExportList(list) {
+    localStorage.setItem(EXPORT_LIST_KEY, JSON.stringify(list));
+}
+
+function addToExportList(productId, productName) {
+    const list = getExportList();
+    if (list.some(item => item.productId === String(productId))) {
+        showToast('Sản phẩm đã có trong danh sách cần xuất.', 'error');
+        return false;
+    }
+    list.push({ productId: String(productId), productName });
+    saveExportList(list);
+    showToast('Đã thêm vào danh sách hàng cần xuất.', 'success');
+    return true;
+}
+
+function removeFromExportList(productId) {
+    const list = getExportList().filter(item => item.productId !== String(productId));
+    saveExportList(list);
+    renderExportListSuggestions();
+}
+
+function clearExportList() {
+    if (!confirm('Xóa toàn bộ danh sách hàng cần xuất?')) return;
+    saveExportList([]);
+    renderExportListSuggestions();
+    showToast('Đã xóa danh sách hàng cần xuất.', 'success');
+}
+
+function renderExportListSuggestions() {
+    const container = document.getElementById('exportListSuggestions');
+    const itemsDiv = document.getElementById('exportListItems');
+    const countSpan = document.getElementById('exportListCount');
+    if (!container || !itemsDiv) return;
+
+    const list = getExportList();
+    countSpan.textContent = list.length;
+
+    if (list.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+    container.style.display = '';
+
+    itemsDiv.innerHTML = list.map(item => `
+        <div class="export_list_chip" onclick="quickAddFromExportList('${item.productId}', '${escapeHtml(item.productName).replace(/'/g, "\\'")}')" title="Nhấn để thêm nhanh vào phiếu xuất">
+            <span class="material-symbols-outlined" style="font-size:16px; color:#ea580c;">remove_circle</span>
+            <span class="chip_name">${escapeHtml(item.productName)}</span>
+            <button class="chip_remove" onclick="event.stopPropagation(); removeFromExportList('${item.productId}')" title="Xóa khỏi danh sách">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+    `).join('');
+}
+
+function quickAddFromExportList(productId, productName) {
+    const quantity = parseInt(prompt(`Nhập số lượng cần xuất cho "${productName}":`, '10'), 10);
+    if (!quantity || quantity <= 0) return;
+
+    const existing = exportBatchItems.find(item => item.productId === productId);
+    if (existing) {
+        existing.quantity += quantity;
+        showToast(`Đã cộng thêm ${number_format(quantity)} vào "${productName}".`, 'success');
+    } else {
+        exportBatchItems.push({ productId, productName, quantity, note: 'Thêm từ danh sách cần xuất' });
+        showToast(`Đã thêm "${productName}" (${number_format(quantity)}) vào phiếu.`, 'success');
+    }
+
+    renderExportBatchTable();
+    removeFromExportList(productId);
+}
+
+window.removeFromExportList = removeFromExportList;
+window.quickAddFromExportList = quickAddFromExportList;
+
+document.getElementById('btnClearExportList')?.addEventListener('click', clearExportList);

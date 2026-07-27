@@ -17,7 +17,23 @@
         </div>
 
         <!-- Bộ lọc tìm kiếm -->
-        <?php $today = date('Y-m-d'); ?>
+        <?php
+        $today = date('Y-m-d');
+        $users_list = [];
+        $max_price = 0;
+        if ($conn) {
+            $res = $conn->query("SELECT id, full_name FROM users WHERE is_active = 1 ORDER BY full_name ASC");
+            if ($res) {
+                while ($row = $res->fetch_assoc()) {
+                    $users_list[] = $row;
+                }
+            }
+            $res2 = $conn->query("SELECT MAX(Gia) as max_price FROM sanpham");
+            if ($res2) {
+                $max_price = (int)($res2->fetch_assoc()['max_price'] ?? 0);
+            }
+        }
+        ?>
         <div id="historyFilterBar" class="main_content_sort" style="margin-bottom:20px;">
           <div class="search_field_wrapper" style="flex:1; min-width:200px;">
             <label class="search_label">Tìm sản phẩm</label>
@@ -47,6 +63,34 @@
                   <option value="<?php echo htmlspecialchars($cat['MaDM'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($cat['TenDM'], ENT_QUOTES, 'UTF-8'); ?></option>
                 <?php endforeach; ?>
               </select>
+            </div>
+          </div>
+          <div class="search_field_wrapper">
+            <label class="search_label">Người tạo</label>
+            <div class="input_group">
+              <select id="hist_user" style="width:180px;">
+                <option value="">Tất cả người tạo</option>
+                <?php foreach ($users_list as $u): ?>
+                  <option value="<?php echo (int)$u['id']; ?>"><?php echo htmlspecialchars($u['full_name'], ENT_QUOTES, 'UTF-8'); ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+          </div>
+          <div class="search_field_wrapper" style="min-width:280px;">
+            <label class="search_label">Khoảng giá trị đơn hàng</label>
+            <div class="price_range_wrapper">
+              <div class="price_range_labels">
+                <span id="hist_price_min_label"><?php echo number_format(0); ?>đ</span>
+                <span id="hist_price_max_label"><?php echo number_format($max_price); ?>đ</span>
+              </div>
+              <div class="price_range_track">
+                <input type="range" id="hist_price_min" min="0" max="<?php echo $max_price; ?>" value="0" step="100000" class="price_range_input price_range_min">
+                <input type="range" id="hist_price_max" min="0" max="<?php echo $max_price; ?>" value="<?php echo $max_price; ?>" step="100000" class="price_range_input price_range_max">
+              </div>
+              <div class="price_range_limits">
+                <span>0đ</span>
+                <span><?php echo number_format($max_price); ?>đ</span>
+              </div>
             </div>
           </div>
           <div class="search_field_wrapper" style="align-self:flex-end;">

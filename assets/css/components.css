@@ -298,3 +298,135 @@
 .product_history_tab#prod_hist_tab_export.active { background: #ea580c !important; }
 
 .product_history_tab.active .material-symbols-outlined { color: #ffffff !important; }
+
+/* ===== IMPORT LIST SUGGESTION CHIPS ===== */
+.import_list_chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #9a3412;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    max-width: 280px;
+}
+
+.import_list_chip:hover {
+    background: #ffedd5;
+    border-color: #fdba74;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(234, 88, 12, 0.12);
+}
+
+.import_list_chip:active {
+    transform: scale(0.97);
+}
+
+.import_list_chip .chip_name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.import_list_chip .chip_remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(234, 88, 12, 0.15);
+    color: #c2410c;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+
+.import_list_chip .chip_remove:hover {
+    background: rgba(220, 38, 38, 0.2);
+    color: #dc2626;
+}
+
+.import_list_chip .chip_remove .material-symbols-outlined {
+    font-size: 14px;
+}
+
+.import_list_empty {
+    font-size: 13px;
+    color: #94a3b8;
+    font-style: italic;
+    padding: 4px 0;
+}
+
+.btn_import_list_added {
+    background: #16a34a !important;
+    pointer-events: none;
+}
+
+/* ===== EXPORT LIST SUGGESTION CHIPS ===== */
+.export_list_chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    background: #fff1f2;
+    border: 1px solid #fecdd3;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #9f1239;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    max-width: 280px;
+}
+
+.export_list_chip:hover {
+    background: #ffe4e6;
+    border-color: #fda4af;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(234, 88, 12, 0.12);
+}
+
+.export_list_chip:active {
+    transform: scale(0.97);
+}
+
+.export_list_chip .chip_name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.export_list_chip .chip_remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(244, 63, 94, 0.15);
+    color: #e11d48;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+
+.export_list_chip .chip_remove:hover {
+    background: rgba(220, 38, 38, 0.2);
+    color: #dc2626;
+}
+
+.export_list_chip .chip_remove .material-symbols-outlined {
+    font-size: 14px;
+}

@@ -254,6 +254,34 @@ if (prodDetailModal) {
     document.getElementById('btnCloseProductDetailModal')?.addEventListener('click', () => prodDetailModal.classList.remove('open'));
     prodDetailModal.addEventListener('click', e => { if (e.target === prodDetailModal) prodDetailModal.classList.remove('open'); });
 
+    document.getElementById('btnAddToImportList')?.addEventListener('click', function() {
+        if (!currentDetailProduct) return;
+        const p = currentDetailProduct.product;
+        const added = addToImportList(p.MaSP, p.TenSP);
+        if (added) {
+            this.classList.add('btn_import_list_added');
+            this.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">check_circle</span> Đã lưu';
+            setTimeout(() => {
+                this.classList.remove('btn_import_list_added');
+                this.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">bookmark_add</span> Nhập hàng';
+            }, 1500);
+        }
+    });
+
+    document.getElementById('btnAddToExportList')?.addEventListener('click', function() {
+        if (!currentDetailProduct) return;
+        const p = currentDetailProduct.product;
+        const added = addToExportList(p.MaSP, p.TenSP);
+        if (added) {
+            this.classList.add('btn_import_list_added');
+            this.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">check_circle</span> Đã lưu';
+            setTimeout(() => {
+                this.classList.remove('btn_import_list_added');
+                this.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">bookmark_add</span> Xuất hàng';
+            }, 1500);
+        }
+    });
+
     document.getElementById('btnToggleProdEditMode')?.addEventListener('click', function() {
         if (!currentDetailProduct) return;
         const p = currentDetailProduct.product;

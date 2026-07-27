@@ -216,10 +216,20 @@ $categories_list  = $categories_list  ?? [];
               <span id="detail_prod_status_badge" class="badge in_stock"></span>
               <span id="detail_prod_stock_info" style="font-size:13px; color:#64748b;"></span>
             </div>
-            <button class="btn_primary" id="btnToggleProdEditMode" style="padding:6px 14px; font-size:13px; height:36px; background:#3b82f6;">
-              <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
-              Chỉnh sửa
-            </button>
+            <div style="display:flex; gap:8px;">
+              <button class="btn_primary" id="btnAddToImportList" style="padding:6px 14px; font-size:13px; height:36px; background:#16a34a;">
+                <span class="material-symbols-outlined" style="font-size:18px;">bookmark_add</span>
+                Nhập hàng
+              </button>
+              <button class="btn_primary" id="btnAddToExportList" style="padding:6px 14px; font-size:13px; height:36px; background:#ea580c;">
+                <span class="material-symbols-outlined" style="font-size:18px;">bookmark_add</span>
+                Xuất hàng
+              </button>
+              <button class="btn_primary" id="btnToggleProdEditMode" style="padding:6px 14px; font-size:13px; height:36px; background:#3b82f6;">
+                <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+                Chỉnh sửa
+              </button>
+            </div>
           </div>
           <div class="product_detail_grid">
             <div class="detail_field">
@@ -412,6 +422,21 @@ $categories_list  = $categories_list  ?? [];
             Thêm vào phiếu
           </button>
         </div>
+
+        <!-- Danh sách hàng cần nhập (gợi ý) -->
+        <div id="importListSuggestions" style="margin-top:16px; display:none;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+            <label style="font-weight:600; font-size:13px; color:#334155; display:flex; align-items:center; gap:6px;">
+              <span class="material-symbols-outlined" style="font-size:16px; color:#ea580c;">bookmark</span>
+              Hàng cần nhập (<span id="importListCount">0</span>)
+            </label>
+            <button class="btn_secondary" id="btnClearImportList" style="padding:4px 10px; font-size:12px; height:28px; color:#dc2626; border-color:#fecaca; background:#fef2f2;">
+              <span class="material-symbols-outlined" style="font-size:14px;">delete_sweep</span>
+              Xóa hết
+            </button>
+          </div>
+          <div id="importListItems" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+        </div>
       </div>
       <div class="modal_footer">
         <button class="btn_primary" id="btnSubmitImport" style="background-color: #16a34a;" disabled>
@@ -500,6 +525,21 @@ $categories_list  = $categories_list  ?? [];
             <span class="material-symbols-outlined" style="font-size: 18px;">playlist_add</span>
             Thêm vào phiếu
           </button>
+        </div>
+
+        <!-- Danh sách hàng cần xuất (gợi ý) -->
+        <div id="exportListSuggestions" style="margin-top:16px; display:none;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+            <label style="font-weight:600; font-size:13px; color:#334155; display:flex; align-items:center; gap:6px;">
+              <span class="material-symbols-outlined" style="font-size:16px; color:#ea580c;">bookmark</span>
+              Hàng cần xuất (<span id="exportListCount">0</span>)
+            </label>
+            <button class="btn_secondary" id="btnClearExportList" style="padding:4px 10px; font-size:12px; height:28px; color:#dc2626; border-color:#fecaca; background:#fef2f2;">
+              <span class="material-symbols-outlined" style="font-size:14px;">delete_sweep</span>
+              Xóa hết
+            </button>
+          </div>
+          <div id="exportListItems" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
         </div>
       </div>
       <div class="modal_footer">

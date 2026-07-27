@@ -215,6 +215,12 @@ switch ($action) {
         $filter_date_from = trim($_GET['date_from'] ?? '');
         $filter_date_to   = trim($_GET['date_to'] ?? '');
         $filter_category  = trim($_GET['category'] ?? '');
+        $filter_user_id   = (int)($_GET['user_id'] ?? 0);
+        $filter_price_min = isset($_GET['price_min']) && $_GET['price_min'] !== '' ? (int)$_GET['price_min'] : -1;
+        $filter_price_max = isset($_GET['price_max']) && $_GET['price_max'] !== '' ? (int)$_GET['price_max'] : -1;
+        if ($filter_price_min >= 0 && $filter_price_max >= 0 && $filter_price_min > $filter_price_max) {
+            [$filter_price_min, $filter_price_max] = [$filter_price_max, $filter_price_min];
+        }
 
         $where = "1=1";
         $bind_types = "";
@@ -225,6 +231,12 @@ switch ($action) {
             $where .= " AND px.nguoi_tao = ?";
             $bind_types .= "i";
             $bind_values[] = $scope_user_id;
+        }
+
+        if ($filter_user_id > 0) {
+            $where .= " AND px.nguoi_tao = ?";
+            $bind_types .= "i";
+            $bind_values[] = $filter_user_id;
         }
 
         if ($filter_sp > 0) {
@@ -257,10 +269,31 @@ switch ($action) {
             $bind_values[] = $filter_category;
         }
 
+        if ($filter_price_min >= 0 || $filter_price_max >= 0) {
+            $where .= " AND COALESCE((SELECT SUM(ct4.so_luong * sp4.Gia) FROM chi_tiet_phieu_xuat ct4 JOIN sanpham sp4 ON ct4.san_pham = sp4.MaSP WHERE ct4.ma_phieu = px.ma_phieu), 0)";
+            if ($filter_price_min >= 0 && $filter_price_max >= 0) {
+                $where .= " BETWEEN ? AND ?";
+                $bind_types .= "ii";
+                $bind_values[] = $filter_price_min;
+                $bind_values[] = $filter_price_max;
+            } elseif ($filter_price_min >= 0) {
+                $where .= " >= ?";
+                $bind_types .= "i";
+                $bind_values[] = $filter_price_min;
+            } else {
+                $where .= " <= ?";
+                $bind_types .= "i";
+                $bind_values[] = $filter_price_max;
+            }
+        }
+
+        error_log("[EXPORT_LIST] GET=" . json_encode($_GET) . " | price_min=$filter_price_min price_max=$filter_price_max | where=$where | bind_types=$bind_types | bind_values=" . json_encode($bind_values));
+
         $count_sql = "SELECT COUNT(*) as total FROM phieu_xuat px WHERE $where";
         $count_stmt = $conn->prepare($count_sql);
         if ($bind_types !== "") {
-            $count_stmt->bind_param($bind_types, ...$bind_values);
+            $count_vals = $bind_values;
+            $count_stmt->bind_param($bind_types, ...$count_vals);
         }
         $count_stmt->execute();
         $total = $count_stmt->get_result()->fetch_assoc()['total'];
@@ -283,7 +316,8 @@ switch ($action) {
 
         $stmt = $conn->prepare($sql);
         if ($bind_types !== "") {
-            $stmt->bind_param($bind_types, ...$bind_values);
+            $data_vals = $bind_values;
+            $stmt->bind_param($bind_types, ...$data_vals);
         }
         $stmt->execute();
         $result = $stmt->get_result();
