@@ -1,0 +1,229 @@
+/* ===== PRODUCT TABLE ===== */
+.table_container {
+    background: #ffffff;
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(60, 80, 120, 0.06), 0 0 0 1px rgba(60, 80, 120, 0.04);
+    overflow: hidden;
+    margin-top: 24px;
+}
+
+.table_container > div {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.product_table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
+}
+
+.product_table th {
+    background-color: #f4f6f9;
+    color: #5a6577;
+    font-weight: 600;
+    padding: 14px 20px;
+    border-bottom: 1px solid #e8ecf0;
+    text-transform: none;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+}
+
+.product_table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #eef1f5;
+    color: #3d4555;
+    vertical-align: middle;
+}
+
+.product_table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.product_table tbody tr:hover {
+    background-color: #f0f2f6;
+}
+
+.product_table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.product_name {
+    font-weight: 600;
+    color: #1a1d23;
+}
+
+.product_price {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    font-weight: 600;
+    color: #1a1d23;
+}
+
+/* ===== BADGES ===== */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 550;
+}
+
+.badge.in_stock {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badge.low_stock {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.badge.out_of_stock {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.badge.hidden_product {
+    background-color: #eef1f5;
+    color: #97a5b8;
+}
+
+/* ===== NO RESULTS ===== */
+.no_results {
+    padding: 32px;
+    text-align: center;
+    color: #6b7a8d;
+    font-size: 15px;
+}
+
+/* ===== FILTER BUTTON ===== */
+.filter_button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background-color: #1a1d23;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    height: 38px;
+    box-sizing: border-box;
+}
+
+.filter_button:hover {
+    background-color: #2a2d33;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(26, 29, 35, 0.15), 0 2px 4px -2px rgba(26, 29, 35, 0.15);
+}
+
+.filter_button:active {
+    transform: scale(0.98);
+    box-shadow: none;
+}
+
+.filter_button .material-symbols-outlined {
+    font-size: 20px;
+}
+
+/* ===== IMPORT / EXPORT STOCK BUTTONS ===== */
+.import_stock_button {
+    background-color: #10b981;
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.2s;
+}
+
+.import_stock_button:hover {
+    background-color: #059669;
+}
+
+.export_stock_button {
+    background-color: #f59e0b;
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.2s;
+}
+
+.export_stock_button:hover {
+    background-color: #d97706;
+}
+
+/* ===== ACTION CELL (PRODUCT TABLE) ===== */
+.action_cell {
+    white-space: nowrap;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.action_cell .btn_icon {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7a8d;
+    transition: background 0.15s, color 0.15s;
+}
+
+.action_cell .btn_icon:hover {
+    background: #eef1f5;
+    color: #1a1d23;
+}
+
+.action_cell .btn_icon.danger:hover {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.action_cell .btn_icon .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* ===== HIDDEN PRODUCT ROW ===== */
+.row_hidden {
+    opacity: 0.55;
+}
+
+/* ===== FILTER CHECKBOX ===== */
+.filter_row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #5a6577;
+    cursor: pointer;
+}
+
+.filter_row input[type="checkbox"] {
+    accent-color: #3b6fd4;
+}

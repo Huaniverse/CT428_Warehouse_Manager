@@ -1,0 +1,140 @@
+/* ===== USER DROPDOWN ===== */
+.user_dropdown_wrapper {
+    position: relative;
+}
+
+.user_dropdown_trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: #eef1f5;
+    border: 1px solid #e8ecf0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    font-size: 14px;
+    color: #3d4555;
+}
+
+.user_dropdown_trigger:hover {
+    background: #e8ecf0;
+    color: #1a1d23;
+}
+
+.user_dropdown_trigger .material-symbols-outlined {
+    font-size: 20px;
+    color: #6b7a8d;
+}
+
+.user_name_display {
+    font-weight: 500;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user_role_badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.user_role_badge.admin {
+    background: #e8ecf4;
+    color: #3b5998;
+}
+
+.user_role_badge.staff {
+    background: #dbeafe;
+    color: #2e5cb8;
+}
+
+.user_role_badge.store_manager {
+    background-color: #f0ece4;
+    color: #7a5c2e;
+    border: 1px solid #d4c9b0;
+}
+
+.user_dropdown_menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #ffffff;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(40, 60, 100, 0.12), 0 0 0 1px rgba(60, 80, 120, 0.06);
+    min-width: 200px;
+    z-index: 1000;
+    overflow: hidden;
+    animation: dropdown_in 0.15s ease;
+}
+
+@keyframes dropdown_in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.user_dropdown_menu.open {
+    display: block;
+}
+
+.dropdown_user_info {
+    padding: 14px 16px;
+    border-bottom: 1px solid #eef1f5;
+}
+
+.dropdown_user_info .u_name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #1a1d23;
+}
+
+.dropdown_user_info .u_username {
+    font-size: 12px;
+    color: #6b7a8d;
+    margin-top: 2px;
+}
+
+.dropdown_item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: #3d4555;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    text-decoration: none;
+    width: 100%;
+    box-sizing: border-box;
+    background: none;
+    border: none;
+    font-family: inherit;
+    text-align: left;
+}
+
+.dropdown_item:hover {
+    background: #f4f6f9;
+}
+
+.dropdown_item.danger {
+    color: #dc2626;
+}
+
+.dropdown_item.danger:hover {
+    background: #fef2f2;
+}
+
+.dropdown_item .material-symbols-outlined {
+    font-size: 18px;
+    color: inherit;
+}

@@ -1,0 +1,254 @@
+/* ===== RESPONSIVE DESIGN =====
+ * Breakpoints:
+ *   ≤ 1024px — Tablet: sidebar chuyển sang top nav nằm ngang
+ *   ≤  768px — Mobile: layout dọc hoàn toàn, filter bar xếp chồng
+ *   ≤  480px — Small mobile: login ẩn brand panel, modal full width
+ */
+
+/* ── Tablet (≤ 1024px) ───────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+    header {
+        padding: 12px 16px;
+    }
+
+    .header_left h1 {
+        font-size: 17px;
+    }
+
+    main {
+        flex-direction: column;
+    }
+
+    aside {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e8ecf0;
+        padding: 12px 16px;
+    }
+
+    .sidebar_menu {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .menu_item {
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+
+    .main_content {
+        padding: 20px 16px;
+    }
+
+    .chart_grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Mobile (≤ 768px) ────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    header {
+        padding: 10px 12px;
+    }
+
+    .header_left h1 {
+        font-size: 15px;
+    }
+
+    .user_name_display {
+        display: none;
+    }
+
+    .dashboard_grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .kpi_card {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .kpi_icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .kpi_icon .material-symbols-outlined {
+        font-size: 20px;
+    }
+
+    .kpi_title {
+        font-size: 11px;
+    }
+
+    .kpi_value {
+        font-size: 16px;
+    }
+
+    .main_content {
+        padding: 20px 12px;
+    }
+
+    .main_content_sort {
+        gap: 10px;
+    }
+
+    .main_content_sort .input_find {
+        width: 100%;
+    }
+
+    .table_container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .product_table {
+        min-width: 580px;
+        font-size: 12px;
+    }
+
+    .product_table th,
+    .product_table td {
+        padding: 8px 10px;
+        white-space: nowrap;
+    }
+
+    .users_table {
+        min-width: 540px;
+        font-size: 12px;
+    }
+
+    .users_table th,
+    .users_table td {
+        padding: 8px 10px;
+        white-space: nowrap;
+    }
+
+    .settings_section_body {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .data_table {
+        min-width: 480px;
+        font-size: 12px;
+    }
+
+    .data_table th,
+    .data_table td {
+        padding: 8px 10px;
+        white-space: nowrap;
+    }
+
+    .settings_section_header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .login_wrapper {
+        flex-direction: column;
+        width: 100%;
+        min-height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .login_brand {
+        display: none;
+    }
+
+    .login_card {
+        width: 100%;
+        padding: 32px 24px;
+        flex: 1;
+    }
+
+    .modal_card {
+        width: 95vw !important;
+        padding: 24px 16px;
+    }
+
+    .user_detail_info {
+        --detail-label-min-w: 100px;
+        --detail-right-max: 260px;
+    }
+
+    .detail_row {
+        gap: 8px;
+    }
+
+    .modal_footer .btn_primary,
+    .modal_footer .btn_secondary {
+        padding: 7px 12px;
+        font-size: 12.5px;
+    }
+
+    .action_cell {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .import_stock_button,
+    .export_stock_button {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+}
+
+/* ── Small mobile (≤ 480px) ─────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .dashboard_grid {
+        grid-template-columns: 1fr;
+    }
+
+    .main_content {
+        padding: 16px 12px;
+    }
+
+    .menu_item {
+        padding: 6px 10px;
+        font-size: 12px;
+        gap: 6px;
+    }
+
+    .menu_item .material-symbols-outlined {
+        font-size: 18px;
+    }
+
+    .filter_button,
+    .add_product_button {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    .session_item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .user_detail_info {
+        --detail-label-min-w: 84px;
+        --detail-right-max: 100%;
+    }
+
+    #userDetailModal .detail_row {
+        flex-wrap: wrap;
+    }
+
+    #userDetailModal .detail_label {
+        min-width: 84px;
+    }
+
+    .modal_footer .btn_primary,
+    .modal_footer .btn_secondary {
+        padding: 7px 10px;
+        font-size: 12px;
+    }
+
+    .modal_footer .btn_primary .material-symbols-outlined {
+        font-size: 16px;
+    }
+}

@@ -1,0 +1,16 @@
+# [SEC-08] Bảo vệ các file cấu hình và auth khỏi truy cập trực tiếp
+<FilesMatch "^(config\.php|config\.local\.php|config\.local\.example\.php|db\.php|auth\.php|helpers\.php)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Tắt directory listing
+Options -Indexes
+
+# Ẩn lỗi PHP trên môi trường thật (tuỳ chọn)
+# php_flag display_errors off
+
+# Trang lỗi tùy chỉnh
+ErrorDocument 403 /thuchanh/CT428_Warehouse_Manager/403.php
+ErrorDocument 404 /thuchanh/CT428_Warehouse_Manager/404.php
+ErrorDocument 500 /thuchanh/CT428_Warehouse_Manager/500.php

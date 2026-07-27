@@ -1,0 +1,127 @@
+<?php
+// shared/api/filter_products.php — API lấy danh sách sản phẩm (JSON)
+require_once __DIR__ . '/../../../shared/db.php';
+require_once __DIR__ . '/../../../shared/auth.php';
+
+header('Content-Type: application/json; charset=utf-8');
+
+if (!$conn) {
+    echo json_encode(['success' => false, 'message' => 'Không thể kết nối đến cơ sở dữ liệu.']);
+    exit;
+}
+
+$search       = isset($_GET['search']) ? trim($_GET['search']) : '';
+$category     = isset($_GET['category']) ? trim($_GET['category']) : '';
+$price_sort   = isset($_GET['price_sort']) ? trim($_GET['price_sort']) : '';
+$qty_sort     = isset($_GET['qty_sort']) ? trim($_GET['qty_sort']) : '';
+$page         = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$limit_param  = isset($_GET['limit']) ? $_GET['limit'] : '10';
+$active_only  = isset($_GET['active_only']) ? (int)$_GET['active_only'] : 0;
+
+$can_manage_products = isAdmin() || isStoreManager();
+
+$where = "1=1";
+$params = [];
+$types = "";
+
+if ($search !== '') {
+    $where .= " AND (s.TenSP LIKE ? OR s.MoTa LIKE ?)";
+    $search_param = "%" . $search . "%";
+    $params[] = $search_param;
+    $params[] = $search_param;
+    $types .= "ss";
+}
+
+if ($category !== '') {
+    $where .= " AND s.DanhMuc = ?";
+    $params[] = $category;
+    $types .= "s";
+}
+
+if ($active_only === 1) {
+    $where .= " AND s.is_active = 1";
+}
+
+$sql_count = "SELECT COUNT(*) as total FROM sanpham s JOIN danhmuc d ON s.DanhMuc = d.MaDM WHERE $where";
+$stmt_count = $conn->prepare($sql_count);
+if ($stmt_count) {
+    if ($types !== "") {
+        $stmt_count->bind_param($types, ...$params);
+    }
+    $stmt_count->execute();
+    $total_records = $stmt_count->get_result()->fetch_assoc()['total'];
+    $stmt_count->close();
+} else {
+    $total_records = 0;
+}
+
+$limit = ($limit_param === 'all') ? $total_records : (int)$limit_param;
+if ($limit <= 0) $limit = 10;
+$total_pages = $limit > 0 ? ceil($total_records / $limit) : 1;
+if ($page > $total_pages) $page = max(1, $total_pages);
+$offset = ($page - 1) * $limit;
+
+$sql = "SELECT s.MaSP, s.TenSP, s.MoTa, s.Gia, s.SoLuong, s.is_active, d.TenDM 
+        FROM sanpham s 
+        JOIN danhmuc d ON s.DanhMuc = d.MaDM 
+        WHERE $where";
+$order_by_clauses = [];
+
+if ($price_sort === 'asc') {
+    $order_by_clauses[] = "s.Gia ASC";
+} elseif ($price_sort === 'desc') {
+    $order_by_clauses[] = "s.Gia DESC";
+}
+
+if ($qty_sort === 'asc') {
+    $order_by_clauses[] = "s.SoLuong ASC";
+} elseif ($qty_sort === 'desc') {
+    $order_by_clauses[] = "s.SoLuong DESC";
+}
+
+if (count($order_by_clauses) > 0) {
+    $sql .= " ORDER BY " . implode(", ", $order_by_clauses);
+} else {
+    $sql .= " ORDER BY s.MaSP ASC";
+}
+
+if ($limit_param !== 'all') {
+    $sql .= " LIMIT $limit OFFSET $offset";
+}
+
+$stmt = $conn->prepare($sql);
+$records = [];
+if ($stmt) {
+    if ($types !== "") {
+        $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $records[] = [
+                'MaSP'      => (int)$row['MaSP'],
+                'TenSP'     => $row['TenSP'],
+                'MoTa'      => $row['MoTa'] ?? '',
+                'Gia'       => (int)$row['Gia'],
+                'SoLuong'   => (int)$row['SoLuong'],
+                'TenDM'     => $row['TenDM'],
+                'is_active' => (int)$row['is_active'],
+            ];
+        }
+    }
+    $stmt->close();
+}
+
+echo json_encode([
+    'success'            => true,
+    'records'            => $records,
+    'total'              => $total_records,
+    'page'               => $page,
+    'per_page'           => $limit,
+    'is_admin'           => isAdmin(),
+    'can_manage_products'=> $can_manage_products,
+]);
+
+$conn->close();

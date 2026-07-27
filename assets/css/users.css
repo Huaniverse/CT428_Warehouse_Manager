@@ -1,0 +1,208 @@
+/* ===== USER MANAGEMENT TAB ===== */
+.settings_section {
+    background: #ffffff;
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(60, 80, 120, 0.06), 0 0 0 1px rgba(60, 80, 120, 0.04);
+    overflow: hidden;
+    margin-bottom: 28px;
+}
+
+.settings_section_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid #eef1f5;
+}
+
+.settings_section_header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1d23;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.settings_section_header h3 .material-symbols-outlined {
+    font-size: 20px;
+    color: #3b6fd4;
+}
+
+.settings_section_body {
+    padding: 24px;
+}
+
+/* ===== USERS TABLE ===== */
+.users_table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.users_table th {
+    background: #f4f6f9;
+    color: #5a6577;
+    font-weight: 600;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e8ecf0;
+    font-size: 12px;
+    text-transform: none;
+    letter-spacing: 0.02em;
+}
+
+.users_table td {
+    padding: 14px 16px;
+    color: #3d4555;
+    border-bottom: 1px solid #f0f2f6;
+    vertical-align: middle;
+}
+
+.users_table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.users_table tbody tr:hover {
+    background: #f0f2f6;
+}
+
+.user_avatar {
+    width: 34px; height: 34px;
+    background: #3b6fd4;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.user_info_cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user_info_cell .u_fullname {
+    font-weight: 600;
+    color: #1a1d23;
+    font-size: 14px;
+}
+
+.user_info_cell .u_username {
+    font-size: 12px;
+    color: #6b7a8d;
+}
+
+.status_badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status_badge.active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status_badge.inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.action_group {
+    display: flex;
+    gap: 6px;
+}
+
+.btn_icon {
+    width: 32px; height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #6b7a8d;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+}
+
+.btn_icon:hover {
+    background: #eef1f5;
+    color: #1a1d23;
+}
+
+.btn_icon:active {
+    transform: scale(0.92);
+}
+
+.btn_icon.danger:hover {
+    background: #fef2f2;
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+.btn_icon .material-symbols-outlined {
+    font-size: 16px;
+}
+
+/* ===== SESSIONS LIST ===== */
+.session_list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.session_item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #f4f6f9;
+    border: none;
+    border-radius: 10px;
+    gap: 12px;
+}
+
+.session_item.current_session {
+    border: none;
+    background: #eef3fb;
+}
+
+.session_info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.session_user {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1a1d23;
+}
+
+.session_meta {
+    font-size: 12px;
+    color: #6b7a8d;
+}
+
+.current_tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    background: #3b6fd4;
+    color: #fff;
+    border-radius: 9999px;
+    font-weight: 600;
+    margin-left: 6px;
+}
