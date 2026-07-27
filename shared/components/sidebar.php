@@ -22,7 +22,7 @@ $is_store_manager= $is_store_manager?? isStoreManager();
       <?php if ($is_admin || $is_store_manager): ?>
       <a class="menu_item" data-tab="caidat">
         <span class="material-symbols-outlined">manage_accounts</span>
-        <span>Quản lý người dùng</span>
+        <span>Quản lý nhân viên</span>
       </a>
       <?php endif; ?>
     </nav>

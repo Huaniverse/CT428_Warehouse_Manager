@@ -43,6 +43,8 @@
     border-radius: 9999px;
     text-transform: uppercase;
     letter-spacing: 0.03em;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .user_role_badge.admin {

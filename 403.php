@@ -1,16 +1,16 @@
 <?php
 /**
- * WarehouseManager - 404 Page
+ * WarehouseManager - 403 Page
  * Standalone error page (no auth/session dependencies)
  */
-http_response_code(404);
+http_response_code(403);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>404 - Không tìm thấy trang</title>
+<title>403 - Truy cập bị từ chối</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -47,11 +47,11 @@ a {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(to bottom, #87CEEB 0%, #B0E0E6 100%);
+  background: linear-gradient(to bottom, #E8937A 0%, #F4C2A1 100%);
   position: relative;
 }
 
-/* ===== BACKGROUND "404" TEXT + OVAL ===== */
+/* ===== BACKGROUND "403" TEXT + OVAL ===== */
 .bg-layer {
   position: absolute;
   inset: 0;
@@ -169,7 +169,7 @@ a {
   color: #FFFFFF;
   font-weight: 600;
   font-size: 0.875rem;
-  background: #5BA3D9;
+  background: #C97B5A;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -191,10 +191,10 @@ a {
 
 <div class="page">
 
-  <!-- BACKGROUND "404" TEXT + OVAL -->
+  <!-- BACKGROUND "403" TEXT + OVAL -->
   <div class="bg-layer" aria-hidden="true">
     <div class="bg-center">
-      <div id="text404" class="bg-text">404</div>
+      <div id="text403" class="bg-text">403</div>
       <div id="ovalShape" class="bg-oval"></div>
     </div>
   </div>
@@ -215,7 +215,7 @@ a {
 
   <!-- BOTTOM CONTENT -->
   <div class="bottom-content">
-    <h1 class="oops-heading">Oops, trang không tồn tại!</h1>
+    <h1 class="oops-heading">Bạn không có quyền truy cập trang này!</h1>
     <a href="/thuchanh/CT428_Warehouse_Manager/" class="home-btn">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
       Back to Home
@@ -228,18 +228,18 @@ a {
 (function () {
   'use strict';
 
-  var text404 = document.getElementById('text404');
+  var text403 = document.getElementById('text403');
   var ovalShape = document.getElementById('ovalShape');
 
   function updateScale() {
-    if (!text404 || !ovalShape) return;
+    if (!text403 || !ovalShape) return;
 
-    var textHeight = text404.offsetHeight;
+    var textHeight = text403.offsetHeight;
     if (!textHeight) return;
 
     var scaleY = (window.innerHeight / textHeight) * 1.4;
 
-    text404.style.transform = 'scale(1.15, ' + scaleY + ')';
+    text403.style.transform = 'scale(1.15, ' + scaleY + ')';
     ovalShape.style.transform = 'scaleY(' + scaleY + ')';
   }
 

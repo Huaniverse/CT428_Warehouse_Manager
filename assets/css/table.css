@@ -8,6 +8,11 @@
     margin-top: 24px;
 }
 
+.table_container > div {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 .product_table {
     width: 100%;
     border-collapse: collapse;

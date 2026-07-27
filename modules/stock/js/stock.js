@@ -517,8 +517,6 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
     const elPriceMin  = document.getElementById('hist_price_min');
     const elPriceMax  = document.getElementById('hist_price_max');
     const btnClear    = document.getElementById('btnClearHistoryFilter');
-    const lblPriceMin = document.getElementById('hist_price_min_label');
-    const lblPriceMax = document.getElementById('hist_price_max_label');
 
     const PRICE_MAX_CAP = elPriceMax ? (Number(elPriceMax.getAttribute('max')) || 0) : 0;
 
@@ -537,12 +535,14 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
             || (elCategory?.value || '') !== ''
             || (elUser?.value || '') !== ''
             || getSliderMin() > 0
-            || getSliderMax() < PRICE_MAX_CAP;
+            || getSliderMax() < PRICE_MAX_CAP
+            || (elPriceMin && Number(elPriceMin.value) > 0)
+            || (elPriceMax && Number(elPriceMax.value) < PRICE_MAX_CAP);
     }
 
     function toggleClearBtn() {
         if (!btnClear) return;
-        btnClear.style.display = isFilterActive() ? '' : 'none';
+        btnClear.closest('.clear_btn_wrapper')?.classList.toggle('filter-active', isFilterActive());
     }
 
     function clampDate(el) {
@@ -563,31 +563,6 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
         else loadExportHistory(1);
     }
 
-    function updatePriceRangeUI() {
-        if (!elPriceMin || !elPriceMax) return;
-        if (PRICE_MAX_CAP <= 0) return;
-        let minVal = Number(elPriceMin.value) || 0;
-        let maxVal = Number(elPriceMax.value) || 0;
-        if (minVal > maxVal) {
-            if (this === elPriceMin) {
-                elPriceMax.value = minVal;
-                maxVal = minVal;
-            } else {
-                elPriceMin.value = maxVal;
-                minVal = maxVal;
-            }
-        }
-        if (lblPriceMin) lblPriceMin.textContent = number_format(minVal) + 'đ';
-        if (lblPriceMax) lblPriceMax.textContent = number_format(maxVal) + 'đ';
-
-        const minPercent = (minVal / PRICE_MAX_CAP) * 100;
-        const maxPercent = (maxVal / PRICE_MAX_CAP) * 100;
-        const track = elPriceMin.closest('.price_range_track');
-        if (track) {
-            track.style.background = 'linear-gradient(to right, #e2e8f0 ' + minPercent + '%, #3b6fd4 ' + minPercent + '%, #3b6fd4 ' + maxPercent + '%, #e2e8f0 ' + maxPercent + '%)';
-        }
-    }
-
     elSearch?.addEventListener('input', function() {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(applyHistoryFilter, 400);
@@ -600,13 +575,13 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
 
     elPriceMin?.addEventListener('input', function() {
         __priceFilterDirty = true;
-        updatePriceRangeUI.call(this);
+        toggleClearBtn();
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(applyHistoryFilter, 300);
     });
     elPriceMax?.addEventListener('input', function() {
         __priceFilterDirty = true;
-        updatePriceRangeUI.call(this);
+        toggleClearBtn();
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(applyHistoryFilter, 300);
     });
@@ -621,7 +596,6 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
             if (elPriceMin) elPriceMin.value = 0;
             if (elPriceMax) elPriceMax.value = PRICE_MAX_CAP;
             __priceFilterDirty = false;
-            updatePriceRangeUI();
             toggleClearBtn();
             const tab = getCurrentHistoryTab();
             if (tab === 'import') loadImportHistory(1);
@@ -629,7 +603,6 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
         });
     }
 
-    updatePriceRangeUI();
     toggleClearBtn();
 })();
 

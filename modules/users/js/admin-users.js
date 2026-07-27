@@ -362,10 +362,14 @@ function loadUsers() {
                 const canManage = window.APP_CONFIG?.isAdmin ? u.role !== 'admin' : u.role === 'staff';
                 const canGrantTemp = canManage && u.role !== 'admin' && u.has_schedule == 1;
                 const hasTempAccess = u.temp_access_until && new Date(u.temp_access_until) > new Date();
+                const canEditSched = u.role !== 'admin' && canManage;
+                const schedStartVal = u.access_start ? u.access_start.substring(0,5) : '06:00';
+                const schedEndVal   = u.access_end   ? u.access_end.substring(0,5)   : '22:00';
                 const actions = isSelf
                     ? '<span style="font-size:12px;color:#94a3b8;">Tài khoản của bạn</span>'
                     : `<div class="action_group">
                         <button class="btn_icon" title="Xem / Sửa thông tin" onclick="openUserDetail(${u.id})"><span class="material-symbols-outlined">edit</span></button>
+                        ${canEditSched ? `<button class="btn_icon" title="Chỉnh lịch truy cập" onclick="openScheduleModal(${u.id}, '${safeName}', '${u.role}', ${u.has_schedule}, '${schedStartVal}', '${schedEndVal}')"><span class="material-symbols-outlined">schedule</span></button>` : ''}
                         ${canGrantTemp ? (hasTempAccess
                             ? `<button class="btn_icon temp_revoke" title="Thu hồi quyền tạm thời" onclick="revokeTempAccess(${u.id})"><span class="material-symbols-outlined">timer_off</span></button>`
                             : `<button class="btn_icon temp_grant" title="Cấp quyền truy cập tạm thời" onclick="openTempAccessModal(${u.id}, '${safeName}')"><span class="material-symbols-outlined">timer</span></button>`) : ''}

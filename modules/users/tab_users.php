@@ -4,9 +4,9 @@
       $is_store_manager = $is_store_manager ?? isStoreManager();
       if ($is_admin || $is_store_manager):
       ?>
-      <!-- TAB QUẢN LÝ NGƯỜI DÙNG -->
+      <!-- TAB QUẢN LÝ NHÂN VIÊN -->
       <div id="content_caidat" class="tab_content">
-        <h1 style="font-size: 24px; font-weight: 600; color: #0f172a; margin: 0 0 4px 0;">Quản lý người dùng</h1>
+        <h1 style="font-size: 24px; font-weight: 600; color: #0f172a; margin: 0 0 4px 0;">Quản lý nhân viên</h1>
         <p style="font-size: 14px; color: #64748b; margin: 0 0 24px 0;">Tạo và quản lý tài khoản nhân viên, theo dõi phiên đăng nhập đang hoạt động.</p>
 
         <!-- Section: Danh sách tài khoản -->
@@ -25,7 +25,7 @@
             <table class="users_table" id="usersTable">
               <thead>
                 <tr>
-                  <th>Người dùng</th>
+                  <th>Nhân viên</th>
                   <th>Vai trò</th>
                   <th>Trạng thái</th>
                   <th>Lịch truy cập</th>

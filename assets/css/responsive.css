@@ -44,10 +44,6 @@
     .chart_grid {
         grid-template-columns: 1fr;
     }
-
-    .main_content_sort .input_group {
-        width: 200px;
-    }
 }
 
 /* ── Mobile (≤ 768px) ────────────────────────────────────────────────────── */
@@ -66,25 +62,37 @@
 
     .dashboard_grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+        gap: 8px;
     }
 
     .kpi_card {
-        padding: 16px;
+        padding: 10px 12px;
+        gap: 8px;
     }
 
-    .kpi_value {
+    .kpi_icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .kpi_icon .material-symbols-outlined {
         font-size: 20px;
     }
 
-    .main_content_sort {
-        flex-direction: column;
-        gap: 10px;
+    .kpi_title {
+        font-size: 11px;
     }
 
-    .main_content_sort .input_group {
-        width: 100%;
-        box-sizing: border-box;
+    .kpi_value {
+        font-size: 16px;
+    }
+
+    .main_content {
+        padding: 20px 12px;
+    }
+
+    .main_content_sort {
+        gap: 10px;
     }
 
     .main_content_sort .input_find {
@@ -97,11 +105,41 @@
     }
 
     .product_table {
-        min-width: 640px;
+        min-width: 580px;
+        font-size: 12px;
+    }
+
+    .product_table th,
+    .product_table td {
+        padding: 8px 10px;
+        white-space: nowrap;
     }
 
     .users_table {
-        min-width: 600px;
+        min-width: 540px;
+        font-size: 12px;
+    }
+
+    .users_table th,
+    .users_table td {
+        padding: 8px 10px;
+        white-space: nowrap;
+    }
+
+    .settings_section_body {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .data_table {
+        min-width: 480px;
+        font-size: 12px;
+    }
+
+    .data_table th,
+    .data_table td {
+        padding: 8px 10px;
+        white-space: nowrap;
     }
 
     .settings_section_header {

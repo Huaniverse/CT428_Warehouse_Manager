@@ -1,7 +1,7 @@
   <?php $current_user = $current_user ?? getCurrentUser(); ?>
   <header>
     <div class="header_left">
-      <span class="material-symbols-outlined logo_icon">inventory_2</span>
+      <span class="material-symbols-outlined logo_icon">package_2</span>
       <h1>Quản Lí Kho</h1>
     </div>
     <div class="header_right">

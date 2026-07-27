@@ -11,4 +11,6 @@ Options -Indexes
 # php_flag display_errors off
 
 # Trang lỗi tùy chỉnh
+ErrorDocument 403 /thuchanh/CT428_Warehouse_Manager/403.php
 ErrorDocument 404 /thuchanh/CT428_Warehouse_Manager/404.php
+ErrorDocument 500 /thuchanh/CT428_Warehouse_Manager/500.php

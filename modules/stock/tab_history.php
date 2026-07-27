@@ -35,29 +35,17 @@
         }
         ?>
         <div id="historyFilterBar" class="main_content_sort" style="margin-bottom:20px;">
-          <div class="search_field_wrapper" style="flex:1; min-width:200px;">
+          <div class="search_field_wrapper search_field_main">
             <label class="search_label">Tìm sản phẩm</label>
-            <div class="input_group" style="width:100%;">
+            <div class="input_group">
               <span class="material-symbols-outlined" style="font-size:18px; color:#97a5b8;">search</span>
-              <input type="text" id="hist_search_product" class="input_find" placeholder="Tên sản phẩm..." style="width:100%;">
+              <input type="text" id="hist_search_product" class="input_find" placeholder="Tên sản phẩm...">
             </div>
           </div>
-          <div class="search_field_wrapper">
-            <label class="search_label">Từ ngày</label>
-            <div class="input_group">
-              <input type="date" id="hist_date_from" class="input_find" max="<?php echo $today; ?>" style="width:160px;">
-            </div>
-          </div>
-          <div class="search_field_wrapper">
-            <label class="search_label">Đến ngày</label>
-            <div class="input_group">
-              <input type="date" id="hist_date_to" class="input_find" max="<?php echo $today; ?>" style="width:160px;">
-            </div>
-          </div>
-          <div class="search_field_wrapper">
+          <div class="search_field_wrapper select_field">
             <label class="search_label">Danh mục</label>
             <div class="input_group">
-              <select id="hist_category" style="width:180px;">
+              <select id="hist_category">
                 <option value="">Tất cả danh mục</option>
                 <?php foreach ($categories_list as $cat): ?>
                   <option value="<?php echo htmlspecialchars($cat['MaDM'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($cat['TenDM'], ENT_QUOTES, 'UTF-8'); ?></option>
@@ -65,10 +53,22 @@
               </select>
             </div>
           </div>
-          <div class="search_field_wrapper">
+          <div class="search_field_wrapper date_field">
+            <label class="search_label">Từ ngày</label>
+            <div class="input_group">
+              <input type="date" id="hist_date_from" class="input_find" max="<?php echo $today; ?>">
+            </div>
+          </div>
+          <div class="search_field_wrapper date_field">
+            <label class="search_label">Đến ngày</label>
+            <div class="input_group">
+              <input type="date" id="hist_date_to" class="input_find" max="<?php echo $today; ?>">
+            </div>
+          </div>
+          <div class="search_field_wrapper select_field">
             <label class="search_label">Người tạo</label>
             <div class="input_group">
-              <select id="hist_user" style="width:180px;">
+              <select id="hist_user">
                 <option value="">Tất cả người tạo</option>
                 <?php foreach ($users_list as $u): ?>
                   <option value="<?php echo (int)$u['id']; ?>"><?php echo htmlspecialchars($u['full_name'], ENT_QUOTES, 'UTF-8'); ?></option>
@@ -76,25 +76,20 @@
               </select>
             </div>
           </div>
-          <div class="search_field_wrapper" style="min-width:280px;">
+          <div class="search_field_wrapper price_range_field">
             <label class="search_label">Khoảng giá trị đơn hàng</label>
-            <div class="price_range_wrapper">
-              <div class="price_range_labels">
-                <span id="hist_price_min_label"><?php echo number_format(0); ?>đ</span>
-                <span id="hist_price_max_label"><?php echo number_format($max_price); ?>đ</span>
+            <div class="price_range_inputs">
+              <div class="input_group">
+                <input type="number" id="hist_price_min" min="0" max="<?php echo $max_price; ?>" value="0" step="100000" placeholder="Từ" class="input_find price_input">
               </div>
-              <div class="price_range_track">
-                <input type="range" id="hist_price_min" min="0" max="<?php echo $max_price; ?>" value="0" step="100000" class="price_range_input price_range_min">
-                <input type="range" id="hist_price_max" min="0" max="<?php echo $max_price; ?>" value="<?php echo $max_price; ?>" step="100000" class="price_range_input price_range_max">
-              </div>
-              <div class="price_range_limits">
-                <span>0đ</span>
-                <span><?php echo number_format($max_price); ?>đ</span>
+              <span class="price_range_separator">—</span>
+              <div class="input_group">
+                <input type="number" id="hist_price_max" min="0" max="<?php echo $max_price; ?>" value="<?php echo $max_price; ?>" step="100000" placeholder="Đến" class="input_find price_input">
               </div>
             </div>
           </div>
-          <div class="search_field_wrapper" style="align-self:flex-end;">
-            <button id="btnClearHistoryFilter" class="filter_button" style="height:40px; white-space:nowrap; display:none;">
+          <div class="search_field_wrapper action_buttons_wrapper clear_btn_wrapper">
+            <button id="btnClearHistoryFilter" class="filter_button">
               <span class="material-symbols-outlined" style="font-size:18px;">filter_list_off</span>
               <span>Xóa lọc</span>
             </button>

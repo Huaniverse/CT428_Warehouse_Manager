@@ -52,6 +52,13 @@ extract(getDashboardData($conn));
     const chart1Data = <?php echo json_encode($chart1_data); ?>;
     const chart2Labels = <?php echo json_encode($chart2_labels); ?>;
     const chart2Data = <?php echo json_encode($chart2_data); ?>;
+    const chartTrendLabels = <?php echo json_encode($chart_trend_labels); ?>;
+    const chartTrendImport = <?php echo json_encode($chart_trend_import); ?>;
+    const chartTrendExport = <?php echo json_encode($chart_trend_export); ?>;
+    const chartStatusLabels = <?php echo json_encode($chart_status_labels); ?>;
+    const chartStatusData = <?php echo json_encode($chart_status_data); ?>;
+    const chartTopLabels = <?php echo json_encode($chart_top_labels); ?>;
+    const chartTopData = <?php echo json_encode($chart_top_data); ?>;
   </script>
   <script src="modules/users/js/dashboard.js"></script>
 </body>

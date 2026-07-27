@@ -94,7 +94,7 @@ function renderProductPagination(totalPages, currentPage) {
     html += `<button class="btn_secondary pagination_btn ${currentPage === 1 ? 'disabled' : ''}" ${currentPage === 1 ? 'disabled' : ''} onclick="fetchFilteredProducts(${currentPage - 1})">
                <span class="material-symbols-outlined" style="font-size:18px;">chevron_left</span>
              </button>`;
-    const MAX_VISIBLE = 7;
+    const MAX_VISIBLE = window.innerWidth <= 480 ? 3 : window.innerWidth <= 768 ? 5 : 7;
     let start = Math.max(1, currentPage - Math.floor(MAX_VISIBLE / 2));
     let end = start + MAX_VISIBLE - 1;
     if (end > totalPages) { end = totalPages; start = Math.max(1, end - MAX_VISIBLE + 1); }
