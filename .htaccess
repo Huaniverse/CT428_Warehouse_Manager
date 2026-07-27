@@ -9,3 +9,6 @@ Options -Indexes
 
 # Ẩn lỗi PHP trên môi trường thật (tuỳ chọn)
 # php_flag display_errors off
+
+# Trang lỗi tùy chỉnh
+ErrorDocument 404 /thuchanh/CT428_Warehouse_Manager/404.php

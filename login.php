@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!$conn) {
         $error = 'Không thể kết nối cơ sở dữ liệu. Vui lòng thử lại sau.';
     } else {
-        $stmt = $conn->prepare("SELECT id, username, password, full_name, role, is_active, has_schedule, access_start, access_end FROM users WHERE username = ?");
+        $stmt = $conn->prepare("SELECT id, username, password, full_name, role, is_active, has_schedule, access_start, access_end, temp_access_until FROM users WHERE username = ?");
         $stmt->bind_param("s", $username);
         $stmt->execute();
         $user = $stmt->get_result()->fetch_assoc();

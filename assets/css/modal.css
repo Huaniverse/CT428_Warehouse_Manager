@@ -1,0 +1,299 @@
+/* ===== MODAL ===== */
+.modal_overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 30, 50, 0.45);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal_overlay.open {
+    display: flex;
+    animation: fade_in 0.2s ease;
+}
+
+@keyframes fade_in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.modal_card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 32px;
+    width: 440px;
+    max-width: 95vw;
+    box-shadow: 0 24px 48px rgba(30, 50, 80, 0.18), 0 0 0 1px rgba(60, 80, 120, 0.06);
+    animation: modal_slide_in 0.2s ease;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+@keyframes modal_slide_in {
+    from { opacity: 0; transform: translateY(-20px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.modal_header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1d23;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal_header h3 .material-symbols-outlined {
+    color: #3b6fd4;
+    font-size: 22px;
+}
+
+.modal_close {
+    width: 32px; height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #97a5b8;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+}
+
+.modal_close:hover {
+    background: #eef1f5;
+    color: #1a1d23;
+}
+
+.modal_body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modal_footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid #e8ecf0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.modal_footer .btn_primary,
+.modal_footer .btn_secondary {
+    font-size: 13px;
+    padding: 7px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    font-weight: 500;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.modal_footer .btn_primary {
+    background-color: #3b6fd4;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.modal_footer .btn_primary:hover {
+    background-color: #2e5cb8;
+}
+
+.modal_footer .btn_secondary {
+    background-color: #eef1f5;
+    color: #5a6577;
+}
+
+.modal_footer .btn_secondary:hover {
+    background-color: #e8ecf0;
+}
+
+/* ===== MODAL FORM HELPERS ===== */
+.modal_card .form_group label {
+    font-weight: 500;
+    font-size: 13px;
+    color: #3d4555;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.modal_card select,
+.modal_card input[type="text"],
+.modal_card input[type="number"],
+.modal_card input[type="time"],
+.modal_card textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d0d8e2;
+    border-radius: 6px;
+    font-size: 13px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border 0.2s;
+}
+
+.modal_card .form_input_wrapper select,
+.modal_card .form_input_wrapper input[type="text"],
+.modal_card .form_input_wrapper input[type="number"],
+.modal_card .form_input_wrapper input[type="password"],
+.modal_card .form_input_wrapper input[type="time"],
+.modal_card .form_input_wrapper textarea,
+.modal_card select.form_input,
+.modal_card input[type="text"].form_input,
+.modal_card input[type="number"].form_input,
+.modal_card input[type="password"].form_input,
+.modal_card input[type="time"].form_input,
+.modal_card textarea.form_input {
+    border: none;
+    border-radius: 0;
+    padding: 11px 10px;
+    box-shadow: none;
+    background: transparent;
+    min-width: 0;
+}
+
+.modal_card .form_input_wrapper textarea.form_input {
+    padding: 6px 0;
+    min-height: auto;
+}
+
+.modal_card .form_input_wrapper select:focus,
+.modal_card .form_input_wrapper input[type="text"]:focus,
+.modal_card .form_input_wrapper input[type="number"]:focus,
+.modal_card .form_input_wrapper input[type="password"]:focus,
+.modal_card .form_input_wrapper input[type="time"]:focus,
+.modal_card .form_input_wrapper textarea:focus,
+.modal_card select.form_input:focus,
+.modal_card input[type="text"].form_input:focus,
+.modal_card input[type="number"].form_input:focus,
+.modal_card input[type="password"].form_input:focus,
+.modal_card input[type="time"].form_input:focus,
+.modal_card textarea.form_input:focus {
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.modal_card input[type="time"] {
+    overflow: hidden;
+}
+
+.modal_card .form_input_wrapper input[type="time"] {
+    height: 38px;
+    min-height: 38px;
+}
+
+.modal_card textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+/* ===== TOGGLE PASSWORD IN MODALS ===== */
+.modal_body .form_input_wrapper .toggle_password {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+}
+
+.modal_body .form_input_wrapper .toggle_password:hover {
+    color: #475569;
+}
+
+.modal_body .form_input_wrapper {
+    position: relative;
+    overflow: visible;
+}
+
+.modal_body .form_input_wrapper input[type="password"].form_input,
+.modal_body .form_input_wrapper .form_input[type="password"] {
+    padding-right: 36px;
+}
+
+.modal_body .form_input_wrapper:has(.toggle_password) {
+    position: relative;
+}
+
+/* ===== TIME INPUT FIXES ===== */
+.modal_card .form_input_wrapper input[type="time"]::-webkit-calendar-picker-indicator {
+    display: none !important;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    background: none;
+    color: transparent;
+    pointer-events: none;
+}
+
+.modal_card .form_input_wrapper input[type="time"]::-webkit-datetime-edit,
+.modal_card .form_input_wrapper input[type="time"]::-webkit-datetime-edit-fields-wrapper,
+.modal_card .form_input_wrapper input[type="time"]::-webkit-datetime-edit-hour-field,
+.modal_card .form_input_wrapper input[type="time"]::-webkit-datetime-edit-minute-field,
+.modal_card .form_input_wrapper input[type="time"]::-webkit-datetime-edit-ampm-field,
+.modal_card .form_input_wrapper input[type="time"]::-webkit-datetime-edit-text {
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+    line-height: normal;
+}
+
+.modal_card .form_input_wrapper input[type="time"]::-moz-calendar-picker-indicator {
+    display: none;
+}
+
+/* ===== SELECT/INPUT FIX IN DETAIL MODAL ===== */
+.modal_card .form_input_wrapper select.form_input,
+.modal_card .form_input_wrapper input.form_input,
+.user_detail_info .form_input_wrapper select.form_input,
+.user_detail_info .form_input_wrapper input.form_input {
+    line-height: 1.4;
+    overflow: visible;
+    height: auto;
+    min-height: 38px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+}
+
+/* ===== STOCK INFO (EXPORT MODAL) ===== */
+.stock_info {
+    background: #eef1f5;
+    border: 1px solid #e8ecf0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #5a6577;
+}

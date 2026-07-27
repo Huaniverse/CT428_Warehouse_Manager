@@ -123,6 +123,83 @@ switch ($action) {
         $stmt->close();
         break;
 
+    // ── Chi tiết sản phẩm + lịch sử nhập/xuất ──────────────────────────────
+    case 'detail':
+        $ma_sp = (int)($_GET['id'] ?? 0);
+        if ($ma_sp <= 0) {
+            echo json_encode(['success' => false, 'message' => 'Mã sản phẩm không hợp lệ.']);
+            exit;
+        }
+
+        $stmt = $conn->prepare(
+            "SELECT s.MaSP, s.TenSP, s.MoTa, s.Gia, s.SoLuong, s.DanhMuc, s.is_active,
+                    d.TenDM
+             FROM sanpham s
+             JOIN danhmuc d ON s.DanhMuc = d.MaDM
+             WHERE s.MaSP = ?"
+        );
+        $stmt->bind_param("i", $ma_sp);
+        $stmt->execute();
+        $product = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$product) {
+            echo json_encode(['success' => false, 'message' => 'Không tìm thấy sản phẩm.']);
+            exit;
+        }
+
+        $history_limit = 20;
+
+        // Lịch sử nhập kho
+        $import_sql = "SELECT pn.ma_phieu, ct.so_luong, sp.Gia AS don_gia,
+                              (ct.so_luong * sp.Gia) AS thanh_tien,
+                              u.full_name AS nguoi_tao_name, pn.ngay_tao
+                       FROM phieu_nhap pn
+                       JOIN chi_tiet_phieu_nhap ct ON ct.ma_phieu = pn.ma_phieu
+                       JOIN sanpham sp ON ct.san_pham = sp.MaSP
+                       JOIN users u ON pn.nguoi_tao = u.id
+                       WHERE ct.san_pham = ?
+                       ORDER BY pn.ngay_tao DESC
+                       LIMIT $history_limit";
+        $import_stmt = $conn->prepare($import_sql);
+        $import_stmt->bind_param("i", $ma_sp);
+        $import_stmt->execute();
+        $import_result = $import_stmt->get_result();
+        $import_history = [];
+        while ($row = $import_result->fetch_assoc()) {
+            $import_history[] = $row;
+        }
+        $import_stmt->close();
+
+        // Lịch sử xuất kho
+        $export_sql = "SELECT px.ma_phieu, ct.so_luong, sp.Gia AS don_gia,
+                              (ct.so_luong * sp.Gia) AS thanh_tien,
+                              u.full_name AS nguoi_tao_name, px.ngay_tao
+                       FROM phieu_xuat px
+                       JOIN chi_tiet_phieu_xuat ct ON ct.ma_phieu = px.ma_phieu
+                       JOIN sanpham sp ON ct.san_pham = sp.MaSP
+                       JOIN users u ON px.nguoi_tao = u.id
+                       WHERE ct.san_pham = ?
+                       ORDER BY px.ngay_tao DESC
+                       LIMIT $history_limit";
+        $export_stmt = $conn->prepare($export_sql);
+        $export_stmt->bind_param("i", $ma_sp);
+        $export_stmt->execute();
+        $export_result = $export_stmt->get_result();
+        $export_history = [];
+        while ($row = $export_result->fetch_assoc()) {
+            $export_history[] = $row;
+        }
+        $export_stmt->close();
+
+        echo json_encode([
+            'success'        => true,
+            'product'        => $product,
+            'import_history' => $import_history,
+            'export_history' => $export_history,
+        ]);
+        break;
+
     default:
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Hành động không hợp lệ.']);

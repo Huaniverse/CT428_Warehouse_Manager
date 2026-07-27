@@ -80,7 +80,7 @@ if ($conn) {
     $token = $_SESSION['session_token'];
     $stmt = $conn->prepare(
         "SELECT s.user_id, s.expires_at, u.is_active, u.role, u.full_name, u.allow_import_export,
-                u.has_schedule, u.access_start, u.access_end
+                u.has_schedule, u.access_start, u.access_end, u.temp_access_until
          FROM sessions s
          JOIN users u ON s.user_id = u.id
          WHERE s.session_token = ? AND s.expires_at > NOW() AND u.is_active = 1"
@@ -109,13 +109,18 @@ if ($conn) {
                     ? ($now >= $start && $now <= $end)
                     : ($now >= $start || $now <= $end);
                 if (!$inRange) {
-                    $del = $conn->prepare("DELETE FROM sessions WHERE session_token = ?");
-                    $del->bind_param("s", $token);
-                    $del->execute();
-                    $del->close();
-                    $_SESSION = [];
-                    session_destroy();
-                    redirectToLogin('expired');
+                    $tempUntil = $session_data['temp_access_until'] ?? null;
+                    if ($tempUntil && $tempUntil > date('Y-m-d H:i:s')) {
+                        //仍在 temporary access window — cho phép truy cập
+                    } else {
+                        $del = $conn->prepare("DELETE FROM sessions WHERE session_token = ?");
+                        $del->bind_param("s", $token);
+                        $del->execute();
+                        $del->close();
+                        $_SESSION = [];
+                        session_destroy();
+                        redirectToLogin('expired');
+                    }
                 }
             }
         }

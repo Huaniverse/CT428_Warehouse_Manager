@@ -1,0 +1,87 @@
+/* ===== PRODUCT SEARCH COMBOBOX ===== */
+.product_combobox {
+    position: relative;
+}
+
+.combobox_dropdown {
+    display: none;
+    position: fixed;
+    background: #ffffff;
+    border: 1.5px solid #e8ecf0;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(40, 60, 100, 0.12);
+    max-height: 240px;
+    overflow-y: auto;
+    z-index: 3000;
+    box-sizing: border-box;
+}
+
+.combobox_item {
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #3d4555;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    border-bottom: 1px solid #eef1f5;
+}
+
+.combobox_item:last-child {
+    border-bottom: none;
+}
+
+.combobox_item:hover,
+.combobox_item.active {
+    background: #eff6ff;
+    color: #2e5cb8;
+}
+
+.combobox_empty {
+    padding: 14px;
+    text-align: center;
+    font-size: 13px;
+    color: #97a5b8;
+}
+
+/* ===== TOGGLE SWITCH ===== */
+.toggle_switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.toggle_switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle_slider {
+    position: absolute;
+    inset: 0;
+    background-color: #d0d8e2;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: background-color 0.25s;
+}
+
+.toggle_slider::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.25s;
+    box-shadow: 0 1px 2px rgba(40, 60, 100, 0.15);
+}
+
+.toggle_switch input:checked + .toggle_slider {
+    background-color: #3b6fd4;
+}
+
+.toggle_switch input:checked + .toggle_slider::before {
+    transform: translateX(20px);
+}

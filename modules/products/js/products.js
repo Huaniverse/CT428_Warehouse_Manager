@@ -1,6 +1,5 @@
 let productCurrentPage = 1;
 
-// ─── Product status badge helper ───────────────────────────────────────────
 function getProductStatus(r) {
     if (r.is_active == 0) return { cls: 'hidden_product', text: 'Ngừng kinh doanh' };
     if (r.SoLuong <= 0)   return { cls: 'out_of_stock', text: 'Hết hàng' };
@@ -8,14 +7,25 @@ function getProductStatus(r) {
     return { cls: 'in_stock', text: 'Còn hàng' };
 }
 
-// ─── AJAX Product Filtering ───────────────────────────────────────────────
-function fetchFilteredProducts(page = 1) {
+function fetchFilteredProducts(page) {
+    const searchEl    = document.getElementById('search_input_sort');
+    const categoryEl  = document.getElementById('select_category');
+    const priceEl     = document.getElementById('select_price');
+    const qtyEl       = document.getElementById('select_quantity');
+    const limitEl     = document.getElementById('select_limit');
+
+    if (!searchEl || !categoryEl || !priceEl || !qtyEl || !limitEl) return;
+
+    if (page === undefined || page === null || page < 1) {
+        page = productCurrentPage || 1;
+    }
     productCurrentPage = page;
-    const searchVal    = document.getElementById('search_input_sort').value;
-    const categoryVal  = document.getElementById('select_category').value;
-    const priceSortVal = document.getElementById('select_price').value;
-    const qtySortVal   = document.getElementById('select_quantity').value;
-    const limitVal     = document.getElementById('select_limit')?.value || 10;
+
+    const searchVal    = searchEl.value;
+    const categoryVal  = categoryEl.value;
+    const priceSortVal = priceEl.value;
+    const qtySortVal   = qtyEl.value;
+    const limitVal     = limitEl.value || 10;
 
     const params = new URLSearchParams({
         search: searchVal, category: categoryVal,
@@ -27,6 +37,7 @@ function fetchFilteredProducts(page = 1) {
     const canManage = !!cfg.canManageProducts || !!cfg.isAdmin || cfg.role === 'store_manager';
     const colspan = canManage ? 8 : 7;
     const tbody = document.getElementById('product_table_body');
+    if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="' + colspan + '" style="text-align: center; padding: 32px; color: #64748b;">Đang tải dữ liệu...</td></tr>';
 
     apiFetch('modules/products/api/filter_products.php?' + params.toString())
@@ -48,11 +59,11 @@ function fetchFilteredProducts(page = 1) {
                 const desc = escapeHtml(r.MoTa || '');
                 let actionCell = '';
                 if (managePerm) {
-                    const editBtn = '<button class="btn_icon" title="Sửa sản phẩm" onclick="openEditProduct(' + r.MaSP + ')"><span class="material-symbols-outlined">edit</span></button>';
+                    const viewBtn = '<button class="btn_icon" title="Xem chi tiết" onclick="openProductDetail(' + r.MaSP + ')"><span class="material-symbols-outlined">visibility</span></button>';
                     const toggleBtn = r.is_active == 1
                         ? '<button class="btn_icon" title="Ẩn sản phẩm" onclick="toggleProductActive(' + r.MaSP + ', 0)"><span class="material-symbols-outlined">visibility_off</span></button>'
                         : '<button class="btn_icon" title="Khôi phục sản phẩm" onclick="toggleProductActive(' + r.MaSP + ', 1)"><span class="material-symbols-outlined">restore</span></button>';
-                    actionCell = '<td class="action_cell"><div class="action_group">' + editBtn + toggleBtn + '</div></td>';
+                    actionCell = '<td class="action_cell"><div class="action_group">' + viewBtn + toggleBtn + '</div></td>';
                 }
                 return '<tr' + rowCls + '>'
                     + '<td>' + r.MaSP + '</td>'
@@ -105,6 +116,21 @@ function renderProductPagination(totalPages, currentPage) {
     container.innerHTML = html;
 }
 
+function resetProductFilter() {
+    productCurrentPage = 1;
+    const searchEl   = document.getElementById('search_input_sort');
+    const categoryEl = document.getElementById('select_category');
+    const priceEl    = document.getElementById('select_price');
+    const qtyEl      = document.getElementById('select_quantity');
+    const limitEl    = document.getElementById('select_limit');
+    if (searchEl)   searchEl.value = '';
+    if (categoryEl) categoryEl.value = '';
+    if (priceEl)    priceEl.value = '';
+    if (qtyEl)      qtyEl.value = '';
+    if (limitEl)    limitEl.value = '10';
+    fetchFilteredProducts(1);
+}
+
 ['select_category', 'select_price', 'select_quantity', 'select_limit'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('change', () => fetchFilteredProducts(1));
@@ -113,22 +139,99 @@ function renderProductPagination(totalPages, currentPage) {
 const searchInput = document.getElementById('search_input_sort');
 if (searchInput) {
     searchInput.addEventListener('input', debounce(() => fetchFilteredProducts(1), 400));
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); fetchFilteredProducts(1); }
+    });
 }
 
-// ─── Edit Product ────────────────────────────────────────────────────────
-function openEditProduct(maSp) {
-    apiFetch('modules/products/api/edit_product.php?action=get&id=' + maSp)
+const searchBtn = document.querySelector('.search_button');
+if (searchBtn) {
+    searchBtn.addEventListener('click', function() {
+        if (searchInput) searchInput.focus();
+        fetchFilteredProducts(1);
+    });
+}
+
+// ─── Product Detail ──────────────────────────────────────────────────────
+let currentDetailProduct = null;
+let currentProductHistoryType = 'import';
+
+function openProductDetail(maSp) {
+    const modal = document.getElementById('productDetailModal');
+    if (!modal) return;
+
+    document.getElementById('productInfoDisplay').style.display = '';
+    document.getElementById('productInfoEdit').style.display = 'none';
+
+    const tbody = document.getElementById('productHistoryBody');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Đang tải...</td></tr>';
+
+    modal.classList.add('open');
+
+    apiFetch('modules/products/api/edit_product.php?action=detail&id=' + maSp)
         .then(data => {
-            if (!data.success) { showToast(data.message, 'error'); return; }
-            const p = data.product;
-            document.getElementById('edit_prod_id').value = p.MaSP;
-            document.getElementById('edit_prod_name').value = p.TenSP;
-            document.getElementById('edit_prod_category').value = p.DanhMuc;
-            document.getElementById('edit_prod_price').value = p.Gia;
-            document.getElementById('edit_prod_desc').value = p.MoTa || '';
-            document.getElementById('editProductModal').classList.add('open');
+            if (!data.success) { showToast(data.message, 'error'); modal.classList.remove('open'); return; }
+            currentDetailProduct = data;
+            renderProductInfo(data.product);
+            renderProductHistory(data);
         })
-        .catch(() => showToast('Không thể tải thông tin sản phẩm.', 'error'));
+        .catch(() => { showToast('Không thể tải thông tin sản phẩm.', 'error'); modal.classList.remove('open'); });
+}
+
+function renderProductInfo(p) {
+    document.getElementById('detail_prod_id').value = p.MaSP;
+    document.getElementById('productDetailTitle').textContent = p.TenSP;
+    document.getElementById('detail_prod_id_display').textContent = '#' + p.MaSP;
+    document.getElementById('detail_prod_name_display').textContent = p.TenSP;
+    document.getElementById('detail_prod_category_display').textContent = p.TenDM;
+    document.getElementById('detail_prod_price_display').textContent = number_format(p.Gia) + ' đ';
+    document.getElementById('detail_prod_desc_display').textContent = p.MoTa || 'Không có mô tả.';
+
+    const statusEl = document.getElementById('detail_prod_status_badge');
+    const stockInfo = document.getElementById('detail_prod_stock_info');
+    const s = getProductStatus(p);
+    statusEl.className = 'badge ' + s.cls;
+    statusEl.textContent = s.text;
+    stockInfo.textContent = 'Tồn kho: ' + number_format(p.SoLuong) + ' sản phẩm';
+}
+
+function renderProductHistory(data) {
+    const tbody = document.getElementById('productHistoryBody');
+    if (!tbody) return;
+
+    const records = currentProductHistoryType === 'import' ? data.import_history : data.export_history;
+    const color = currentProductHistoryType === 'import' ? '#16a34a' : '#ea580c';
+
+    if (!records || records.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty_state"><span class="material-symbols-outlined">inventory_2</span><p>Chưa có lịch sử.</p></td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = records.map((r, idx) => {
+        const date = new Date(r.ngay_tao).toLocaleString('vi-VN');
+        return '<tr>'
+            + '<td><span style="font-family:monospace;font-weight:600;">' + escapeHtml(r.ma_phieu) + '</span></td>'
+            + '<td style="text-align:center;"><strong>' + number_format(r.so_luong) + '</strong></td>'
+            + '<td style="text-align:right;">' + number_format(r.don_gia) + 'đ</td>'
+            + '<td style="text-align:right;font-weight:600;color:' + color + ';">' + number_format(r.thanh_tien) + 'đ</td>'
+            + '<td>' + escapeHtml(r.nguoi_tao_name) + '</td>'
+            + '<td style="font-size:13px;">' + date + '</td>'
+            + '</tr>';
+    }).join('');
+}
+
+function switchProductHistoryTab(type) {
+    currentProductHistoryType = type;
+    const importBtn = document.getElementById('prod_hist_tab_import');
+    const exportBtn = document.getElementById('prod_hist_tab_export');
+    if (type === 'import') {
+        importBtn.classList.add('active');
+        exportBtn.classList.remove('active');
+    } else {
+        importBtn.classList.remove('active');
+        exportBtn.classList.add('active');
+    }
+    if (currentDetailProduct) renderProductHistory(currentDetailProduct);
 }
 
 function toggleProductActive(maSp, newActive) {
@@ -140,21 +243,39 @@ function toggleProductActive(maSp, newActive) {
     apiFetch('modules/products/api/edit_product.php?action=toggle_active', { method: 'POST', body: fd })
         .then(data => {
             showToast(data.message, data.success ? 'success' : 'error');
-            if (data.success) fetchFilteredProducts();
+            if (data.success) fetchFilteredProducts(productCurrentPage);
         })
         .catch(() => showToast('Lỗi kết nối máy chủ.', 'error'));
 }
 
-// ─── Edit Product Modal ──────────────────────────────────────────────────
-const editProdModal = document.getElementById('editProductModal');
-if (editProdModal) {
-    document.getElementById('btnCloseEditProductModal')?.addEventListener('click', () => editProdModal.classList.remove('open'));
-    document.getElementById('btnCancelEditProductModal')?.addEventListener('click', () => editProdModal.classList.remove('open'));
-    editProdModal.addEventListener('click', e => { if (e.target === editProdModal) editProdModal.classList.remove('open'); });
+// ─── Product Detail Modal ────────────────────────────────────────────────
+const prodDetailModal = document.getElementById('productDetailModal');
+if (prodDetailModal) {
+    document.getElementById('btnCloseProductDetailModal')?.addEventListener('click', () => prodDetailModal.classList.remove('open'));
+    prodDetailModal.addEventListener('click', e => { if (e.target === prodDetailModal) prodDetailModal.classList.remove('open'); });
+
+    document.getElementById('btnToggleProdEditMode')?.addEventListener('click', function() {
+        if (!currentDetailProduct) return;
+        const p = currentDetailProduct.product;
+        document.getElementById('edit_prod_name').value = p.TenSP;
+        document.getElementById('edit_prod_category').value = p.DanhMuc;
+        document.getElementById('edit_prod_price').value = p.Gia;
+        document.getElementById('edit_prod_desc').value = p.MoTa || '';
+        document.getElementById('productInfoDisplay').style.display = 'none';
+        document.getElementById('productInfoEdit').style.display = '';
+    });
+
+    function cancelProdEdit() {
+        document.getElementById('productInfoDisplay').style.display = '';
+        document.getElementById('productInfoEdit').style.display = 'none';
+    }
+
+    document.getElementById('btnCancelProdEdit')?.addEventListener('click', cancelProdEdit);
+    document.getElementById('btnCancelProdEditBottom')?.addEventListener('click', cancelProdEdit);
 
     document.getElementById('btnSubmitEditProduct')?.addEventListener('click', function() {
         const fd = new FormData();
-        fd.append('ma_sp', document.getElementById('edit_prod_id').value);
+        fd.append('ma_sp', document.getElementById('detail_prod_id').value);
         fd.append('ten_sp', document.getElementById('edit_prod_name').value.trim());
         fd.append('danhmuc', document.getElementById('edit_prod_category').value);
         fd.append('gia', document.getElementById('edit_prod_price').value);
@@ -170,13 +291,25 @@ if (editProdModal) {
         apiFetch('modules/products/api/edit_product.php?action=update', { method: 'POST', body: fd })
             .then(data => {
                 this.disabled = false;
-                this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu thay đổi';
+                this.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">save</span> Lưu thay đổi';
                 showToast(data.message, data.success ? 'success' : 'error');
-                if (data.success) { editProdModal.classList.remove('open'); fetchFilteredProducts(); }
+                if (data.success) {
+                    fetchFilteredProducts(productCurrentPage);
+                    const maSp = document.getElementById('detail_prod_id').value;
+                    apiFetch('modules/products/api/edit_product.php?action=detail&id=' + maSp)
+                        .then(d => {
+                            if (d.success) {
+                                currentDetailProduct = d;
+                                renderProductInfo(d.product);
+                                renderProductHistory(d);
+                            }
+                        });
+                    cancelProdEdit();
+                }
             })
             .catch(() => {
                 this.disabled = false;
-                this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu thay đổi';
+                this.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">save</span> Lưu thay đổi';
                 showToast('Lỗi kết nối máy chủ.', 'error');
             });
     });
@@ -186,7 +319,6 @@ if (editProdModal) {
 const addProdModal         = document.getElementById('addProductModal');
 const btnOpenProdModal     = document.getElementById('btn_add_product');
 const btnCloseProdModal    = document.getElementById('btnCloseAddProductModal');
-const btnCancelProdModal   = document.getElementById('btnCancelAddProductModal');
 const btnSubmitProd        = document.getElementById('btnSubmitAddProduct');
 
 function openAddProdModal() {
@@ -209,7 +341,6 @@ function closeAddProdModal() {
 
 if (btnOpenProdModal)   btnOpenProdModal.addEventListener('click', openAddProdModal);
 if (btnCloseProdModal)  btnCloseProdModal.addEventListener('click', closeAddProdModal);
-if (btnCancelProdModal) btnCancelProdModal.addEventListener('click', closeAddProdModal);
 if (addProdModal) {
     addProdModal.addEventListener('click', e => {
         if (e.target === addProdModal) closeAddProdModal();
@@ -258,7 +389,7 @@ if (btnSubmitProd) {
                 showToast(data.message, data.success ? 'success' : 'error');
                 if (data.success) {
                     closeAddProdModal();
-                    fetchFilteredProducts();
+                    fetchFilteredProducts(productCurrentPage);
                 }
             })
             .catch(() => {
@@ -273,7 +404,6 @@ if (btnSubmitProd) {
 const addCatModal          = document.getElementById('addCategoryModal');
 const btnOpenCatModal      = document.getElementById('btn_add_category');
 const btnCloseCatModal     = document.getElementById('btnCloseAddCategoryModal');
-const btnCancelCatModal    = document.getElementById('btnCancelAddCategoryModal');
 const btnSubmitCat         = document.getElementById('btnSubmitAddCategory');
 
 function openAddCatModal() {
@@ -293,7 +423,6 @@ function closeAddCatModal() {
 
 if (btnOpenCatModal)   btnOpenCatModal.addEventListener('click', openAddCatModal);
 if (btnCloseCatModal)  btnCloseCatModal.addEventListener('click', closeAddCatModal);
-if (btnCancelCatModal) btnCancelCatModal.addEventListener('click', closeAddCatModal);
 if (addCatModal) {
     addCatModal.addEventListener('click', e => {
         if (e.target === addCatModal) closeAddCatModal();

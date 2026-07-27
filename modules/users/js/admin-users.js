@@ -5,69 +5,74 @@ document.addEventListener('DOMContentLoaded', function() {
     const createModal    = document.getElementById('createUserModal');
     const btnOpenModal   = document.getElementById('btnOpenCreateModal');
     const btnCloseModal  = document.getElementById('btnCloseModal');
-    const btnCancelModal = document.getElementById('btnCancelModal');
     const btnSubmit      = document.getElementById('btnSubmitCreateUser');
-
-    function openModal()  { createModal.classList.add('open'); document.getElementById('new_username').focus(); }
-    function closeModal() {
-        createModal.classList.remove('open');
-        document.getElementById('new_username').value  = '';
-        document.getElementById('new_fullname').value  = '';
-        document.getElementById('new_password').value  = '';
-        document.getElementById('new_role').value      = 'staff';
-        resetCreateScheduleFields();
-    }
-
-    if (btnOpenModal) btnOpenModal.addEventListener('click', openModal);
-    if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
-    if (btnCancelModal) btnCancelModal.addEventListener('click', closeModal);
-    if (createModal) createModal.addEventListener('click', e => { if (e.target === createModal) closeModal(); });
-
-    // Toggle schedule fields trong modal tạo tài khoản
-    const newRole = document.getElementById('new_role');
+    const newRole        = document.getElementById('new_role');
     const createSchedToggle = document.getElementById('create_has_schedule');
-    const createTimeFields = document.getElementById('create_time_fields');
-    const createSchedNote  = document.getElementById('create_staff_note');
-    if (newRole) {
-        newRole.addEventListener('change', function() {
-            updateCreateScheduleUI(this.value);
-        });
-        updateCreateScheduleUI(newRole.value);
-    }
-    if (createSchedToggle) {
-        createSchedToggle.addEventListener('change', function() {
-            createTimeFields.style.display = this.checked ? 'block' : 'none';
-        });
+    const createTimeFields  = document.getElementById('create_time_fields');
+    const createSchedNote   = document.getElementById('create_staff_note');
+    const createSchedToggleGroup = document.getElementById('create_sched_toggle_group');
+
+    function setCreateFieldsDisabled(disabled) {
+        if (!createTimeFields) return;
+        createTimeFields.querySelectorAll('input[type="time"]').forEach(function(inp) { inp.disabled = disabled; });
+        createTimeFields.classList.toggle('sched_disabled', disabled);
     }
 
     function updateCreateScheduleUI(role) {
-        if (role === 'staff') {
-            createSchedNote.style.display = 'block';
-            document.getElementById('create_sched_toggle_group').style.display = 'none';
+        if (!createSchedNote || !createSchedToggle || !createTimeFields || !createSchedToggleGroup) return;
+        var isStaff = (role === 'staff');
+        var isManager = (role === 'store_manager');
+        createSchedNote.classList.toggle('hidden', !isStaff);
+        createSchedToggleGroup.classList.toggle('hidden', !isManager);
+        if (isStaff) {
             createSchedToggle.checked = true;
-            createTimeFields.style.display = 'block';
-        } else if (role === 'store_manager') {
-            createSchedNote.style.display = 'none';
-            document.getElementById('create_sched_toggle_group').style.display = 'flex';
-            createTimeFields.style.display = createSchedToggle.checked ? 'block' : 'none';
+            setCreateFieldsDisabled(false);
+        } else if (isManager) {
+            setCreateFieldsDisabled(!createSchedToggle.checked);
         } else {
-            createSchedNote.style.display = 'none';
-            document.getElementById('create_sched_toggle_group').style.display = 'none';
-            createTimeFields.style.display = 'none';
             createSchedToggle.checked = false;
+            setCreateFieldsDisabled(true);
         }
     }
 
     function resetCreateScheduleFields() {
         if (createSchedToggle) createSchedToggle.checked = false;
-        if (createTimeFields) createTimeFields.style.display = 'none';
-        if (createSchedNote) createSchedNote.style.display = 'none';
-        const ctg = document.getElementById('create_sched_toggle_group');
-        if (ctg) ctg.style.display = 'none';
-        const cs = document.getElementById('create_start');
-        const ce = document.getElementById('create_end');
+        setCreateFieldsDisabled(true);
+        if (createSchedNote) createSchedNote.classList.add('hidden');
+        if (createSchedToggleGroup) createSchedToggleGroup.classList.add('hidden');
+        var cs = document.getElementById('create_start');
+        var ce = document.getElementById('create_end');
         if (cs) cs.value = '06:00';
         if (ce) ce.value = '22:00';
+    }
+
+    function openModal() {
+        if (!createModal) return;
+        createModal.classList.add('open');
+        document.getElementById('new_username').focus();
+        updateCreateScheduleUI(newRole ? newRole.value : 'staff');
+    }
+
+    function closeModal() {
+        if (!createModal) return;
+        createModal.classList.remove('open');
+        document.getElementById('new_username').value  = '';
+        document.getElementById('new_fullname').value  = '';
+        document.getElementById('new_password').value  = '';
+        if (newRole) newRole.value = 'staff';
+        resetCreateScheduleFields();
+    }
+
+    if (btnOpenModal) btnOpenModal.addEventListener('click', openModal);
+    if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
+    if (createModal) createModal.addEventListener('click', e => { if (e.target === createModal) closeModal(); });
+
+    if (newRole) {
+        newRole.addEventListener('change', function() { updateCreateScheduleUI(this.value); });
+        updateCreateScheduleUI(newRole.value);
+    }
+    if (createSchedToggle) {
+        createSchedToggle.addEventListener('change', function() { setCreateFieldsDisabled(!this.checked); });
     }
 
     if (btnSubmit) btnSubmit.addEventListener('click', function() {
@@ -106,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const permModal = document.getElementById('permissionsModal');
     if (permModal) {
         document.getElementById('btnClosePermissionsModal')?.addEventListener('click', () => permModal.classList.remove('open'));
-        document.getElementById('btnCancelPermissionsModal')?.addEventListener('click', () => permModal.classList.remove('open'));
         permModal.addEventListener('click', e => { if (e.target === permModal) permModal.classList.remove('open'); });
         document.getElementById('btnSubmitPermissions')?.addEventListener('click', function() {
             const fd = new FormData();
@@ -133,7 +137,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const schedModal = document.getElementById('scheduleModal');
     if (schedModal) {
         document.getElementById('btnCloseScheduleModal')?.addEventListener('click', () => schedModal.classList.remove('open'));
-        document.getElementById('btnCancelScheduleModal')?.addEventListener('click', () => schedModal.classList.remove('open'));
         schedModal.addEventListener('click', e => { if (e.target === schedModal) schedModal.classList.remove('open'); });
 
         const schedToggle = document.getElementById('sched_has_schedule');
@@ -168,11 +171,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // ── Modal cấp quyền tạm thời ──────────────────────────────────────────
+    const tempAccessModal = document.getElementById('tempAccessModal');
+    if (tempAccessModal) {
+        document.getElementById('btnCloseTempAccessModal')?.addEventListener('click', () => tempAccessModal.classList.remove('open'));
+        tempAccessModal.addEventListener('click', e => { if (e.target === tempAccessModal) tempAccessModal.classList.remove('open'); });
+        document.getElementById('btnSubmitTempAccess')?.addEventListener('click', grantTempAccess);
+        document.querySelectorAll('.temp_duration_btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                _tempSelectedMinutes = parseInt(this.dataset.minutes);
+                document.querySelectorAll('.temp_duration_btn').forEach(function(b) { b.classList.remove('active'); });
+                this.classList.add('active');
+            });
+        });
+    }
+
     // ── Modal chi tiết / sửa tài khoản ─────────────────────────────────────
     const detailModal = document.getElementById('userDetailModal');
     if (detailModal) {
         document.getElementById('btnCloseUserDetail')?.addEventListener('click', () => detailModal.classList.remove('open'));
-        document.getElementById('btnCancelUserDetail')?.addEventListener('click', () => detailModal.classList.remove('open'));
         detailModal.addEventListener('click', e => { if (e.target === detailModal) detailModal.classList.remove('open'); });
 
         // Toggle lịch truy cập — làm mờ khi chưa check
@@ -326,6 +343,10 @@ function loadUsers() {
                 let schedBadge = '';
                 if (u.role === 'admin') {
                     schedBadge = '<span class="schedule_badge none">Không áp dụng</span>';
+                } else if (u.temp_access_until && new Date(u.temp_access_until) > new Date()) {
+                    schedBadge = '<span class="schedule_badge temp_active" data-until="' + escapeHtml(u.temp_access_until) + '">'
+                        + '<span class="material-symbols-outlined" style="font-size:14px; vertical-align:middle;">timer</span> '
+                        + '<span class="temp_countdown"></span></span>';
                 } else if (u.has_schedule == 1 && u.access_start && u.access_end) {
                     schedBadge = '<span class="schedule_badge active">'
                         + '<span class="material-symbols-outlined" style="font-size:14px; vertical-align:middle;">schedule</span> '
@@ -339,10 +360,15 @@ function loadUsers() {
                 const toggleIcon   = u.is_active == 1 ? 'block' : 'check_circle';
                 const toggleStatus = u.is_active == 1 ? 0 : 1;
                 const canManage = window.APP_CONFIG?.isAdmin ? u.role !== 'admin' : u.role === 'staff';
+                const canGrantTemp = canManage && u.role !== 'admin' && u.has_schedule == 1;
+                const hasTempAccess = u.temp_access_until && new Date(u.temp_access_until) > new Date();
                 const actions = isSelf
                     ? '<span style="font-size:12px;color:#94a3b8;">Tài khoản của bạn</span>'
                     : `<div class="action_group">
                         <button class="btn_icon" title="Xem / Sửa thông tin" onclick="openUserDetail(${u.id})"><span class="material-symbols-outlined">edit</span></button>
+                        ${canGrantTemp ? (hasTempAccess
+                            ? `<button class="btn_icon temp_revoke" title="Thu hồi quyền tạm thời" onclick="revokeTempAccess(${u.id})"><span class="material-symbols-outlined">timer_off</span></button>`
+                            : `<button class="btn_icon temp_grant" title="Cấp quyền truy cập tạm thời" onclick="openTempAccessModal(${u.id}, '${safeName}')"><span class="material-symbols-outlined">timer</span></button>`) : ''}
                         ${canManage ? `<button class="btn_icon" title="${toggleTitle}" onclick="toggleUser(${u.id}, ${toggleStatus})"><span class="material-symbols-outlined">${toggleIcon}</span></button>` : ''}
                         ${canManage ? `<button class="btn_icon danger" title="Xóa tài khoản" onclick="deleteUser(${u.id}, '${safeName}')"><span class="material-symbols-outlined">delete</span></button>` : ''}
                        </div>`;
@@ -354,6 +380,7 @@ function loadUsers() {
                     <td style="font-size:13px;">${createdBy}</td>
                     <td>${actions}</td></tr>`;
             }).join('');
+            updateTempCountdowns();
         })
         .catch(() => { tbody.innerHTML = '<tr><td colspan="7" class="table_loading">Lỗi kết nối.</td></tr>'; });
 }
@@ -571,4 +598,69 @@ function kickUser(userId) {
     apiFetch('modules/users/api/users.php?action=kick', { method: 'POST', body: fd })
         .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadSessions(); })
         .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
+}
+
+// ── Cấp quyền truy cập tạm thời ────────────────────────────────────────
+let _tempSelectedMinutes = 10;
+
+function openTempAccessModal(userId, userName) {
+    document.getElementById('temp_user_id').value = userId;
+    document.getElementById('temp_user_name').textContent = userName;
+    _tempSelectedMinutes = 10;
+    document.querySelectorAll('.temp_duration_btn').forEach(function(btn) {
+        btn.classList.toggle('active', parseInt(btn.dataset.minutes) === 10);
+    });
+    document.getElementById('tempAccessModal').classList.add('open');
+}
+
+function grantTempAccess() {
+    var userId  = document.getElementById('temp_user_id').value;
+    var btn     = document.getElementById('btnSubmitTempAccess');
+    var fd      = new FormData();
+    fd.append('user_id', userId);
+    fd.append('minutes', _tempSelectedMinutes);
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang cấp...';
+    apiFetch('modules/users/api/users.php?action=grant_temp_access', { method: 'POST', body: fd })
+        .then(function(data) {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined">timer</span> Cấp quyền';
+            showToast(data.message, data.success ? 'success' : 'error');
+            if (data.success) {
+                document.getElementById('tempAccessModal').classList.remove('open');
+                loadUsers();
+            }
+        })
+        .catch(function() {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined">timer</span> Cấp quyền';
+            showToast('Lỗi kết nối máy chủ.', 'error');
+        });
+}
+
+function revokeTempAccess(userId) {
+    if (!confirm('Thu hồi quyền truy cập tạm thời? Tài khoản sẽ bị khóa theo lịch trình ngay lập tức.')) return;
+    var fd = new FormData();
+    fd.append('user_id', userId);
+    apiFetch('modules/users/api/users.php?action=revoke_temp_access', { method: 'POST', body: fd })
+        .then(function(data) { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadUsers(); })
+        .catch(function(err) { showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'); });
+}
+
+var _tempCountdownInterval = null;
+function updateTempCountdowns() {
+    if (_tempCountdownInterval) clearInterval(_tempCountdownInterval);
+    _tempCountdownInterval = setInterval(function() {
+        var badges = document.querySelectorAll('.schedule_badge.temp_active');
+        if (badges.length === 0) { clearInterval(_tempCountdownInterval); return; }
+        var now = new Date();
+        badges.forEach(function(badge) {
+            var until = new Date(badge.dataset.until);
+            var diff  = Math.max(0, Math.floor((until - now) / 1000));
+            if (diff <= 0) { loadUsers(); return; }
+            var m = Math.floor(diff / 60);
+            var s = diff % 60;
+            badge.querySelector('.temp_countdown').textContent = 'Còn lại ' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        });
+    }, 1000);
 }

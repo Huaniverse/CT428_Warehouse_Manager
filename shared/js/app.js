@@ -1,26 +1,43 @@
 const BASE = window.BASE_URL || '';
 
+function switchTab(tabId) {
+    document.querySelectorAll('.sidebar_menu .menu_item').forEach(el => el.classList.remove('active'));
+    const target = document.querySelector('.sidebar_menu .menu_item[data-tab="' + tabId + '"]');
+    if (target) target.classList.add('active');
+
+    document.querySelectorAll('.tab_content').forEach(content => content.classList.remove('active_tab'));
+    const activeTab = document.getElementById('content_' + tabId);
+    if (activeTab) activeTab.classList.add('active_tab');
+
+    localStorage.setItem('activeTab', tabId);
+
+    if (tabId === 'khohang') fetchFilteredProducts(1);
+    if (tabId === 'lichsu')  switchHistoryTab('import');
+    if (tabId === 'caidat')  { loadUsers(); loadSessions(); }
+}
+
 // ─── Tab switching ────────────────────────────────────────────────────────
 document.querySelectorAll('.sidebar_menu .menu_item').forEach(item => {
     item.addEventListener('click', function(e) {
         e.preventDefault();
-        document.querySelectorAll('.sidebar_menu .menu_item').forEach(el => el.classList.remove('active'));
-        this.classList.add('active');
-        const tabId = this.getAttribute('data-tab');
-        document.querySelectorAll('.tab_content').forEach(content => {
-            content.classList.remove('active_tab');
-        });
-        const activeTab = document.getElementById('content_' + tabId);
-        if (activeTab) activeTab.classList.add('active_tab');
-
-        if (tabId === 'khohang') fetchFilteredProducts();
-        if (tabId === 'lichsu') switchHistoryTab('import');
-        if (tabId === 'caidat') {
-            loadUsers();
-            loadSessions();
-        }
+        switchTab(this.getAttribute('data-tab'));
     });
 });
+
+// ─── Restore active tab from localStorage ────────────────────────────────
+(function() {
+    const saved = localStorage.getItem('activeTab');
+    if (saved && document.getElementById('content_' + saved)) {
+        document.querySelectorAll('.tab_content').forEach(c => c.classList.remove('active_tab'));
+        document.getElementById('content_' + saved).classList.add('active_tab');
+        document.querySelectorAll('.sidebar_menu .menu_item').forEach(el => el.classList.remove('active'));
+        const m = document.querySelector('.sidebar_menu .menu_item[data-tab="' + saved + '"]');
+        if (m) m.classList.add('active');
+        if (saved === 'khohang') setTimeout(function() { fetchFilteredProducts(productCurrentPage || 1); }, 50);
+        if (saved === 'lichsu')  setTimeout(function() { switchHistoryTab('import'); }, 50);
+        if (saved === 'caidat')  setTimeout(function() { loadUsers(); loadSessions(); }, 50);
+    }
+})();
 
 // ─── User Dropdown ────────────────────────────────────────────────────────
 const dropdownTrigger = document.getElementById('userDropdownTrigger');

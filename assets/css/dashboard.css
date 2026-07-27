@@ -1,0 +1,118 @@
+/* ===== DASHBOARD OVERVIEW ===== */
+.dashboard_grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 28px;
+    margin-bottom: 36px;
+}
+
+.kpi_card {
+    background: #ffffff;
+    border: none;
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 1px 3px rgba(60, 80, 120, 0.06), 0 0 0 1px rgba(60, 80, 120, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi_card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(60, 80, 120, 0.08), 0 0 0 1px rgba(60, 80, 120, 0.04);
+}
+
+.kpi_icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+}
+
+.kpi_icon.blue { background-color: #4a7cde; }
+.kpi_icon.green { background-color: #3a9d7c; }
+.kpi_icon.purple { background-color: #7a6db5; }
+.kpi_icon.orange { background-color: #d4943a; }
+
+.kpi_info {
+    display: flex;
+    flex-direction: column;
+}
+
+.kpi_title {
+    font-size: 14px;
+    color: #6b7a8d;
+    font-weight: 500;
+}
+
+.kpi_value {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1a1d23;
+    margin-top: 4px;
+    letter-spacing: -0.02em;
+}
+
+/* ===== CHART GRID ===== */
+.chart_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 28px;
+    margin-bottom: 36px;
+}
+
+.chart_card {
+    background: #ffffff;
+    border: none;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(60, 80, 120, 0.06), 0 0 0 1px rgba(60, 80, 120, 0.04);
+}
+
+.chart_card h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2a2d33;
+}
+
+/* ===== ADD PRODUCT BUTTON ===== */
+.add_product_button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background-color: #3b6fd4;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    height: 38px;
+    box-sizing: border-box;
+}
+
+.add_product_button:hover {
+    background-color: #2e5cb8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(46, 92, 184, 0.2), 0 2px 4px -2px rgba(46, 92, 184, 0.2);
+}
+
+.add_product_button:active {
+    transform: scale(0.98);
+    box-shadow: none;
+}
+
+.add_product_button .material-symbols-outlined {
+    font-size: 20px;
+}

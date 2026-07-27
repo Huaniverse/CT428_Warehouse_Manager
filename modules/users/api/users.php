@@ -22,7 +22,7 @@ switch ($action) {
 
         $caller_role = $_SESSION['role'] ?? '';
         $sql = "SELECT u.id, u.username, u.full_name, u.role, u.is_active, u.allow_import_export,
-                       u.has_schedule, u.access_start, u.access_end,
+                       u.has_schedule, u.access_start, u.access_end, u.temp_access_until,
                        u.created_at, u.last_login,
                        creator.full_name AS created_by_name
                 FROM users u
@@ -656,6 +656,94 @@ switch ($action) {
 
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Đã cập nhật thông tin tài khoản.']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Lỗi cập nhật: ' . $stmt->error]);
+        }
+        $stmt->close();
+        break;
+
+    // ── Cấp quyền truy cập tạm thời ──────────────────────────────────────
+    case 'grant_temp_access':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']);
+            exit;
+        }
+        verifyCsrfToken();
+        if (!$conn) {
+            echo json_encode(['success' => false, 'message' => 'Lỗi kết nối DB']);
+            exit;
+        }
+
+        $target_id = (int)($_POST['user_id'] ?? 0);
+        $minutes   = (int)($_POST['minutes'] ?? 10);
+        $minutes   = max(1, min(120, $minutes));
+
+        if ($target_id <= 0) {
+            echo json_encode(['success' => false, 'message' => 'ID không hợp lệ.']);
+            exit;
+        }
+
+        $check = $conn->prepare("SELECT role, has_schedule FROM users WHERE id = ?");
+        $check->bind_param("i", $target_id);
+        $check->execute();
+        $target_user = $check->get_result()->fetch_assoc();
+        $check->close();
+
+        if (!$target_user) {
+            echo json_encode(['success' => false, 'message' => 'Không tìm thấy tài khoản.']);
+            exit;
+        }
+
+        $permCheck = checkStoreManagerTarget($conn, $target_id);
+        if (!$permCheck['allowed']) {
+            echo json_encode(['success' => false, 'message' => $permCheck['message']]);
+            exit;
+        }
+
+        if ($target_user['role'] === 'admin') {
+            echo json_encode(['success' => false, 'message' => 'Không thể cấp quyền tạm thời cho Admin.']);
+            exit;
+        }
+
+        $until = date('Y-m-d H:i:s', time() + ($minutes * 60));
+        $stmt = $conn->prepare("UPDATE users SET temp_access_until = ? WHERE id = ?");
+        $stmt->bind_param("si", $until, $target_id);
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'message' => "Đã cấp quyền truy cập tạm thời {$minutes} phút.", 'temp_access_until' => $until]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Lỗi cập nhật: ' . $stmt->error]);
+        }
+        $stmt->close();
+        break;
+
+    // ── Thu hồi quyền truy cập tạm thời ───────────────────────────────────
+    case 'revoke_temp_access':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']);
+            exit;
+        }
+        verifyCsrfToken();
+        if (!$conn) {
+            echo json_encode(['success' => false, 'message' => 'Lỗi kết nối DB']);
+            exit;
+        }
+
+        $target_id = (int)($_POST['user_id'] ?? 0);
+        if ($target_id <= 0) {
+            echo json_encode(['success' => false, 'message' => 'ID không hợp lệ.']);
+            exit;
+        }
+
+        $permCheck = checkStoreManagerTarget($conn, $target_id);
+        if (!$permCheck['allowed']) {
+            echo json_encode(['success' => false, 'message' => $permCheck['message']]);
+            exit;
+        }
+
+        $stmt = $conn->prepare("UPDATE users SET temp_access_until = NULL WHERE id = ?");
+        $stmt->bind_param("i", $target_id);
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Đã thu hồi quyền truy cập tạm thời.']);
         } else {
             echo json_encode(['success' => false, 'message' => 'Lỗi cập nhật: ' . $stmt->error]);
         }

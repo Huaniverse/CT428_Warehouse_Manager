@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th7 25, 2026 lúc 08:01 PM
+-- Thời gian đã tạo: Th7 27, 2026 lúc 06:47 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -437,8 +437,7 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`session_token`, `user_id`, `ip_address`, `user_agent`, `created_at`, `expires_at`) VALUES
-('82af5a1ff18763f2205fc4d2ae628b6c07cbddb0faf07a6ea1c9b560f6cb76a180318e095f0ff4ac2a3ff7eefc2a187b1839dea41f2014d0890b25a77d3b2acf', 3, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 OPR/133.0.0.0', '2026-07-25 17:24:56', '2026-07-26 03:24:56'),
-('8bdf7be513cc93c051ef0a0fde1563e3363ab00763e8c03eb827ad0dfc5d152341ba7f484beeab69b9df604648e8edc17dcbec61eb179facf8dbc0e2f4891fc4', 1, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36 Edg/150.0.0.0', '2026-07-25 17:23:53', '2026-07-26 03:23:53');
+('832204c2da88bc7dded3c711178dd217329f9cdd63e3a76a61d3776b9b61de43fe687ffc535757f0e4fb6cbe156e58053f67165f9607fb1442aabb17b7e59b07', 1, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36 Edg/150.0.0.0', '2026-07-27 01:13:36', '2026-07-27 16:13:36');
 
 -- --------------------------------------------------------
 
@@ -457,6 +456,7 @@ CREATE TABLE `users` (
   `has_schedule` tinyint(1) NOT NULL DEFAULT 0,
   `access_start` time DEFAULT NULL,
   `access_end` time DEFAULT NULL,
+  `temp_access_until` datetime DEFAULT NULL,
   `created_by` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `last_login` timestamp NULL DEFAULT NULL
@@ -466,10 +466,11 @@ CREATE TABLE `users` (
 -- Đang đổ dữ liệu cho bảng `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `role`, `is_active`, `allow_import_export`, `has_schedule`, `access_start`, `access_end`, `created_by`, `created_at`, `last_login`) VALUES
-(1, 'admin', '$2y$12$tLxN.y5yFOlS4i676dUWJulxHF3T3imvv0VteXiNx7MphW6qhGjqW', 'Quản trị viên', 'admin', 1, 1, 0, NULL, NULL, 1, '2026-07-15 16:06:35', '2026-07-25 17:23:53'),
-(2, 'nv1', '$2y$12$Ty.RlU5SMnWGXZ.nL1tWe.rWUhEuvtD6OHm9w9rA8qM8E/6uxeWCK', 'Nhật Kim Anh', 'staff', 1, 1, 1, '06:00:00', '20:00:00', 1, '2026-07-17 07:24:39', '2026-07-25 17:24:47'),
-(3, 'chtruong1', '$2y$12$/o3yao3oowPI6Te1Y0wYT.aWMRO73CEpD0aaPKyhS8.TARzXAPhR2', 'Anh Đị Mixo', 'store_manager', 1, 0, 0, NULL, NULL, 1, '2026-07-24 14:17:06', '2026-07-25 17:24:56');
+INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `role`, `is_active`, `allow_import_export`, `has_schedule`, `access_start`, `access_end`, `temp_access_until`, `created_by`, `created_at`, `last_login`) VALUES
+(1, 'admin', '$2y$12$tLxN.y5yFOlS4i676dUWJulxHF3T3imvv0VteXiNx7MphW6qhGjqW', 'Quản trị viên', 'admin', 1, 1, 0, NULL, NULL, NULL, 1, '2026-07-15 16:06:35', '2026-07-27 01:13:36'),
+(2, 'nv1', '$2y$12$Ty.RlU5SMnWGXZ.nL1tWe.rWUhEuvtD6OHm9w9rA8qM8E/6uxeWCK', 'Nhật Kim Anh', 'staff', 1, 1, 1, '06:00:00', '20:00:00', '2026-07-26 14:56:39', 1, '2026-07-17 07:24:39', '2026-07-26 08:27:23'),
+(3, 'chtruong1', '$2y$12$/o3yao3oowPI6Te1Y0wYT.aWMRO73CEpD0aaPKyhS8.TARzXAPhR2', 'Đị Mixo', 'store_manager', 1, 0, 0, '06:00:00', '22:00:00', NULL, 1, '2026-07-24 14:17:06', '2026-07-26 08:27:15'),
+(4, 'nv2', '$2y$12$slpbf3kETWTWOJIcW8NtB.HBrD9l2CQI4wT7OLvgbORqXQjP.UZlK', 'Chú ba Duy', 'staff', 1, 0, 1, '06:00:00', '22:00:00', NULL, 1, '2026-07-26 06:53:10', '2026-07-26 07:35:26');
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -563,7 +564,7 @@ ALTER TABLE `sanpham`
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Các ràng buộc cho các bảng đã đổ

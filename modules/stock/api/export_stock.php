@@ -210,7 +210,11 @@ switch ($action) {
         $limit  = 10;
         $offset = ($page - 1) * $limit;
 
-        $filter_sp = (int)($_GET['san_pham'] ?? 0);
+        $filter_sp       = (int)($_GET['san_pham'] ?? 0);
+        $filter_search   = trim($_GET['search'] ?? '');
+        $filter_date_from = trim($_GET['date_from'] ?? '');
+        $filter_date_to   = trim($_GET['date_to'] ?? '');
+        $filter_category  = trim($_GET['category'] ?? '');
 
         $where = "1=1";
         $bind_types = "";
@@ -227,6 +231,30 @@ switch ($action) {
             $where .= " AND EXISTS (SELECT 1 FROM chi_tiet_phieu_xuat ct WHERE ct.ma_phieu = px.ma_phieu AND ct.san_pham = ?)";
             $bind_types .= "i";
             $bind_values[] = $filter_sp;
+        }
+
+        if ($filter_search !== '') {
+            $where .= " AND EXISTS (SELECT 1 FROM chi_tiet_phieu_xuat ct2 JOIN sanpham sp2 ON ct2.san_pham = sp2.MaSP WHERE ct2.ma_phieu = px.ma_phieu AND sp2.TenSP LIKE ?)";
+            $bind_types .= "s";
+            $bind_values[] = "%{$filter_search}%";
+        }
+
+        if ($filter_date_from !== '') {
+            $where .= " AND px.ngay_tao >= ?";
+            $bind_types .= "s";
+            $bind_values[] = $filter_date_from . ' 00:00:00';
+        }
+
+        if ($filter_date_to !== '') {
+            $where .= " AND px.ngay_tao <= ?";
+            $bind_types .= "s";
+            $bind_values[] = $filter_date_to . ' 23:59:59';
+        }
+
+        if ($filter_category !== '') {
+            $where .= " AND EXISTS (SELECT 1 FROM chi_tiet_phieu_xuat ct3 JOIN sanpham sp3 ON ct3.san_pham = sp3.MaSP WHERE ct3.ma_phieu = px.ma_phieu AND sp3.DanhMuc = ?)";
+            $bind_types .= "s";
+            $bind_values[] = $filter_category;
         }
 
         $count_sql = "SELECT COUNT(*) as total FROM phieu_xuat px WHERE $where";

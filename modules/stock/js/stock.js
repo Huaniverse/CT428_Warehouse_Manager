@@ -46,7 +46,6 @@ if (importModal) {
         importModal.classList.add('open');
     });
     document.getElementById('btnCloseImportModal')?.addEventListener('click', () => importModal.classList.remove('open'));
-    document.getElementById('btnCancelImportModal')?.addEventListener('click', () => importModal.classList.remove('open'));
     importModal.addEventListener('click', e => { if (e.target === importModal) importModal.classList.remove('open'); });
 
     document.getElementById('btnAddToBatch')?.addEventListener('click', function() {
@@ -160,7 +159,6 @@ if (exportModal) {
         exportModal.classList.add('open');
     });
     document.getElementById('btnCloseExportModal')?.addEventListener('click', () => exportModal.classList.remove('open'));
-    document.getElementById('btnCancelExportModal')?.addEventListener('click', () => exportModal.classList.remove('open'));
     exportModal.addEventListener('click', e => { if (e.target === exportModal) exportModal.classList.remove('open'); });
 
     document.getElementById('export_product')?.addEventListener('productSelected', function() {
@@ -253,12 +251,27 @@ if (exportModal) {
 }
 
 // ─── Import History (tab-based) ──────────────────────────────────────────
+function getHistoryFilterParams() {
+    const search   = (document.getElementById('hist_search_product')?.value || '').trim();
+    const dateFrom = document.getElementById('hist_date_from')?.value || '';
+    const dateTo   = document.getElementById('hist_date_to')?.value || '';
+    const category = document.getElementById('hist_category')?.value || '';
+    const params = new URLSearchParams();
+    if (search)   params.set('search', search);
+    if (dateFrom) params.set('date_from', dateFrom);
+    if (dateTo)   params.set('date_to', dateTo);
+    if (category) params.set('category', category);
+    return params.toString();
+}
+
 function loadImportHistory(page = 1) {
     const tbody = document.getElementById('importHistoryBody');
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Đang tải...</td></tr>';
 
-    apiFetch('modules/stock/api/import_stock.php?action=list&page=' + page)
+    const filterQS = getHistoryFilterParams();
+    const sep = filterQS ? '&' : '';
+    apiFetch('modules/stock/api/import_stock.php?action=list&page=' + page + sep + filterQS)
         .then(data => {
             if (!data.success || data.records.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6"><div class="empty_state"><span class="material-symbols-outlined">inventory_2</span><p>Chưa có phiếu nhập kho nào.</p></div></td></tr>';
@@ -297,7 +310,9 @@ function loadExportHistory(page = 1) {
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Đang tải...</td></tr>';
 
-    apiFetch('modules/stock/api/export_stock.php?action=list&page=' + page)
+    const filterQS = getHistoryFilterParams();
+    const sep = filterQS ? '&' : '';
+    apiFetch('modules/stock/api/export_stock.php?action=list&page=' + page + sep + filterQS)
         .then(data => {
             if (!data.success || data.records.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6"><div class="empty_state"><span class="material-symbols-outlined">inventory_2</span><p>Chưa có phiếu xuất kho nào.</p></div></td></tr>';
@@ -360,7 +375,6 @@ function switchHistoryTab(type) {
 const receiptDetailModal = document.getElementById('receiptDetailModal');
 if (receiptDetailModal) {
     document.getElementById('btnCloseReceiptDetailModal')?.addEventListener('click', () => receiptDetailModal.classList.remove('open'));
-    document.getElementById('btnCloseReceiptDetailModalFooter')?.addEventListener('click', () => receiptDetailModal.classList.remove('open'));
     receiptDetailModal.addEventListener('click', e => { if (e.target === receiptDetailModal) receiptDetailModal.classList.remove('open'); });
 }
 
@@ -476,3 +490,74 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
              </button>`;
     return html;
 };
+
+// ─── History filter event listeners ─────────────────────────────────────
+(function() {
+    let debounceTimer = null;
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    const elSearch    = document.getElementById('hist_search_product');
+    const elDateFrom  = document.getElementById('hist_date_from');
+    const elDateTo    = document.getElementById('hist_date_to');
+    const elCategory  = document.getElementById('hist_category');
+    const btnClear    = document.getElementById('btnClearHistoryFilter');
+
+    function getCurrentHistoryTab() {
+        const importBtn = document.getElementById('hist_tab_import');
+        return importBtn?.classList.contains('active') ? 'import' : 'export';
+    }
+
+    function isFilterActive() {
+        return (elSearch?.value || '').trim() !== ''
+            || (elDateFrom?.value || '') !== ''
+            || (elDateTo?.value || '') !== ''
+            || (elCategory?.value || '') !== '';
+    }
+
+    function toggleClearBtn() {
+        if (!btnClear) return;
+        btnClear.style.display = isFilterActive() ? '' : 'none';
+    }
+
+    function clampDate(el) {
+        if (!el) return;
+        const v = el.value;
+        if (v && v > todayStr) el.value = todayStr;
+    }
+
+    function applyHistoryFilter() {
+        clampDate(elDateFrom);
+        clampDate(elDateTo);
+        if (elDateFrom && elDateTo && elDateFrom.value && elDateTo.value && elDateFrom.value > elDateTo.value) {
+            elDateTo.value = elDateFrom.value;
+        }
+        toggleClearBtn();
+        const tab = getCurrentHistoryTab();
+        if (tab === 'import') loadImportHistory(1);
+        else loadExportHistory(1);
+    }
+
+    elSearch?.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(applyHistoryFilter, 400);
+    });
+
+    elDateFrom?.addEventListener('change', applyHistoryFilter);
+    elDateTo?.addEventListener('change', applyHistoryFilter);
+    elCategory?.addEventListener('change', applyHistoryFilter);
+
+    if (btnClear) {
+        btnClear.addEventListener('click', function() {
+            if (elSearch)   elSearch.value = '';
+            if (elDateFrom) elDateFrom.value = '';
+            if (elDateTo)   elDateTo.value = '';
+            if (elCategory) elCategory.value = '';
+            toggleClearBtn();
+            const tab = getCurrentHistoryTab();
+            if (tab === 'import') loadImportHistory(1);
+            else loadExportHistory(1);
+        });
+    }
+
+    toggleClearBtn();
+})();

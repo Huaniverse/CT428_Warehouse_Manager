@@ -1,0 +1,93 @@
+/* ===== HISTORY TAB BUTTONS =====
+   Lưu ý màu sắc: cân bằng độ bật giữa 2 nút
+      nhập:  green-700   #15803d  (màu đậm truyền thống)
+      xuất:  orange-600  #ea580c  (lên shade -600 thay vì -700 để mắt
+                                    người thấy "bằng bật" với xanh lá,
+                                    nhất quán với nút xuất ở tab kho)
+   Độ tương phản trắng:
+      green-700   → 7.6:1 (✅ AAA)
+      orange-600  → 3.3:1 (✅ WCAG AA cho large text, nút có icon + text
+                            kích thước lớn → thoả mãn)
+─────────────────────────────────────────────────────────────────────── */
+.history_tab_btn {
+    background: #ffffff !important;
+    color: #3d4555 !important;
+    border: 1.5px solid #e8ecf0 !important;
+    padding: 8px 16px !important;
+    min-height: 40px !important;
+    height: auto !important;
+    min-width: 140px !important;
+    justify-content: center !important;
+    opacity: 1 !important;
+    transition: all 0.2s ease;
+    box-shadow: none !important;
+}
+
+.history_tab_btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06) !important;
+    background: #f8fafc !important;
+}
+
+.history_tab_btn .material-symbols-outlined {
+    font-size: 20px;
+    transition: color 0.2s ease;
+}
+
+.history_tab_btn#hist_tab_import .material-symbols-outlined { color: #15803d; }
+.history_tab_btn#hist_tab_export .material-symbols-outlined { color: #ea580c; }
+
+.history_tab_btn:not(.active)#hist_tab_import {
+    color: #15803d !important;
+    border-color: rgba(21,128,61,0.55) !important;
+    background: rgba(22,163,74,0.07) !important;
+}
+.history_tab_btn:not(.active)#hist_tab_export {
+    color: #c2410c !important;
+    border-color: rgba(234,88,12,0.55) !important;
+    background: rgba(234,88,12,0.09) !important;
+}
+
+.history_tab_btn:not(.active)#hist_tab_import:hover {
+    border-color: rgba(21,128,61,0.9) !important;
+    background: rgba(22,163,74,0.11) !important;
+}
+.history_tab_btn:not(.active)#hist_tab_export:hover {
+    border-color: rgba(234,88,12,0.9) !important;
+    background: rgba(234,88,12,0.13) !important;
+}
+
+.history_tab_btn.active {
+    color: #ffffff !important;
+    border-color: transparent !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px -4px rgba(0,0,0,0.18) !important;
+    opacity: 1 !important;
+    font-weight: 500;
+}
+
+.history_tab_btn#hist_tab_import.active { background: #15803d !important; }
+.history_tab_btn#hist_tab_export.active { background: #ea580c !important; }
+
+.history_tab_btn.active .material-symbols-outlined { color: #ffffff !important; }
+
+/* ===== HISTORY CLEAR FILTER BUTTON ===== */
+#btnClearHistoryFilter {
+    background: #ffffff !important;
+    color: #ef4444 !important;
+    border: 1.5px solid rgba(239,68,68,0.4) !important;
+    padding: 8px 14px !important;
+    min-height: 40px !important;
+    height: auto !important;
+    transition: all 0.2s ease;
+}
+#btnClearHistoryFilter:hover {
+    background: rgba(239,68,68,0.06) !important;
+    border-color: rgba(239,68,68,0.7) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px -2px rgba(239,68,68,0.12) !important;
+}
+#btnClearHistoryFilter:active {
+    transform: translateY(0);
+}
+#btnClearHistoryFilter .material-symbols-outlined { color: #ef4444 !important; }

@@ -1,0 +1,183 @@
+/* ===== USER DETAIL MODAL ===== */
+.user_detail_info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+.detail_row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    min-height: 38px;
+}
+
+.user_detail_info {
+    --detail-label-min-w: 120px;
+    --detail-right-max: 340px;
+}
+
+.detail_label {
+    font-weight: 600;
+    color: #475569;
+    min-width: var(--detail-label-min-w, 120px);
+    flex-shrink: 0;
+}
+
+.detail_value {
+    color: #0f172a;
+}
+
+.detail_input,
+.detail_right {
+    flex: 1 1 auto;
+    max-width: var(--detail-right-max, 340px);
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.user_detail_info .form_input {
+    height: 38px;
+    min-height: 38px;
+    max-height: 38px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    letter-spacing: normal;
+    box-sizing: border-box;
+}
+
+.user_detail_info .form_input::placeholder {
+    font-family: inherit;
+    font-size: 14px;
+    letter-spacing: normal;
+    opacity: 1;
+}
+
+.user_detail_info .form_input_wrapper {
+    overflow: visible;
+    min-height: 38px;
+}
+
+.user_detail_info .form_input_wrapper select.form_input {
+    padding-right: 28px;
+}
+
+.detail_separator {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 18px 0;
+}
+
+.detail_row {
+    flex-wrap: nowrap;
+    overflow: visible;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ===== SCHEDULE ===== */
+.schedule_badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.schedule_badge.active {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+.schedule_badge.none {
+    background: #f1f5f9;
+    color: #94a3b8;
+    border: 1px solid #e2e8f0;
+}
+
+#detail_schedule_edit {
+    min-width: 0;
+}
+
+#detail_sched_time_fields,
+#detail_sched_time_fields > div {
+    min-width: 0;
+    flex-wrap: nowrap;
+}
+
+/* ===== SCHEDULE NOTE & DISABLED ===== */
+.sched_note {
+    background: #fef3c7;
+    border: 1px solid #fbbf24;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #92400e;
+}
+
+.sched_disabled {
+    opacity: 0.4;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+/* ===== TEMPORARY ACCESS ===== */
+.temp_duration_btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1.5px solid #e2e8f0;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.temp_duration_btn:hover {
+    border-color: #3b82f6;
+    color: #2563eb;
+    background: #eff6ff;
+}
+.temp_duration_btn.active {
+    border-color: #3b82f6;
+    background: #3b82f6;
+    color: #fff;
+}
+
+.schedule_badge.temp_active {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #dc2626;
+    animation: temp_pulse 2s ease-in-out infinite;
+}
+
+@keyframes temp_pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.65; }
+}
+
+.btn_icon.temp_grant {
+    color: #f59e0b;
+}
+.btn_icon.temp_grant:hover {
+    background: #fffbeb;
+    color: #d97706;
+}
+.btn_icon.temp_revoke {
+    color: #dc2626;
+}
+.btn_icon.temp_revoke:hover {
+    background: #fef2f2;
+    color: #b91c1c;
+}

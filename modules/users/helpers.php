@@ -109,6 +109,10 @@ function checkAccessSchedule(array $user): array
         $inRange = ($now >= $start || $now <= $end);
     }
     if (!$inRange) {
+        $tempUntil = $user['temp_access_until'] ?? null;
+        if ($tempUntil && $tempUntil > date('Y-m-d H:i:s')) {
+            return ['allowed' => true, 'message' => ''];
+        }
         $label = substr($start, 0, 5) . ' – ' . substr($end, 0, 5);
         return [
             'allowed' => false,

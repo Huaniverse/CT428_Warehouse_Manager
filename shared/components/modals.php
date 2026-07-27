@@ -50,17 +50,17 @@ $categories_list  = $categories_list  ?? [];
           </div>
         </div>
         <!-- Lịch truy cập khi tạo tài khoản -->
-        <div id="create_staff_note" style="display:none; background:#fef3c7; border:1px solid #fbbf24; border-radius:8px; padding:10px 14px; margin-bottom:12px; font-size:13px; color:#92400e;">
+        <div id="create_staff_note" class="sched_note hidden">
           <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">info</span>
           Nhân viên bắt buộc phải có lịch truy cập.
         </div>
-        <div class="form_group" id="create_sched_toggle_group" style="display:none;">
+        <div class="form_group sched_toggle_row hidden" id="create_sched_toggle_group">
           <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
             <input type="checkbox" id="create_has_schedule" style="width:18px; height:18px; cursor:pointer;">
             <span>Bật giới hạn giờ truy cập</span>
           </label>
         </div>
-        <div id="create_time_fields" style="display:none;">
+        <div id="create_time_fields">
           <div style="display:flex; gap:12px;">
             <div class="form_group" style="flex:1;">
               <label for="create_start">Giờ bắt đầu</label>
@@ -80,7 +80,6 @@ $categories_list  = $categories_list  ?? [];
         </div>
       </div>
       <div class="modal_footer">
-        <button class="btn_secondary" id="btnCancelModal">Hủy</button>
         <button class="btn_primary" id="btnSubmitCreateUser">
           <span class="material-symbols-outlined">save</span>
           Tạo tài khoản
@@ -146,7 +145,6 @@ $categories_list  = $categories_list  ?? [];
         </div>
       </div>
       <div class="modal_footer">
-        <button class="btn_secondary" id="btnCancelAddProductModal">Hủy</button>
         <button class="btn_primary" id="btnSubmitAddProduct">
           <span class="material-symbols-outlined">save</span>
           Thêm sản phẩm
@@ -186,7 +184,6 @@ $categories_list  = $categories_list  ?? [];
         </div>
       </div>
       <div class="modal_footer">
-        <button class="btn_secondary" id="btnCancelAddCategoryModal">Hủy</button>
         <button class="btn_primary" id="btnSubmitAddCategory" style="background-color: #8b5cf6;">
           <span class="material-symbols-outlined">save</span>
           Thêm danh mục
@@ -196,61 +193,145 @@ $categories_list  = $categories_list  ?? [];
   </div>
   <?php endif; ?>
 
-  <!-- Modal sửa sản phẩm -->
+  <!-- Modal chi tiết sản phẩm -->
   <?php if ($is_admin || $is_store_manager): ?>
-  <div class="modal_overlay" id="editProductModal">
-    <div class="modal_card">
+  <div class="modal_overlay" id="productDetailModal">
+    <div class="modal_card" style="width: 800px; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal_header">
         <h3>
-          <span class="material-symbols-outlined">edit</span>
-          Sửa sản phẩm
+          <span class="material-symbols-outlined">inventory_2</span>
+          <span id="productDetailTitle">Chi tiết sản phẩm</span>
         </h3>
-        <button class="modal_close" id="btnCloseEditProductModal" aria-label="Đóng modal">
+        <button class="modal_close" id="btnCloseProductDetailModal" aria-label="Đóng modal">
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
-      <div class="modal_body">
-        <input type="hidden" id="edit_prod_id">
-        <div class="form_group">
-          <label for="edit_prod_name">Tên sản phẩm</label>
-          <div class="form_input_wrapper">
-            <span class="material-symbols-outlined form_icon">shopping_bag</span>
-            <input type="text" id="edit_prod_name" class="form_input">
+      <div class="modal_body" style="overflow-y: auto; flex: 1; padding: 20px 24px 16px;">
+        <input type="hidden" id="detail_prod_id">
+
+        <!-- Thông tin sản phẩm (hiển thị) -->
+        <div id="productInfoDisplay">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span id="detail_prod_status_badge" class="badge in_stock"></span>
+              <span id="detail_prod_stock_info" style="font-size:13px; color:#64748b;"></span>
+            </div>
+            <button class="btn_primary" id="btnToggleProdEditMode" style="padding:6px 14px; font-size:13px; height:36px; background:#3b82f6;">
+              <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+              Chỉnh sửa
+            </button>
+          </div>
+          <div class="product_detail_grid">
+            <div class="detail_field">
+              <span class="detail_field_label">Mã sản phẩm</span>
+              <span class="detail_field_value" id="detail_prod_id_display"></span>
+            </div>
+            <div class="detail_field">
+              <span class="detail_field_label">Tên sản phẩm</span>
+              <span class="detail_field_value" id="detail_prod_name_display"></span>
+            </div>
+            <div class="detail_field">
+              <span class="detail_field_label">Danh mục</span>
+              <span class="detail_field_value" id="detail_prod_category_display"></span>
+            </div>
+            <div class="detail_field">
+              <span class="detail_field_label">Giá bán</span>
+              <span class="detail_field_value product_price" id="detail_prod_price_display"></span>
+            </div>
+            <div class="detail_field detail_field_full">
+              <span class="detail_field_label">Mô tả</span>
+              <span class="detail_field_value" id="detail_prod_desc_display" style="white-space:pre-wrap;"></span>
+            </div>
           </div>
         </div>
-        <div class="form_group">
-          <label for="edit_prod_category">Danh mục</label>
-          <div class="form_input_wrapper">
-            <span class="material-symbols-outlined form_icon">category</span>
-            <select id="edit_prod_category" class="form_input" style="cursor:pointer;">
-              <option value="">-- Chọn danh mục --</option>
-              <?php foreach ($categories_list as $row): ?>
-                <option value="<?php echo htmlspecialchars($row['MaDM']); ?>"><?php echo htmlspecialchars($row['TenDM']); ?></option>
-              <?php endforeach; ?>
-            </select>
+
+        <!-- Form chỉnh sửa sản phẩm (ẩn mặc định) -->
+        <div id="productInfoEdit" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <span style="font-weight:600; font-size:15px; color:#0f172a;">Chỉnh sửa thông tin</span>
+            <button class="btn_secondary" id="btnCancelProdEdit" style="padding:6px 14px; font-size:13px; height:36px;">
+              <span class="material-symbols-outlined" style="font-size:18px;">close</span>
+              Hủy
+            </button>
+          </div>
+          <div class="form_group">
+            <label for="edit_prod_name">Tên sản phẩm</label>
+            <div class="form_input_wrapper">
+              <span class="material-symbols-outlined form_icon">shopping_bag</span>
+              <input type="text" id="edit_prod_name" class="form_input">
+            </div>
+          </div>
+          <div class="form_group">
+            <label for="edit_prod_category">Danh mục</label>
+            <div class="form_input_wrapper">
+              <span class="material-symbols-outlined form_icon">category</span>
+              <select id="edit_prod_category" class="form_input" style="cursor:pointer;">
+                <option value="">-- Chọn danh mục --</option>
+                <?php foreach ($categories_list as $row): ?>
+                  <option value="<?php echo htmlspecialchars($row['MaDM']); ?>"><?php echo htmlspecialchars($row['TenDM']); ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+          </div>
+          <div class="form_group">
+            <label for="edit_prod_price">Giá bán (VNĐ)</label>
+            <div class="form_input_wrapper">
+              <span class="material-symbols-outlined form_icon">payments</span>
+              <input type="number" id="edit_prod_price" class="form_input" min="0">
+            </div>
+          </div>
+          <div class="form_group">
+            <label for="edit_prod_desc">Mô tả sản phẩm</label>
+            <div class="form_input_wrapper" style="align-items: flex-start; padding: 6px 12px;">
+              <span class="material-symbols-outlined form_icon" style="margin-top:6px;">description</span>
+              <textarea id="edit_prod_desc" class="form_input" rows="3" style="resize:vertical; border:none; outline:none; background:transparent; width:100%; font-family:inherit;"></textarea>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:16px;">
+            <button class="btn_secondary" id="btnCancelProdEditBottom" style="padding:6px 14px; font-size:13px; height:36px;">Hủy</button>
+            <button class="btn_primary" id="btnSubmitEditProduct" style="padding:6px 14px; font-size:13px; height:36px; background:#16a34a;">
+              <span class="material-symbols-outlined" style="font-size:18px;">save</span>
+              Lưu thay đổi
+            </button>
           </div>
         </div>
-        <div class="form_group">
-          <label for="edit_prod_price">Giá bán (VNĐ)</label>
-          <div class="form_input_wrapper">
-            <span class="material-symbols-outlined form_icon">payments</span>
-            <input type="number" id="edit_prod_price" class="form_input" min="0">
+
+        <!-- Lịch sử nhập/xuất kho -->
+        <div style="margin-top:24px; border-top:1px solid #e8ecf0; padding-top:20px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+            <span class="material-symbols-outlined" style="font-size:20px; color:#475569;">history</span>
+            <span style="font-weight:600; font-size:15px; color:#0f172a;">Lịch sử nhập/xuất kho</span>
+          </div>
+          <div style="display:flex; gap:8px; margin-bottom:14px;">
+            <button class="filter_button product_history_tab active" id="prod_hist_tab_import" onclick="switchProductHistoryTab('import')">
+              <span class="material-symbols-outlined" style="font-size:16px;">download</span>
+              <span>Nhập kho</span>
+            </button>
+            <button class="filter_button product_history_tab" id="prod_hist_tab_export" onclick="switchProductHistoryTab('export')">
+              <span class="material-symbols-outlined" style="font-size:16px;">upload</span>
+              <span>Xuất kho</span>
+            </button>
+          </div>
+          <div id="productHistoryContent">
+            <div class="table_container" style="border-radius:8px;">
+              <table class="product_table" style="margin:0; font-size:13px;">
+                <thead>
+                  <tr>
+                    <th style="width:160px;">Mã phiếu</th>
+                    <th style="width:80px;">Số lượng</th>
+                    <th>Đơn giá</th>
+                    <th>Thành tiền</th>
+                    <th>Người tạo</th>
+                    <th style="width:140px;">Ngày tạo</th>
+                  </tr>
+                </thead>
+                <tbody id="productHistoryBody">
+                  <tr><td colspan="6" class="table_loading">Chọn sản phẩm để xem lịch sử.</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-        <div class="form_group">
-          <label for="edit_prod_desc">Mô tả sản phẩm</label>
-          <div class="form_input_wrapper" style="align-items: flex-start; padding: 6px 12px;">
-            <span class="material-symbols-outlined form_icon" style="margin-top:6px;">description</span>
-            <textarea id="edit_prod_desc" class="form_input" rows="3" style="resize:vertical; border:none; outline:none; background:transparent; width:100%; font-family:inherit;"></textarea>
-          </div>
-        </div>
-      </div>
-      <div class="modal_footer">
-        <button class="btn_secondary" id="btnCancelEditProductModal">Hủy</button>
-        <button class="btn_primary" id="btnSubmitEditProduct">
-          <span class="material-symbols-outlined">save</span>
-          Lưu thay đổi
-        </button>
       </div>
     </div>
   </div>
@@ -259,7 +340,7 @@ $categories_list  = $categories_list  ?? [];
   <!-- Modal nhập kho (Batch) -->
   <?php if (canImportExport()): ?>
   <div class="modal_overlay" id="importStockModal">
-    <div class="modal_card" style="width: 680px; max-height: 90vh; display: flex; flex-direction: column;">
+    <div class="modal_card" style="width: 780px; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal_header">
         <h3>
           <span class="material-symbols-outlined" style="color:#16a34a;">download</span>
@@ -333,7 +414,6 @@ $categories_list  = $categories_list  ?? [];
         </div>
       </div>
       <div class="modal_footer">
-        <button class="btn_secondary" id="btnCancelImportModal">Hủy</button>
         <button class="btn_primary" id="btnSubmitImport" style="background-color: #16a34a;" disabled>
           <span class="material-symbols-outlined">save</span>
           Xác nhận nhập kho (<span id="importBatchCount">0</span> sản phẩm)
@@ -346,7 +426,7 @@ $categories_list  = $categories_list  ?? [];
   <!-- Modal xuất kho -->
   <?php if (canImportExport()): ?>
   <div class="modal_overlay" id="exportStockModal">
-    <div class="modal_card" style="width: 680px; max-height: 90vh; display: flex; flex-direction: column;">
+    <div class="modal_card" style="width: 780px; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal_header">
         <h3>
           <span class="material-symbols-outlined" style="color:#ea580c;">upload</span>
@@ -423,7 +503,6 @@ $categories_list  = $categories_list  ?? [];
         </div>
       </div>
       <div class="modal_footer">
-        <button class="btn_secondary" id="btnCancelExportModal">Hủy</button>
         <button class="btn_primary" id="btnSubmitExport" style="background-color: #ea580c;" disabled>
           <span class="material-symbols-outlined">save</span>
           Xác nhận xuất kho (<span id="exportBatchCount">0</span> sản phẩm)
@@ -459,7 +538,6 @@ $categories_list  = $categories_list  ?? [];
         </div>
       </div>
       <div class="modal_footer">
-        <button class="btn_secondary" id="btnCancelPermissionsModal">Hủy</button>
         <button class="btn_primary" id="btnSubmitPermissions">
           <span class="material-symbols-outlined">save</span>
           Lưu quyền
@@ -518,10 +596,49 @@ $categories_list  = $categories_list  ?? [];
         </div>
       </div>
       <div class="modal_footer">
-        <button class="btn_secondary" id="btnCancelScheduleModal">Hủy</button>
         <button class="btn_primary" id="btnSubmitSchedule">
           <span class="material-symbols-outlined">save</span>
           Lưu lịch
+        </button>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <!-- Modal cấp quyền truy cập tạm thời -->
+  <?php if ($is_admin || $is_store_manager): ?>
+  <div class="modal_overlay" id="tempAccessModal">
+    <div class="modal_card" style="width: 380px;">
+      <div class="modal_header">
+        <h3>
+          <span class="material-symbols-outlined">timer</span>
+          Cấp quyền tạm thời
+        </h3>
+        <button class="modal_close" id="btnCloseTempAccessModal" aria-label="Đóng modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal_body">
+        <input type="hidden" id="temp_user_id">
+        <p style="font-size:14px; color:#475569; margin-bottom:16px;">
+          Cho phép <strong id="temp_user_name"></strong> truy cập ngoài lịch trong:
+        </p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+          <button class="temp_duration_btn active" data-minutes="5">5 phút</button>
+          <button class="temp_duration_btn" data-minutes="10">10 phút</button>
+          <button class="temp_duration_btn" data-minutes="15">15 phút</button>
+          <button class="temp_duration_btn" data-minutes="30">30 phút</button>
+          <button class="temp_duration_btn" data-minutes="60">1 giờ</button>
+        </div>
+        <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:10px 14px; font-size:13px; color:#0369a1;">
+          <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">info</span>
+          Sau khi hết giờ, tài khoản sẽ tự động khóa theo lịch trình.
+        </div>
+      </div>
+      <div class="modal_footer">
+        <button class="btn_primary" id="btnSubmitTempAccess">
+          <span class="material-symbols-outlined">timer</span>
+          Cấp quyền
         </button>
       </div>
     </div>
@@ -619,7 +736,6 @@ $categories_list  = $categories_list  ?? [];
         </div>
       </div>
       <div class="modal_footer">
-        <button class="btn_secondary" id="btnCancelUserDetail">Đóng</button>
         <button class="btn_primary" id="btnSaveUserInfo">
           <span class="material-symbols-outlined">save</span>
           Lưu thay đổi
@@ -632,7 +748,7 @@ $categories_list  = $categories_list  ?? [];
   <!-- Modal chi tiết phiếu nhập/xuất -->
   <?php if (canImportExport()): ?>
   <div class="modal_overlay" id="receiptDetailModal">
-    <div class="modal_card" style="width: 640px; max-height: 90vh; display: flex; flex-direction: column;">
+    <div class="modal_card" style="width: 800px; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal_header">
         <h3>
           <span class="material-symbols-outlined">receipt_long</span>
@@ -645,9 +761,6 @@ $categories_list  = $categories_list  ?? [];
       <div class="modal_body" style="overflow-y: auto; flex: 1;">
         <div id="receiptDetailInfo" style="margin-bottom: 16px;"></div>
         <div id="receiptDetailItems"></div>
-      </div>
-      <div class="modal_footer">
-        <button class="btn_secondary" id="btnCloseReceiptDetailModalFooter">Đóng</button>
       </div>
     </div>
   </div>
