@@ -7,7 +7,7 @@ requireAdminOrStoreManager();
 
 header('Content-Type: application/json; charset=utf-8');
 
-$action = $_REQUEST['action'] ?? '';
+$action = ($_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST['action'] : $_GET['action']) ?? '';
 
 switch ($action) {
 
@@ -54,6 +54,14 @@ switch ($action) {
         }
         if (!preg_match('/^[a-zA-Z0-9_]{3,50}$/', $new_username)) {
             echo json_encode(['success' => false, 'message' => 'Tên đăng nhập chỉ được gồm chữ cái, số, dấu gạch dưới (3–50 ký tự).']);
+            exit;
+        }
+        if (mb_strlen($new_fullname) > 100) {
+            echo json_encode(['success' => false, 'message' => 'Họ và tên không được quá 100 ký tự.']);
+            exit;
+        }
+        if (strlen($new_password) > 255) {
+            echo json_encode(['success' => false, 'message' => 'Mật khẩu không được quá 255 ký tự.']);
             exit;
         }
         if (strlen($new_password) < 6) {
@@ -399,6 +407,10 @@ switch ($action) {
             echo json_encode(['success' => false, 'message' => 'Mật khẩu phải có ít nhất 6 ký tự.']);
             exit;
         }
+        if (strlen($new_password) > 255) {
+            echo json_encode(['success' => false, 'message' => 'Mật khẩu không được quá 255 ký tự.']);
+            exit;
+        }
         if ($new_password !== $confirm_pass) {
             echo json_encode(['success' => false, 'message' => 'Mật khẩu xác nhận không khớp.']);
             exit;
@@ -449,6 +461,10 @@ switch ($action) {
         }
         if ($new_fullname === '') {
             echo json_encode(['success' => false, 'message' => 'Họ và tên không được để trống.']);
+            exit;
+        }
+        if (mb_strlen($new_fullname) > 100) {
+            echo json_encode(['success' => false, 'message' => 'Họ và tên không được quá 100 ký tự.']);
             exit;
         }
 

@@ -12,6 +12,12 @@ function validateProductInput(mysqli $conn, array $post, bool $isEdit = false): 
     if ($ten_sp === '') {
         return ['success' => false, 'message' => 'Tên sản phẩm không được để trống.'];
     }
+    if (mb_strlen($ten_sp) > 200) {
+        return ['success' => false, 'message' => 'Tên sản phẩm không được quá 200 ký tự.'];
+    }
+    if (mb_strlen($mota) > 1000) {
+        return ['success' => false, 'message' => 'Mô tả sản phẩm không được quá 1000 ký tự.'];
+    }
 
     if ($danhmuc === '') {
         return ['success' => false, 'message' => 'Vui lòng chọn danh mục sản phẩm.'];

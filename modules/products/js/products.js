@@ -313,33 +313,23 @@ if (prodDetailModal) {
             showToast('Vui lòng nhập đầy đủ thông tin.', 'error'); return;
         }
 
-        this.disabled = true;
-        this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
-
-        apiFetch('modules/products/api/edit_product.php?action=update', { method: 'POST', body: fd })
-            .then(data => {
-                this.disabled = false;
-                this.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">save</span> Lưu thay đổi';
-                showToast(data.message, data.success ? 'success' : 'error');
-                if (data.success) {
-                    fetchFilteredProducts(productCurrentPage);
-                    const maSp = document.getElementById('detail_prod_id').value;
-                    apiFetch('modules/products/api/edit_product.php?action=detail&id=' + maSp)
-                        .then(d => {
-                            if (d.success) {
-                                currentDetailProduct = d;
-                                renderProductInfo(d.product);
-                                renderProductHistory(d);
-                            }
-                        });
-                    cancelProdEdit();
-                }
-            })
-            .catch(() => {
-                this.disabled = false;
-                this.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">save</span> Lưu thay đổi';
-                showToast('Lỗi kết nối máy chủ.', 'error');
-            });
+        submitForm(this, 'modules/products/api/edit_product.php?action=update', fd, {
+            loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...',
+            successLabel: '<span class="material-symbols-outlined" style="font-size:18px;">save</span> Lưu thay đổi',
+            onSuccess: () => {
+                fetchFilteredProducts(productCurrentPage);
+                const maSp = document.getElementById('detail_prod_id').value;
+                apiFetch('modules/products/api/edit_product.php?action=detail&id=' + maSp)
+                    .then(d => {
+                        if (d.success) {
+                            currentDetailProduct = d;
+                            renderProductInfo(d.product);
+                            renderProductHistory(d);
+                        }
+                    });
+                cancelProdEdit();
+            }
+        });
     });
 }
 
@@ -407,24 +397,11 @@ if (btnSubmitProd) {
         fd.append('so_luong', quantity);
         fd.append('mota', desc);
 
-        btnSubmitProd.disabled = true;
-        btnSubmitProd.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
-
-        apiFetch('modules/products/api/add_product.php', { method: 'POST', body: fd })
-            .then(data => {
-                btnSubmitProd.disabled = false;
-                btnSubmitProd.innerHTML = '<span class="material-symbols-outlined">save</span> Thêm sản phẩm';
-                showToast(data.message, data.success ? 'success' : 'error');
-                if (data.success) {
-                    closeAddProdModal();
-                    fetchFilteredProducts(productCurrentPage);
-                }
-            })
-            .catch(() => {
-                btnSubmitProd.disabled = false;
-                btnSubmitProd.innerHTML = '<span class="material-symbols-outlined">save</span> Thêm sản phẩm';
-                showToast('Lỗi kết nối máy chủ.', 'error');
-            });
+        submitForm(this, 'modules/products/api/add_product.php', fd, {
+            loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...',
+            successLabel: '<span class="material-symbols-outlined">save</span> Thêm sản phẩm',
+            onSuccess: () => { closeAddProdModal(); fetchFilteredProducts(productCurrentPage); }
+        });
     });
 }
 
@@ -505,23 +482,10 @@ if (btnSubmitCat) {
         fd.append('ma_dm', code);
         fd.append('ten_dm', name);
 
-        btnSubmitCat.disabled = true;
-        btnSubmitCat.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
-
-        apiFetch('modules/products/api/add_category.php', { method: 'POST', body: fd })
-            .then(data => {
-                btnSubmitCat.disabled = false;
-                btnSubmitCat.innerHTML = '<span class="material-symbols-outlined">save</span> Thêm danh mục';
-                showToast(data.message, data.success ? 'success' : 'error');
-                if (data.success) {
-                    closeAddCatModal();
-                    updateCategoryDropdowns(data.categories);
-                }
-            })
-            .catch(() => {
-                btnSubmitCat.disabled = false;
-                btnSubmitCat.innerHTML = '<span class="material-symbols-outlined">save</span> Thêm danh mục';
-                showToast('Lỗi kết nối máy chủ.', 'error');
-            });
+        submitForm(this, 'modules/products/api/add_category.php', fd, {
+            loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...',
+            successLabel: '<span class="material-symbols-outlined">save</span> Thêm danh mục',
+            onSuccess: (data) => { closeAddCatModal(); updateCategoryDropdowns(data.categories); }
+        });
     });
 }

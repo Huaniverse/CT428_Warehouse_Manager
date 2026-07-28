@@ -115,9 +115,7 @@ $categories_list  = $categories_list  ?? [];
             <span class="material-symbols-outlined form_icon">category</span>
             <select id="new_prod_category" class="form_input" style="cursor:pointer;">
               <option value="">-- Chọn danh mục --</option>
-              <?php foreach ($categories_list as $row): ?>
-                <option value="<?php echo htmlspecialchars($row['MaDM']); ?>"><?php echo htmlspecialchars($row['TenDM']); ?></option>
-              <?php endforeach; ?>
+              <?php echo renderCategoryOptions($categories_list); ?>
             </select>
           </div>
         </div>
@@ -276,9 +274,7 @@ $categories_list  = $categories_list  ?? [];
               <span class="material-symbols-outlined form_icon">category</span>
               <select id="edit_prod_category" class="form_input" style="cursor:pointer;">
                 <option value="">-- Chọn danh mục --</option>
-                <?php foreach ($categories_list as $row): ?>
-                  <option value="<?php echo htmlspecialchars($row['MaDM']); ?>"><?php echo htmlspecialchars($row['TenDM']); ?></option>
-                <?php endforeach; ?>
+                <?php echo renderCategoryOptions($categories_list); ?>
               </select>
             </div>
           </div>

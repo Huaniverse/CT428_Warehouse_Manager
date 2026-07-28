@@ -47,9 +47,7 @@
             <div class="input_group">
               <select id="hist_category">
                 <option value="">Tất cả danh mục</option>
-                <?php foreach ($categories_list as $cat): ?>
-                  <option value="<?php echo htmlspecialchars($cat['MaDM'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($cat['TenDM'], ENT_QUOTES, 'UTF-8'); ?></option>
-                <?php endforeach; ?>
+                <?php echo renderCategoryOptions($categories_list); ?>
               </select>
             </div>
           </div>

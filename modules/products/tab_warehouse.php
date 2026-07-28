@@ -21,9 +21,7 @@
             <div class="input_group">
               <select name="category" id="select_category">
                 <option value="">Tất cả danh mục</option>
-                <?php foreach ($categories_list as $row): ?>
-                  <option value="<?php echo htmlspecialchars($row['MaDM']); ?>"><?php echo htmlspecialchars($row['TenDM']); ?></option>
-                <?php endforeach; ?>
+                <?php echo renderCategoryOptions($categories_list); ?>
               </select>
             </div>
           </div>

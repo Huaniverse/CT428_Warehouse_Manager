@@ -1,49 +1,66 @@
-// ─── Import Stock Modal (Batch) ─────────────────────────────────────────
-const importModal = document.getElementById('importStockModal');
-let importBatchItems = [];
+// ─── Import/Export Stock Modal (Batch) ─────────────────────────────────────
+let importModal, exportModal;
+let importBatchItems = [], exportBatchItems = [];
 
-function renderImportBatchTable() {
-    const tbody = document.getElementById('importBatchBody');
-    const wrapper = document.getElementById('importBatchTableWrapper');
-    const countSpan = document.getElementById('importBatchCount');
-    const submitBtn = document.getElementById('btnSubmitImport');
+// ─── Shared: Batch table render ────────────────────────────────────────────
+function getBatchConfig(type) {
+    return type === 'import'
+        ? { items: importBatchItems, tbodyId: 'importBatchBody', wrapperId: 'importBatchTableWrapper', countId: 'importBatchCount', submitId: 'btnSubmitImport', removeFn: 'removeImportBatchItem', icon: 'add_circle', color: '#16a34a' }
+        : { items: exportBatchItems, tbodyId: 'exportBatchBody', wrapperId: 'exportBatchTableWrapper', countId: 'exportBatchCount', submitId: 'btnSubmitExport', removeFn: 'removeExportBatchItem', icon: 'remove_circle', color: '#ea580c' };
+}
+
+function renderBatchTable(type) {
+    const cfg = getBatchConfig(type);
+    const tbody = document.getElementById(cfg.tbodyId);
+    const wrapper = document.getElementById(cfg.wrapperId);
+    const countSpan = document.getElementById(cfg.countId);
+    const submitBtn = document.getElementById(cfg.submitId);
     if (!tbody || !wrapper) return;
 
-    countSpan.textContent = importBatchItems.length;
-    submitBtn.disabled = importBatchItems.length === 0;
+    countSpan.textContent = cfg.items.length;
+    submitBtn.disabled = cfg.items.length === 0;
 
-    if (importBatchItems.length === 0) {
+    if (cfg.items.length === 0) {
         wrapper.style.display = 'none';
         tbody.innerHTML = '';
         return;
     }
     wrapper.style.display = '';
-    tbody.innerHTML = importBatchItems.map((item, idx) => `<tr>
+    tbody.innerHTML = cfg.items.map((item, idx) => `<tr>
         <td style="text-align:center; color:#64748b;">${idx + 1}</td>
         <td><span class="product_name">${escapeHtml(item.productName)}</span></td>
         <td style="text-align:center;"><strong>${number_format(item.quantity)}</strong></td>
         <td style="max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#64748b;" title="${escapeHtml(item.note)}">${escapeHtml(item.note || '—')}</td>
         <td style="text-align:center;">
-            <button onclick="removeImportBatchItem(${idx})" style="background:none; border:none; cursor:pointer; color:#ef4444; padding:4px;" title="Xóa khỏi phiếu">
+            <button onclick="${cfg.removeFn}(${idx})" style="background:none; border:none; cursor:pointer; color:#ef4444; padding:4px;" title="Xóa khỏi phiếu">
                 <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
             </button>
         </td>
     </tr>`).join('');
 }
 
-window.removeImportBatchItem = function(idx) {
-    importBatchItems.splice(idx, 1);
-    renderImportBatchTable();
-};
+function resetBatchForm(type) {
+    const prefix = type === 'import' ? 'import' : 'export';
+    document.getElementById(prefix + '_quantity').value = '';
+    document.getElementById(prefix + '_note').value = '';
+    document.getElementById(prefix + '_product').value = '';
+    document.getElementById(prefix + '_product_id').value = '';
+    document.getElementById(prefix + '_combobox_clear').style.display = 'none';
+}
 
+window.removeImportBatchItem = function(idx) { importBatchItems.splice(idx, 1); renderBatchTable('import'); };
+window.removeExportBatchItem = function(idx) { exportBatchItems.splice(idx, 1); renderBatchTable('export'); };
+
+// ─── Import Modal ──────────────────────────────────────────────────────────
+importModal = document.getElementById('importStockModal');
 if (importModal) {
     document.getElementById('btn_import_stock')?.addEventListener('click', () => {
         loadProductDropdown('import_product');
         document.getElementById('import_quantity').value = '';
         document.getElementById('import_note').value = '';
         importBatchItems = [];
-        renderImportBatchTable();
-        renderImportListSuggestions();
+        renderBatchTable('import');
+        renderListSuggestions('import');
         importModal.classList.add('open');
     });
     document.getElementById('btnCloseImportModal')?.addEventListener('click', () => importModal.classList.remove('open'));
@@ -68,12 +85,8 @@ if (importModal) {
             showToast(`Đã thêm "${productName}" vào phiếu.`, 'success');
         }
 
-        renderImportBatchTable();
-        document.getElementById('import_quantity').value = '';
-        document.getElementById('import_note').value = '';
-        document.getElementById('import_product').value = '';
-        document.getElementById('import_product_id').value = '';
-        document.getElementById('import_combobox_clear').style.display = 'none';
+        renderBatchTable('import');
+        resetBatchForm('import');
     });
 
     document.getElementById('btnSubmitImport')?.addEventListener('click', function() {
@@ -83,72 +96,34 @@ if (importModal) {
 
         const fd = new FormData();
         fd.append('items', JSON.stringify(importBatchItems.map(item => ({
-            san_pham: item.productId,
-            so_luong: item.quantity,
-            ghi_chu: item.note
+            san_pham: item.productId, so_luong: item.quantity, ghi_chu: item.note
         }))));
-
+        const originalLabel = this.innerHTML;
         this.disabled = true;
         this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang xử lý...';
 
         apiFetch('modules/stock/api/import_stock.php?action=create_batch', { method: 'POST', body: fd })
             .then(data => {
                 this.disabled = false;
-                this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận nhập kho (<span id="importBatchCount">' + importBatchItems.length + '</span> sản phẩm)';
+                this.innerHTML = originalLabel;
                 showToast(data.message, data.success ? 'success' : 'error');
                 if (data.success) {
                     importBatchItems = [];
-                    renderImportBatchTable();
+                    renderBatchTable('import');
                     importModal.classList.remove('open');
                     fetchFilteredProducts();
                 }
             })
             .catch(() => {
                 this.disabled = false;
-                this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận nhập kho (<span id="importBatchCount">' + importBatchItems.length + '</span> sản phẩm)';
+                this.innerHTML = originalLabel;
                 showToast('Lỗi kết nối máy chủ.', 'error');
             });
     });
 }
 
-// ─── Export Stock Modal (Batch) ──────────────────────────────────────────
-const exportModal = document.getElementById('exportStockModal');
-let exportBatchItems = [];
-
-function renderExportBatchTable() {
-    const tbody = document.getElementById('exportBatchBody');
-    const wrapper = document.getElementById('exportBatchTableWrapper');
-    const countSpan = document.getElementById('exportBatchCount');
-    const submitBtn = document.getElementById('btnSubmitExport');
-    if (!tbody || !wrapper) return;
-
-    countSpan.textContent = exportBatchItems.length;
-    submitBtn.disabled = exportBatchItems.length === 0;
-
-    if (exportBatchItems.length === 0) {
-        wrapper.style.display = 'none';
-        tbody.innerHTML = '';
-        return;
-    }
-    wrapper.style.display = '';
-    tbody.innerHTML = exportBatchItems.map((item, idx) => `<tr>
-        <td style="text-align:center; color:#64748b;">${idx + 1}</td>
-        <td><span class="product_name">${escapeHtml(item.productName)}</span></td>
-        <td style="text-align:center;"><strong>${number_format(item.quantity)}</strong></td>
-        <td style="max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#64748b;" title="${escapeHtml(item.note)}">${escapeHtml(item.note || '—')}</td>
-        <td style="text-align:center;">
-            <button onclick="removeExportBatchItem(${idx})" style="background:none; border:none; cursor:pointer; color:#ef4444; padding:4px;" title="Xóa khỏi phiếu">
-                <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
-            </button>
-        </td>
-    </tr>`).join('');
-}
-
-window.removeExportBatchItem = function(idx) {
-    exportBatchItems.splice(idx, 1);
-    renderExportBatchTable();
-};
-
+// ─── Export Modal ───────────────────────────────────────────────────────────
+exportModal = document.getElementById('exportStockModal');
 if (exportModal) {
     document.getElementById('btn_export_stock')?.addEventListener('click', () => {
         loadProductDropdown('export_product');
@@ -156,8 +131,8 @@ if (exportModal) {
         document.getElementById('export_note').value = '';
         document.getElementById('export_stock_info').style.display = 'none';
         exportBatchItems = [];
-        renderExportBatchTable();
-        renderExportListSuggestions();
+        renderBatchTable('export');
+        renderListSuggestions('export');
         exportModal.classList.add('open');
     });
     document.getElementById('btnCloseExportModal')?.addEventListener('click', () => exportModal.classList.remove('open'));
@@ -190,10 +165,7 @@ if (exportModal) {
 
         let totalQuantity = quantity;
         const existing = exportBatchItems.find(item => item.productId === productId);
-        if (existing) {
-            totalQuantity += existing.quantity;
-        }
-
+        if (existing) totalQuantity += existing.quantity;
         if (totalQuantity > currentStock) {
             showToast(`Số lượng yêu cầu (${totalQuantity}) vượt quá tồn kho hiện tại (${currentStock}).`, 'error');
             return;
@@ -208,12 +180,8 @@ if (exportModal) {
             showToast(`Đã thêm "${productName}" vào phiếu.`, 'success');
         }
 
-        renderExportBatchTable();
-        document.getElementById('export_quantity').value = '';
-        document.getElementById('export_note').value = '';
-        document.getElementById('export_product').value = '';
-        document.getElementById('export_product_id').value = '';
-        document.getElementById('export_combobox_clear').style.display = 'none';
+        renderBatchTable('export');
+        resetBatchForm('export');
         document.getElementById('export_stock_info').style.display = 'none';
     });
 
@@ -224,35 +192,33 @@ if (exportModal) {
 
         const fd = new FormData();
         fd.append('items', JSON.stringify(exportBatchItems.map(item => ({
-            san_pham: item.productId,
-            so_luong: item.quantity,
-            ghi_chu: item.note
+            san_pham: item.productId, so_luong: item.quantity, ghi_chu: item.note
         }))));
-
+        const originalLabel = this.innerHTML;
         this.disabled = true;
         this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang xử lý...';
 
         apiFetch('modules/stock/api/export_stock.php?action=create_batch', { method: 'POST', body: fd })
             .then(data => {
                 this.disabled = false;
-                this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận xuất kho (<span id="exportBatchCount">' + exportBatchItems.length + '</span> sản phẩm)';
+                this.innerHTML = originalLabel;
                 showToast(data.message, data.success ? 'success' : 'error');
                 if (data.success) {
                     exportBatchItems = [];
-                    renderExportBatchTable();
+                    renderBatchTable('export');
                     exportModal.classList.remove('open');
                     fetchFilteredProducts();
                 }
             })
             .catch(() => {
                 this.disabled = false;
-                this.innerHTML = '<span class="material-symbols-outlined">save</span> Xác nhận xuất kho (<span id="exportBatchCount">' + exportBatchItems.length + '</span> sản phẩm)';
+                this.innerHTML = originalLabel;
                 showToast('Lỗi kết nối máy chủ.', 'error');
             });
     });
 }
 
-// ─── Import History (tab-based) ──────────────────────────────────────────
+// ─── Shared: History filter params ─────────────────────────────────────────
 var __priceFilterDirty = false;
 function getHistoryFilterParams() {
     const search   = (document.getElementById('hist_search_product')?.value || '').trim();
@@ -269,103 +235,64 @@ function getHistoryFilterParams() {
     if (category) params.set('category', category);
     if (userId)   params.set('user_id', userId);
     if (elPriceMin && elPriceMax && __priceFilterDirty) {
-        const minVal = Number(elPriceMin.value) || 0;
-        const maxVal = Number(elPriceMax.value) || 0;
-        params.set('price_min', minVal);
-        params.set('price_max', maxVal);
+        params.set('price_min', Number(elPriceMin.value) || 0);
+        params.set('price_max', Number(elPriceMax.value) || 0);
     }
     return params.toString();
 }
 
-function loadImportHistory(page = 1) {
-    const tbody = document.getElementById('importHistoryBody');
+// ─── Shared: Load history ──────────────────────────────────────────────────
+function loadHistory(type, page = 1) {
+    const cfg = type === 'import'
+        ? { tbodyId: 'importHistoryBody', paginationId: 'importHistoryPagination', endpoint: 'import_stock.php', color: '#16a34a', emptyMsg: 'Chưa có phiếu nhập kho nào.' }
+        : { tbodyId: 'exportHistoryBody', paginationId: 'exportHistoryPagination', endpoint: 'export_stock.php', color: '#ea580c', emptyMsg: 'Chưa có phiếu xuất kho nào.' };
+    const tbody = document.getElementById(cfg.tbodyId);
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Đang tải...</td></tr>';
 
     const filterQS = getHistoryFilterParams();
     const sep = filterQS ? '&' : '';
-    apiFetch('modules/stock/api/import_stock.php?action=list&page=' + page + sep + filterQS)
+    apiFetch('modules/stock/api/' + cfg.endpoint + '?action=list&page=' + page + sep + filterQS)
         .then(data => {
             if (!data.success || data.records.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6"><div class="empty_state"><span class="material-symbols-outlined">inventory_2</span><p>Chưa có phiếu nhập kho nào.</p></div></td></tr>';
-                document.getElementById('importHistoryPagination').innerHTML = '';
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty_state"><span class="material-symbols-outlined">inventory_2</span><p>${cfg.emptyMsg}</p></div></td></tr>`;
+                document.getElementById(cfg.paginationId).innerHTML = '';
                 return;
             }
             tbody.innerHTML = data.records.map(r => {
                 const date = new Date(r.ngay_tao).toLocaleString('vi-VN');
                 const safeMaPhieu = escapeHtml(r.ma_phieu).replace(/'/g, "\\'");
                 const tongGia = number_format(parseInt(r.tong_gia_tien) || 0);
-                return `<tr style="cursor:pointer;" onclick="openReceiptDetail('import', '${safeMaPhieu}')">
+                return `<tr style="cursor:pointer;" onclick="openReceiptDetail('${type}', '${safeMaPhieu}')">
                     <td><span style="font-family:monospace;font-weight:600;">${escapeHtml(r.ma_phieu)}</span></td>
                     <td style="text-align:center;">${r.so_loai_hang} loại</td>
                     <td style="text-align:center;"><strong>${number_format(r.tong_so_luong)}</strong></td>
-                    <td style="text-align:right;font-weight:600;color:#16a34a;">${tongGia}đ</td>
+                    <td style="text-align:right;font-weight:600;color:${cfg.color};">${tongGia}đ</td>
                     <td>${escapeHtml(r.nguoi_tao_name)}</td>
                     <td style="font-size:13px;">${date}</td>
                 </tr>`;
             }).join('');
 
             const totalPages = Math.ceil(data.total / data.per_page);
-            if (totalPages > 1) {
-                document.getElementById('importHistoryPagination').innerHTML = renderHistoryPagination(totalPages, page, 'import');
-            } else {
-                document.getElementById('importHistoryPagination').innerHTML = '';
-            }
+            document.getElementById(cfg.paginationId).innerHTML = totalPages > 1
+                ? renderHistoryPagination(totalPages, page, type)
+                : '';
         })
         .catch(() => {
             tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Lỗi tải dữ liệu.</td></tr>';
         });
 }
 
-// ─── Export History (tab-based) ──────────────────────────────────────────
-function loadExportHistory(page = 1) {
-    const tbody = document.getElementById('exportHistoryBody');
-    if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Đang tải...</td></tr>';
+function loadImportHistory(page = 1) { loadHistory('import', page); }
+function loadExportHistory(page = 1) { loadHistory('export', page); }
 
-    const filterQS = getHistoryFilterParams();
-    const sep = filterQS ? '&' : '';
-    apiFetch('modules/stock/api/export_stock.php?action=list&page=' + page + sep + filterQS)
-        .then(data => {
-            if (!data.success || data.records.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6"><div class="empty_state"><span class="material-symbols-outlined">inventory_2</span><p>Chưa có phiếu xuất kho nào.</p></div></td></tr>';
-                document.getElementById('exportHistoryPagination').innerHTML = '';
-                return;
-            }
-            tbody.innerHTML = data.records.map(r => {
-                const date = new Date(r.ngay_tao).toLocaleString('vi-VN');
-                const safeMaPhieu = escapeHtml(r.ma_phieu).replace(/'/g, "\\'");
-                const tongGia = number_format(parseInt(r.tong_gia_tien) || 0);
-                return `<tr style="cursor:pointer;" onclick="openReceiptDetail('export', '${safeMaPhieu}')">
-                    <td><span style="font-family:monospace;font-weight:600;">${escapeHtml(r.ma_phieu)}</span></td>
-                    <td style="text-align:center;">${r.so_loai_hang} loại</td>
-                    <td style="text-align:center;"><strong>${number_format(r.tong_so_luong)}</strong></td>
-                    <td style="text-align:right;font-weight:600;color:#ea580c;">${tongGia}đ</td>
-                    <td>${escapeHtml(r.nguoi_tao_name)}</td>
-                    <td style="font-size:13px;">${date}</td>
-                </tr>`;
-            }).join('');
-
-            const totalPages = Math.ceil(data.total / data.per_page);
-            if (totalPages > 1) {
-                document.getElementById('exportHistoryPagination').innerHTML = renderHistoryPagination(totalPages, page, 'export');
-            } else {
-                document.getElementById('exportHistoryPagination').innerHTML = '';
-            }
-        })
-        .catch(() => {
-            tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Lỗi tải dữ liệu.</td></tr>';
-        });
-}
-
-// ─── Switch history sub-tab (Nhập / Xuất) ──────────────────────────────
+// ─── Switch history sub-tab ────────────────────────────────────────────────
 function switchHistoryTab(type) {
     const importBtn   = document.getElementById('hist_tab_import');
     const exportBtn   = document.getElementById('hist_tab_export');
     const importPanel = document.getElementById('history_import_panel');
     const exportPanel = document.getElementById('history_export_panel');
 
-    // Xóa inline style cũ (để CSS quy định 100% opacity, active state, hover)
     importBtn.style.opacity = '';
     exportBtn.style.opacity = '';
 
@@ -384,7 +311,7 @@ function switchHistoryTab(type) {
     }
 }
 
-// ─── Receipt Detail Modal ──────────────────────────────────────────────
+// ─── Receipt Detail Modal ──────────────────────────────────────────────────
 const receiptDetailModal = document.getElementById('receiptDetailModal');
 if (receiptDetailModal) {
     document.getElementById('btnCloseReceiptDetailModal')?.addEventListener('click', () => receiptDetailModal.classList.remove('open'));
@@ -409,7 +336,7 @@ function openReceiptDetail(type, maPhieu) {
                 return;
             }
             const ngayTao = new Date(data.ngay_tao).toLocaleString('vi-VN');
-            const icon = type === 'import' ? 'download' : 'upload';
+            const icon  = type === 'import' ? 'download' : 'upload';
             const color = type === 'import' ? '#16a34a' : '#ea580c';
             const label = type === 'import' ? 'Nhập kho' : 'Xuất kho';
 
@@ -475,7 +402,7 @@ function openReceiptDetail(type, maPhieu) {
         });
 }
 
-// ─── Shared: History pagination (styled like project buttons) ─────────────
+// ─── Shared: History pagination ─────────────────────────────────────────────
 window.renderHistoryPagination = function(totalPages, currentPage, type) {
     const onClickName = (type === 'import') ? 'loadImportHistory' : 'loadExportHistory';
     let html = '';
@@ -504,7 +431,7 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
     return html;
 };
 
-// ─── History filter event listeners ─────────────────────────────────────
+// ─── History filter event listeners ─────────────────────────────────────────
 (function() {
     let debounceTimer = null;
     const todayStr = new Date().toISOString().slice(0, 10);
@@ -521,12 +448,8 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
     const PRICE_MAX_CAP = elPriceMax ? (Number(elPriceMax.getAttribute('max')) || 0) : 0;
 
     function getCurrentHistoryTab() {
-        const importBtn = document.getElementById('hist_tab_import');
-        return importBtn?.classList.contains('active') ? 'import' : 'export';
+        return document.getElementById('hist_tab_import')?.classList.contains('active') ? 'import' : 'export';
     }
-
-    function getSliderMin() { return elPriceMin ? (Number(elPriceMin.value) || 0) : 0; }
-    function getSliderMax() { return elPriceMax ? (Number(elPriceMax.value) || 0) : 0; }
 
     function isFilterActive() {
         return (elSearch?.value || '').trim() !== ''
@@ -534,8 +457,6 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
             || (elDateTo?.value || '') !== ''
             || (elCategory?.value || '') !== ''
             || (elUser?.value || '') !== ''
-            || getSliderMin() > 0
-            || getSliderMax() < PRICE_MAX_CAP
             || (elPriceMin && Number(elPriceMin.value) > 0)
             || (elPriceMax && Number(elPriceMax.value) < PRICE_MAX_CAP);
     }
@@ -547,8 +468,7 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
 
     function clampDate(el) {
         if (!el) return;
-        const v = el.value;
-        if (v && v > todayStr) el.value = todayStr;
+        if (el.value && el.value > todayStr) el.value = todayStr;
     }
 
     function applyHistoryFilter() {
@@ -567,7 +487,6 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(applyHistoryFilter, 400);
     });
-
     elDateFrom?.addEventListener('change', applyHistoryFilter);
     elDateTo?.addEventListener('change', applyHistoryFilter);
     elCategory?.addEventListener('change', applyHistoryFilter);
@@ -606,176 +525,98 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
     toggleClearBtn();
 })();
 
-// ─── Import List (Danh sách hàng cần nhập — localStorage) ───────────────
-const IMPORT_LIST_KEY = 'warehouse_import_list';
+// ─── Shared: Storage list (localStorage) ───────────────────────────────────
+function getListConfig(type) {
+    return type === 'import'
+        ? { key: 'warehouse_import_list', msg: 'Sản phẩm đã có trong danh sách.', addMsg: 'Đã thêm vào danh sách hàng cần nhập.', clearMsg: 'Xóa toàn bộ danh sách hàng cần nhập?', clearDoneMsg: 'Đã xóa danh sách hàng cần nhập.', chipClass: 'import_list_chip', promptLabel: 'Nhập số lượng cần nhập cho', suggestTitle: 'Nhấn để thêm nhanh vào phiếu nhập', quickNote: 'Thêm từ danh sách cần nhập', icon: 'add_circle', color: '#ea580c', countId: 'importListCount', containerId: 'importListSuggestions', itemsId: 'importListItems' }
+        : { key: 'warehouse_export_list', msg: 'Sản phẩm đã có trong danh sách cần xuất.', addMsg: 'Đã thêm vào danh sách hàng cần xuất.', clearMsg: 'Xóa toàn bộ danh sách hàng cần xuất?', clearDoneMsg: 'Đã xóa danh sách hàng cần xuất.', chipClass: 'export_list_chip', promptLabel: 'Nhập số lượng cần xuất cho', suggestTitle: 'Nhấn để thêm nhanh vào phiếu xuất', quickNote: 'Thêm từ danh sách cần xuất', icon: 'remove_circle', color: '#ea580c', countId: 'exportListCount', containerId: 'exportListSuggestions', itemsId: 'exportListItems' };
+}
 
-function getImportList() {
-    try { return JSON.parse(localStorage.getItem(IMPORT_LIST_KEY)) || []; }
+function getList(type) {
+    try { return JSON.parse(localStorage.getItem(getListConfig(type).key)) || []; }
     catch { return []; }
 }
 
-function saveImportList(list) {
-    localStorage.setItem(IMPORT_LIST_KEY, JSON.stringify(list));
+function saveList(type, list) {
+    localStorage.setItem(getListConfig(type).key, JSON.stringify(list));
 }
 
-function addToImportList(productId, productName) {
-    const list = getImportList();
+function addToList(type, productId, productName) {
+    const cfg = getListConfig(type);
+    const list = getList(type);
     if (list.some(item => item.productId === String(productId))) {
-        showToast('Sản phẩm đã có trong danh sách.', 'error');
+        showToast(cfg.msg, 'error');
         return false;
     }
     list.push({ productId: String(productId), productName });
-    saveImportList(list);
-    showToast('Đã thêm vào danh sách hàng cần nhập.', 'success');
+    saveList(type, list);
+    showToast(cfg.addMsg, 'success');
     return true;
 }
 
-function removeFromImportList(productId) {
-    const list = getImportList().filter(item => item.productId !== String(productId));
-    saveImportList(list);
-    renderImportListSuggestions();
+function removeFromList(type, productId) {
+    const list = getList(type).filter(item => item.productId !== String(productId));
+    saveList(type, list);
+    renderListSuggestions(type);
 }
 
-function clearImportList() {
-    if (!confirm('Xóa toàn bộ danh sách hàng cần nhập?')) return;
-    saveImportList([]);
-    renderImportListSuggestions();
-    showToast('Đã xóa danh sách hàng cần nhập.', 'success');
+function clearList(type) {
+    const cfg = getListConfig(type);
+    if (!confirm(cfg.clearMsg)) return;
+    saveList(type, []);
+    renderListSuggestions(type);
+    showToast(cfg.clearDoneMsg, 'success');
 }
 
-function isInImportList(productId) {
-    return getImportList().some(item => item.productId === String(productId));
-}
-
-function renderImportListSuggestions() {
-    const container = document.getElementById('importListSuggestions');
-    const itemsDiv = document.getElementById('importListItems');
-    const countSpan = document.getElementById('importListCount');
+function renderListSuggestions(type) {
+    const cfg = getListConfig(type);
+    const container = document.getElementById(cfg.containerId);
+    const itemsDiv = document.getElementById(cfg.itemsId);
+    const countSpan = document.getElementById(cfg.countId);
     if (!container || !itemsDiv) return;
 
-    const list = getImportList();
+    const list = getList(type);
     countSpan.textContent = list.length;
 
-    if (list.length === 0) {
-        container.style.display = 'none';
-        return;
-    }
+    if (list.length === 0) { container.style.display = 'none'; return; }
     container.style.display = '';
 
     itemsDiv.innerHTML = list.map(item => `
-        <div class="import_list_chip" onclick="quickAddFromImportList('${item.productId}', '${escapeHtml(item.productName).replace(/'/g, "\\'")}')" title="Nhấn để thêm nhanh vào phiếu nhập">
-            <span class="material-symbols-outlined" style="font-size:16px; color:#ea580c;">add_circle</span>
+        <div class="${cfg.chipClass}" onclick="quickAddFromList('${type}', '${item.productId}', '${escapeHtml(item.productName).replace(/'/g, "\\'")}')" title="${cfg.suggestTitle}">
+            <span class="material-symbols-outlined" style="font-size:16px; color:${cfg.color};">${cfg.icon}</span>
             <span class="chip_name">${escapeHtml(item.productName)}</span>
-            <button class="chip_remove" onclick="event.stopPropagation(); removeFromImportList('${item.productId}')" title="Xóa khỏi danh sách">
+            <button class="chip_remove" onclick="event.stopPropagation(); removeFromList('${type}', '${item.productId}')" title="Xóa khỏi danh sách">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
     `).join('');
 }
 
-function quickAddFromImportList(productId, productName) {
-    const quantity = parseInt(prompt(`Nhập số lượng cần nhập cho "${productName}":`, '10'), 10);
+function quickAddFromList(type, productId, productName) {
+    const cfg = getListConfig(type);
+    const quantity = parseInt(prompt(`${cfg.promptLabel} "${productName}":`, '10'), 10);
     if (!quantity || quantity <= 0) return;
 
-    const existing = importBatchItems.find(item => item.productId === productId);
+    const batchItems = type === 'import' ? importBatchItems : exportBatchItems;
+    const existing = batchItems.find(item => item.productId === productId);
     if (existing) {
         existing.quantity += quantity;
         showToast(`Đã cộng thêm ${number_format(quantity)} vào "${productName}".`, 'success');
     } else {
-        importBatchItems.push({ productId, productName, quantity, note: 'Thêm từ danh sách cần nhập' });
+        batchItems.push({ productId, productName, quantity, note: cfg.quickNote });
         showToast(`Đã thêm "${productName}" (${number_format(quantity)}) vào phiếu.`, 'success');
     }
 
-    renderImportBatchTable();
-    removeFromImportList(productId);
+    renderBatchTable(type);
+    removeFromList(type, productId);
 }
 
-window.removeFromImportList = removeFromImportList;
-window.quickAddFromImportList = quickAddFromImportList;
+window.removeFromList = removeFromList;
+window.quickAddFromList = quickAddFromList;
 
-document.getElementById('btnClearImportList')?.addEventListener('click', clearImportList);
+// Backward-compatible aliases (used by products.js)
+window.addToImportList = (pid, pname) => addToList('import', pid, pname);
+window.addToExportList  = (pid, pname) => addToList('export', pid, pname);
 
-// ─── Export List (Danh sách hàng cần xuất — localStorage) ───────────────
-const EXPORT_LIST_KEY = 'warehouse_export_list';
-
-function getExportList() {
-    try { return JSON.parse(localStorage.getItem(EXPORT_LIST_KEY)) || []; }
-    catch { return []; }
-}
-
-function saveExportList(list) {
-    localStorage.setItem(EXPORT_LIST_KEY, JSON.stringify(list));
-}
-
-function addToExportList(productId, productName) {
-    const list = getExportList();
-    if (list.some(item => item.productId === String(productId))) {
-        showToast('Sản phẩm đã có trong danh sách cần xuất.', 'error');
-        return false;
-    }
-    list.push({ productId: String(productId), productName });
-    saveExportList(list);
-    showToast('Đã thêm vào danh sách hàng cần xuất.', 'success');
-    return true;
-}
-
-function removeFromExportList(productId) {
-    const list = getExportList().filter(item => item.productId !== String(productId));
-    saveExportList(list);
-    renderExportListSuggestions();
-}
-
-function clearExportList() {
-    if (!confirm('Xóa toàn bộ danh sách hàng cần xuất?')) return;
-    saveExportList([]);
-    renderExportListSuggestions();
-    showToast('Đã xóa danh sách hàng cần xuất.', 'success');
-}
-
-function renderExportListSuggestions() {
-    const container = document.getElementById('exportListSuggestions');
-    const itemsDiv = document.getElementById('exportListItems');
-    const countSpan = document.getElementById('exportListCount');
-    if (!container || !itemsDiv) return;
-
-    const list = getExportList();
-    countSpan.textContent = list.length;
-
-    if (list.length === 0) {
-        container.style.display = 'none';
-        return;
-    }
-    container.style.display = '';
-
-    itemsDiv.innerHTML = list.map(item => `
-        <div class="export_list_chip" onclick="quickAddFromExportList('${item.productId}', '${escapeHtml(item.productName).replace(/'/g, "\\'")}')" title="Nhấn để thêm nhanh vào phiếu xuất">
-            <span class="material-symbols-outlined" style="font-size:16px; color:#ea580c;">remove_circle</span>
-            <span class="chip_name">${escapeHtml(item.productName)}</span>
-            <button class="chip_remove" onclick="event.stopPropagation(); removeFromExportList('${item.productId}')" title="Xóa khỏi danh sách">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-        </div>
-    `).join('');
-}
-
-function quickAddFromExportList(productId, productName) {
-    const quantity = parseInt(prompt(`Nhập số lượng cần xuất cho "${productName}":`, '10'), 10);
-    if (!quantity || quantity <= 0) return;
-
-    const existing = exportBatchItems.find(item => item.productId === productId);
-    if (existing) {
-        existing.quantity += quantity;
-        showToast(`Đã cộng thêm ${number_format(quantity)} vào "${productName}".`, 'success');
-    } else {
-        exportBatchItems.push({ productId, productName, quantity, note: 'Thêm từ danh sách cần xuất' });
-        showToast(`Đã thêm "${productName}" (${number_format(quantity)}) vào phiếu.`, 'success');
-    }
-
-    renderExportBatchTable();
-    removeFromExportList(productId);
-}
-
-window.removeFromExportList = removeFromExportList;
-window.quickAddFromExportList = quickAddFromExportList;
-
-document.getElementById('btnClearExportList')?.addEventListener('click', clearExportList);
+document.getElementById('btnClearImportList')?.addEventListener('click', () => clearList('import'));
+document.getElementById('btnClearExportList')?.addEventListener('click', () => clearList('export'));

@@ -125,3 +125,21 @@ function escapeHtml(text) {
 function number_format(num) {
     return parseInt(num).toLocaleString('vi-VN');
 }
+
+// ─── Submit form helper ────────────────────────────────────────────────────
+async function submitForm(btn, url, fd, { loadingText, successLabel, onSuccess, onError } = {}) {
+    const originalLabel = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = loadingText || '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang xử lý...';
+    try {
+        const data = await apiFetch(url, { method: 'POST', body: fd });
+        showToast(data.message, data.success ? 'success' : 'error');
+        if (data.success && onSuccess) await onSuccess(data);
+    } catch {
+        showToast('Lỗi kết nối máy chủ.', 'error');
+        if (onError) onError();
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = successLabel || originalLabel;
+    }
+}

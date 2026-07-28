@@ -7,7 +7,7 @@ requireAdminOrStoreManager();
 
 header('Content-Type: application/json; charset=utf-8');
 
-$action = $_REQUEST['action'] ?? '';
+$action = ($_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST['action'] : $_GET['action']) ?? '';
 
 if (!$conn) {
     echo json_encode(['success' => false, 'message' => 'Lỗi kết nối cơ sở dữ liệu.']);

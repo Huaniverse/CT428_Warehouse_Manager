@@ -90,21 +90,11 @@ document.addEventListener('DOMContentLoaded', function() {
             fd.append('has_schedule', 0);
         }
 
-        btnSubmit.disabled = true;
-        btnSubmit.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang tạo...';
-
-        apiFetch('modules/users/api/users.php?action=create', { method: 'POST', body: fd })
-            .then(data => {
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = '<span class="material-symbols-outlined">save</span> Tạo tài khoản';
-                showToast(data.message, data.success ? 'success' : 'error');
-                if (data.success) { closeModal(); loadUsers(); }
-            })
-            .catch(() => {
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = '<span class="material-symbols-outlined">save</span> Tạo tài khoản';
-                showToast('Lỗi kết nối máy chủ.', 'error');
-            });
+        submitForm(this, 'modules/users/api/users.php?action=create', fd, {
+            loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang tạo...',
+            successLabel: '<span class="material-symbols-outlined">save</span> Tạo tài khoản',
+            onSuccess: () => { closeModal(); loadUsers(); }
+        });
     });
 
     // ── Modal quyền ────────────────────────────────────────────────────────
@@ -116,20 +106,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const fd = new FormData();
             fd.append('id', document.getElementById('perm_user_id').value);
             fd.append('allow_import_export', document.getElementById('perm_import_export').checked ? 1 : 0);
-            this.disabled = true;
-            this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
-            apiFetch('modules/users/api/users.php?action=update_permissions', { method: 'POST', body: fd })
-                .then(data => {
-                    this.disabled = false;
-                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu quyền';
-                    showToast(data.message, data.success ? 'success' : 'error');
-                    if (data.success) { permModal.classList.remove('open'); loadUsers(); }
-                })
-                .catch(() => {
-                    this.disabled = false;
-                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu quyền';
-                    showToast('Lỗi kết nối máy chủ.', 'error');
-                });
+            submitForm(this, 'modules/users/api/users.php?action=update_permissions', fd, {
+                loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...',
+                successLabel: '<span class="material-symbols-outlined">save</span> Lưu quyền',
+                onSuccess: () => { permModal.classList.remove('open'); loadUsers(); }
+            });
         });
     }
 
@@ -153,21 +134,11 @@ document.addEventListener('DOMContentLoaded', function() {
             fd.append('has_schedule', schedToggle.checked ? 1 : 0);
             fd.append('access_start', document.getElementById('sched_start').value);
             fd.append('access_end',   document.getElementById('sched_end').value);
-
-            this.disabled = true;
-            this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
-            apiFetch('modules/users/api/users.php?action=update_schedule', { method: 'POST', body: fd })
-                .then(data => {
-                    this.disabled = false;
-                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu lịch';
-                    showToast(data.message, data.success ? 'success' : 'error');
-                    if (data.success) { schedModal.classList.remove('open'); loadUsers(); }
-                })
-                .catch(() => {
-                    this.disabled = false;
-                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu lịch';
-                    showToast('Lỗi kết nối máy chủ.', 'error');
-                });
+            submitForm(this, 'modules/users/api/users.php?action=update_schedule', fd, {
+                loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...',
+                successLabel: '<span class="material-symbols-outlined">save</span> Lưu lịch',
+                onSuccess: () => { schedModal.classList.remove('open'); loadUsers(); }
+            });
         });
     }
 
@@ -258,21 +229,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (permCb && permCb.offsetParent !== null) {
                 fd.append('allow_import_export', permCb.checked ? 1 : 0);
             }
-
-            this.disabled = true;
-            this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...';
-            apiFetch('modules/users/api/users.php?action=update', { method: 'POST', body: fd })
-                .then(data => {
-                    this.disabled = false;
-                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu thay đổi';
-                    showToast(data.message, data.success ? 'success' : 'error');
-                    if (data.success) { detailModal.classList.remove('open'); loadUsers(); }
-                })
-                .catch(() => {
-                    this.disabled = false;
-                    this.innerHTML = '<span class="material-symbols-outlined">save</span> Lưu thay đổi';
-                    showToast('Lỗi kết nối máy chủ.', 'error');
-                });
+            submitForm(this, 'modules/users/api/users.php?action=update', fd, {
+                loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...',
+                successLabel: '<span class="material-symbols-outlined">save</span> Lưu thay đổi',
+                onSuccess: () => { detailModal.classList.remove('open'); loadUsers(); }
+            });
         });
 
         // Đặt lại mật khẩu (nút nhỏ bên cạnh input)
@@ -290,22 +251,11 @@ document.addEventListener('DOMContentLoaded', function() {
             fd.append('new_password',     newPass);
             fd.append('confirm_password', newPass);
 
-            this.disabled = true;
-            this.innerHTML = '<span class="material-symbols-outlined spin_icon" style="font-size:18px;">autorenew</span>';
-            apiFetch('modules/users/api/users.php?action=reset_password', { method: 'POST', body: fd })
-                .then(data => {
-                    this.disabled = false;
-                    this.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">key</span> Lưu';
-                    showToast(data.message, data.success ? 'success' : 'error');
-                    if (data.success) {
-                        document.getElementById('detail_new_password').value = '';
-                    }
-                })
-                .catch(() => {
-                    this.disabled = false;
-                    this.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">key</span> Lưu';
-                    showToast('Lỗi kết nối máy chủ.', 'error');
-                });
+            submitForm(this, 'modules/users/api/users.php?action=reset_password', fd, {
+                loadingText: '<span class="material-symbols-outlined spin_icon" style="font-size:18px;">autorenew</span>',
+                successLabel: '<span class="material-symbols-outlined" style="font-size:18px;">key</span> Lưu',
+                onSuccess: () => { document.getElementById('detail_new_password').value = ''; }
+            });
         });
     }
 });
@@ -623,23 +573,14 @@ function grantTempAccess() {
     var fd      = new FormData();
     fd.append('user_id', userId);
     fd.append('minutes', _tempSelectedMinutes);
-    btn.disabled = true;
-    btn.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang cấp...';
-    apiFetch('modules/users/api/users.php?action=grant_temp_access', { method: 'POST', body: fd })
-        .then(function(data) {
-            btn.disabled = false;
-            btn.innerHTML = '<span class="material-symbols-outlined">timer</span> Cấp quyền';
-            showToast(data.message, data.success ? 'success' : 'error');
-            if (data.success) {
-                document.getElementById('tempAccessModal').classList.remove('open');
-                loadUsers();
-            }
-        })
-        .catch(function() {
-            btn.disabled = false;
-            btn.innerHTML = '<span class="material-symbols-outlined">timer</span> Cấp quyền';
-            showToast('Lỗi kết nối máy chủ.', 'error');
-        });
+    submitForm(btn, 'modules/users/api/users.php?action=grant_temp_access', fd, {
+        loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang cấp...',
+        successLabel: '<span class="material-symbols-outlined">timer</span> Cấp quyền',
+        onSuccess: () => {
+            document.getElementById('tempAccessModal').classList.remove('open');
+            loadUsers();
+        }
+    });
 }
 
 function revokeTempAccess(userId) {
