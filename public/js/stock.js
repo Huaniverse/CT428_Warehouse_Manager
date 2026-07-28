@@ -102,7 +102,7 @@ if (importModal) {
         this.disabled = true;
         this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang xử lý...';
 
-        apiFetch('modules/stock/api/import_stock.php?action=create_batch', { method: 'POST', body: fd })
+        apiFetch(BASE + '/api/import_stock.php?action=create_batch', { method: 'POST', body: fd })
             .then(data => {
                 this.disabled = false;
                 this.innerHTML = originalLabel;
@@ -142,7 +142,7 @@ if (exportModal) {
         const spId = document.getElementById('export_product_id').value;
         const infoDiv = document.getElementById('export_stock_info');
         if (!spId) { infoDiv.style.display = 'none'; return; }
-        apiFetch('modules/products/api/edit_product.php?action=get&id=' + spId)
+        apiFetch(BASE + '/api/edit_product.php?action=get&id=' + spId)
             .then(data => {
                 if (data.success) {
                     document.getElementById('export_current_stock').textContent = data.product.SoLuong;
@@ -198,7 +198,7 @@ if (exportModal) {
         this.disabled = true;
         this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang xử lý...';
 
-        apiFetch('modules/stock/api/export_stock.php?action=create_batch', { method: 'POST', body: fd })
+        apiFetch(BASE + '/api/export_stock.php?action=create_batch', { method: 'POST', body: fd })
             .then(data => {
                 this.disabled = false;
                 this.innerHTML = originalLabel;
@@ -252,7 +252,7 @@ function loadHistory(type, page = 1) {
 
     const filterQS = getHistoryFilterParams();
     const sep = filterQS ? '&' : '';
-    apiFetch('modules/stock/api/' + cfg.endpoint + '?action=list&page=' + page + sep + filterQS)
+    apiFetch(BASE + '/api/' + cfg.endpoint + '?action=list&page=' + page + sep + filterQS)
         .then(data => {
             if (!data.success || data.records.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6"><div class="empty_state"><span class="material-symbols-outlined">inventory_2</span><p>${cfg.emptyMsg}</p></div></td></tr>`;
@@ -328,7 +328,7 @@ function openReceiptDetail(type, maPhieu) {
     infoDiv.innerHTML = '<p style="color:#64748b;">Đang tải...</p>';
     itemsDiv.innerHTML = '';
 
-    const endpoint = type === 'import' ? 'modules/stock/api/import_stock.php' : 'modules/stock/api/export_stock.php';
+    const endpoint = type === 'import' ? BASE + '/api/import_stock.php' : BASE + '/api/export_stock.php';
     apiFetch(endpoint + '?action=detail&ma_phieu=' + encodeURIComponent(maPhieu))
         .then(data => {
             if (!data.success || !data.items || data.items.length === 0) {

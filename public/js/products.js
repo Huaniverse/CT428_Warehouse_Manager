@@ -40,7 +40,7 @@ function fetchFilteredProducts(page) {
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="' + colspan + '" style="text-align: center; padding: 32px; color: #64748b;">Đang tải dữ liệu...</td></tr>';
 
-    apiFetch('modules/products/api/filter_products.php?' + params.toString())
+    apiFetch(BASE + '/api/filter_products.php?' + params.toString())
         .then(data => {
             const totalPages = Math.ceil(data.total / data.per_page);
             renderProductPagination(totalPages, data.page);
@@ -168,7 +168,7 @@ function openProductDetail(maSp) {
 
     modal.classList.add('open');
 
-    apiFetch('modules/products/api/edit_product.php?action=detail&id=' + maSp)
+    apiFetch(BASE + '/api/edit_product.php?action=detail&id=' + maSp)
         .then(data => {
             if (!data.success) { showToast(data.message, 'error'); modal.classList.remove('open'); return; }
             currentDetailProduct = data;
@@ -240,7 +240,7 @@ function toggleProductActive(maSp, newActive) {
     const fd = new FormData();
     fd.append('ma_sp', maSp);
     fd.append('is_active', newActive);
-    apiFetch('modules/products/api/edit_product.php?action=toggle_active', { method: 'POST', body: fd })
+    apiFetch(BASE + '/api/edit_product.php?action=toggle_active', { method: 'POST', body: fd })
         .then(data => {
             showToast(data.message, data.success ? 'success' : 'error');
             if (data.success) fetchFilteredProducts(productCurrentPage);
@@ -313,13 +313,13 @@ if (prodDetailModal) {
             showToast('Vui lòng nhập đầy đủ thông tin.', 'error'); return;
         }
 
-        submitForm(this, 'modules/products/api/edit_product.php?action=update', fd, {
+        submitForm(this, BASE + '/api/edit_product.php?action=update', fd, {
             loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...',
             successLabel: '<span class="material-symbols-outlined" style="font-size:18px;">save</span> Lưu thay đổi',
             onSuccess: () => {
                 fetchFilteredProducts(productCurrentPage);
                 const maSp = document.getElementById('detail_prod_id').value;
-                apiFetch('modules/products/api/edit_product.php?action=detail&id=' + maSp)
+                apiFetch(BASE + '/api/edit_product.php?action=detail&id=' + maSp)
                     .then(d => {
                         if (d.success) {
                             currentDetailProduct = d;
@@ -397,7 +397,7 @@ if (btnSubmitProd) {
         fd.append('so_luong', quantity);
         fd.append('mota', desc);
 
-        submitForm(this, 'modules/products/api/add_product.php', fd, {
+        submitForm(this, BASE + '/api/add_product.php', fd, {
             loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...',
             successLabel: '<span class="material-symbols-outlined">save</span> Thêm sản phẩm',
             onSuccess: () => { closeAddProdModal(); fetchFilteredProducts(productCurrentPage); }
@@ -482,7 +482,7 @@ if (btnSubmitCat) {
         fd.append('ma_dm', code);
         fd.append('ten_dm', name);
 
-        submitForm(this, 'modules/products/api/add_category.php', fd, {
+        submitForm(this, BASE + '/api/add_category.php', fd, {
             loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...',
             successLabel: '<span class="material-symbols-outlined">save</span> Thêm danh mục',
             onSuccess: (data) => { closeAddCatModal(); updateCategoryDropdowns(data.categories); }

@@ -1,0 +1,5 @@
+# Bảo vệ các file backend khỏi truy cập trực tiếp
+<FilesMatch "^(config\.php|config\.local\.example\.php|db\.php|auth\.php|helpers\.php|helpers-.+\.php)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

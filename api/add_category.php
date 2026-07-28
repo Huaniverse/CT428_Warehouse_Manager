@@ -1,7 +1,7 @@
 <?php
 
-require_once __DIR__ . '/../../../shared/db.php';
-require_once __DIR__ . '/../../../shared/auth.php';
+require_once __DIR__ . '/../php/db.php';
+require_once __DIR__ . '/../php/auth.php';
 requireAdmin(); // Yêu cầu quyền Admin
 
 header('Content-Type: application/json; charset=utf-8');

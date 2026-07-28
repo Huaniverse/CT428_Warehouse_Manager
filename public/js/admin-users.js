@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fd.append('has_schedule', 0);
         }
 
-        submitForm(this, 'modules/users/api/users.php?action=create', fd, {
+        submitForm(this, BASE + '/api/users.php?action=create', fd, {
             loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang tạo...',
             successLabel: '<span class="material-symbols-outlined">save</span> Tạo tài khoản',
             onSuccess: () => { closeModal(); loadUsers(); }
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const fd = new FormData();
             fd.append('id', document.getElementById('perm_user_id').value);
             fd.append('allow_import_export', document.getElementById('perm_import_export').checked ? 1 : 0);
-            submitForm(this, 'modules/users/api/users.php?action=update_permissions', fd, {
+            submitForm(this, BASE + '/api/users.php?action=update_permissions', fd, {
                 loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...',
                 successLabel: '<span class="material-symbols-outlined">save</span> Lưu quyền',
                 onSuccess: () => { permModal.classList.remove('open'); loadUsers(); }
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fd.append('has_schedule', schedToggle.checked ? 1 : 0);
             fd.append('access_start', document.getElementById('sched_start').value);
             fd.append('access_end',   document.getElementById('sched_end').value);
-            submitForm(this, 'modules/users/api/users.php?action=update_schedule', fd, {
+            submitForm(this, BASE + '/api/users.php?action=update_schedule', fd, {
                 loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...',
                 successLabel: '<span class="material-symbols-outlined">save</span> Lưu lịch',
                 onSuccess: () => { schedModal.classList.remove('open'); loadUsers(); }
@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (permCb && permCb.offsetParent !== null) {
                 fd.append('allow_import_export', permCb.checked ? 1 : 0);
             }
-            submitForm(this, 'modules/users/api/users.php?action=update', fd, {
+            submitForm(this, BASE + '/api/users.php?action=update', fd, {
                 loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...',
                 successLabel: '<span class="material-symbols-outlined">save</span> Lưu thay đổi',
                 onSuccess: () => { detailModal.classList.remove('open'); loadUsers(); }
@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fd.append('new_password',     newPass);
             fd.append('confirm_password', newPass);
 
-            submitForm(this, 'modules/users/api/users.php?action=reset_password', fd, {
+            submitForm(this, BASE + '/api/users.php?action=reset_password', fd, {
                 loadingText: '<span class="material-symbols-outlined spin_icon" style="font-size:18px;">autorenew</span>',
                 successLabel: '<span class="material-symbols-outlined" style="font-size:18px;">key</span> Lưu',
                 onSuccess: () => { document.getElementById('detail_new_password').value = ''; }
@@ -265,7 +265,7 @@ function loadUsers() {
     const tbody = document.getElementById('usersTableBody');
     tbody.innerHTML = '<tr><td colspan="7" class="table_loading">Đang tải...</td></tr>';
 
-    apiFetch('modules/users/api/users.php?action=list')
+    apiFetch(BASE + '/api/users.php?action=list')
         .then(data => {
             if (!data.success) { tbody.innerHTML = '<tr><td colspan="7" class="table_loading">Lỗi tải dữ liệu.</td></tr>'; return; }
             if (data.users.length === 0) {
@@ -344,7 +344,7 @@ function toggleUser(id, newStatus) {
     const fd = new FormData();
     fd.append('id', id);
     fd.append('is_active', newStatus);
-    apiFetch('modules/users/api/users.php?action=toggle', { method: 'POST', body: fd })
+    apiFetch(BASE + '/api/users.php?action=toggle', { method: 'POST', body: fd })
         .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadUsers(); })
         .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
 }
@@ -354,7 +354,7 @@ function deleteUser(id, name) {
     if (!confirm(`Bạn có chắc muốn xóa tài khoản "${name}"? Hành động này không thể hoàn tác.`)) return;
     const fd = new FormData();
     fd.append('id', id);
-    apiFetch('modules/users/api/users.php?action=delete', { method: 'POST', body: fd })
+    apiFetch(BASE + '/api/users.php?action=delete', { method: 'POST', body: fd })
         .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadUsers(); })
         .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
 }
@@ -398,7 +398,7 @@ function openScheduleModal(userId, userName, role, hasSchedule, startTime, endTi
 
 // ── Modal chi tiết / sửa tài khoản ───────────────────────────────────────
 function openUserDetail(userId) {
-    apiFetch('modules/users/api/users.php?action=get_detail&id=' + userId)
+    apiFetch(BASE + '/api/users.php?action=get_detail&id=' + userId)
         .then(data => {
             if (!data.success) { showToast(data.message, 'error'); return; }
             const u = data.user;
@@ -518,7 +518,7 @@ function loadSessions() {
     const list = document.getElementById('sessionList');
     list.innerHTML = '<div class="table_loading">Đang tải...</div>';
 
-    apiFetch('modules/users/api/users.php?action=sessions')
+    apiFetch(BASE + '/api/users.php?action=sessions')
         .then(data => {
             if (!data.success || data.sessions.length === 0) {
                 list.innerHTML = '<div class="empty_state"><span class="material-symbols-outlined">sensors_off</span><p>Không có phiên hoạt động nào.</p></div>';
@@ -549,7 +549,7 @@ function kickUser(userId) {
     if (!confirm('Đăng xuất người dùng này khỏi tất cả phiên?')) return;
     const fd = new FormData();
     fd.append('user_id', userId);
-    apiFetch('modules/users/api/users.php?action=kick', { method: 'POST', body: fd })
+    apiFetch(BASE + '/api/users.php?action=kick', { method: 'POST', body: fd })
         .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadSessions(); })
         .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
 }
@@ -573,7 +573,7 @@ function grantTempAccess() {
     var fd      = new FormData();
     fd.append('user_id', userId);
     fd.append('minutes', _tempSelectedMinutes);
-    submitForm(btn, 'modules/users/api/users.php?action=grant_temp_access', fd, {
+    submitForm(btn, BASE + '/api/users.php?action=grant_temp_access', fd, {
         loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang cấp...',
         successLabel: '<span class="material-symbols-outlined">timer</span> Cấp quyền',
         onSuccess: () => {
@@ -587,7 +587,7 @@ function revokeTempAccess(userId) {
     if (!confirm('Thu hồi quyền truy cập tạm thời? Tài khoản sẽ bị khóa theo lịch trình ngay lập tức.')) return;
     var fd = new FormData();
     fd.append('user_id', userId);
-    apiFetch('modules/users/api/users.php?action=revoke_temp_access', { method: 'POST', body: fd })
+    apiFetch(BASE + '/api/users.php?action=revoke_temp_access', { method: 'POST', body: fd })
         .then(function(data) { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadUsers(); })
         .catch(function(err) { showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'); });
 }

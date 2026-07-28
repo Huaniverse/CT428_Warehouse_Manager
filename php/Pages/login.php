@@ -7,8 +7,8 @@ if (isset($_SESSION['user_id'])) {
     exit;
 }
 
-require_once __DIR__ . '/shared/config.php';
-require_once __DIR__ . '/shared/db.php';
+require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../db.php';
 
 $error   = '';
 $success = '';
@@ -124,7 +124,7 @@ $expired = isset($_GET['expired']) && $_GET['expired'] == '1';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập — Quản Lí Kho</title>
     <meta name="description" content="Đăng nhập vào hệ thống Quản Lí Kho hàng.">
-    <link rel="stylesheet" href="assets/css/style.css?v=<?php echo filemtime('assets/css/style.css'); ?>">
+    <link rel="stylesheet" href="../../public/css/style.css?v=<?php echo filemtime(__DIR__ . '/../../public/css/style.css'); ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">

@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-require_once __DIR__ . '/shared/db.php';
+require_once __DIR__ . '/../db.php';
 
 // Xóa session khỏi bảng sessions trong DB
 if ($conn && isset($_SESSION['session_token'])) {

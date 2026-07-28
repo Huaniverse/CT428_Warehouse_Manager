@@ -78,7 +78,7 @@ function apiFetch(url, options = {}) {
         .then(r => {
             if (r.status === 401) {
                 return r.json().then(data => {
-                    window.location.href = data.redirect || 'login.php?expired=1';
+                    window.location.href = data.redirect || (BASE + '/php/Pages/login.php?expired=1');
                     return new Promise(() => {});
                 });
             }
