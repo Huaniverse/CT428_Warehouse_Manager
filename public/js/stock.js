@@ -102,7 +102,7 @@ if (importModal) {
         this.disabled = true;
         this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang xử lý...';
 
-        apiFetch(BASE + '/api/import_stock.php?action=create_batch', { method: 'POST', body: fd })
+        ajaxCall(BASE + '/api/import_stock.php?action=create_batch', { method: 'POST', body: fd })
             .then(data => {
                 this.disabled = false;
                 this.innerHTML = originalLabel;
@@ -142,7 +142,7 @@ if (exportModal) {
         const spId = document.getElementById('export_product_id').value;
         const infoDiv = document.getElementById('export_stock_info');
         if (!spId) { infoDiv.style.display = 'none'; return; }
-        apiFetch(BASE + '/api/edit_product.php?action=get&id=' + spId)
+        ajaxCall(BASE + '/api/edit_product.php?action=get&id=' + spId)
             .then(data => {
                 if (data.success) {
                     document.getElementById('export_current_stock').textContent = data.product.SoLuong;
@@ -198,7 +198,7 @@ if (exportModal) {
         this.disabled = true;
         this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang xử lý...';
 
-        apiFetch(BASE + '/api/export_stock.php?action=create_batch', { method: 'POST', body: fd })
+        ajaxCall(BASE + '/api/export_stock.php?action=create_batch', { method: 'POST', body: fd })
             .then(data => {
                 this.disabled = false;
                 this.innerHTML = originalLabel;
@@ -252,7 +252,7 @@ function loadHistory(type, page = 1) {
 
     const filterQS = getHistoryFilterParams();
     const sep = filterQS ? '&' : '';
-    apiFetch(BASE + '/api/' + cfg.endpoint + '?action=list&page=' + page + sep + filterQS)
+    ajaxCall(BASE + '/api/' + cfg.endpoint + '?action=list&page=' + page + sep + filterQS)
         .then(data => {
             if (!data.success || data.records.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6"><div class="empty_state"><span class="material-symbols-outlined">inventory_2</span><p>${cfg.emptyMsg}</p></div></td></tr>`;
@@ -329,7 +329,7 @@ function openReceiptDetail(type, maPhieu) {
     itemsDiv.innerHTML = '';
 
     const endpoint = type === 'import' ? BASE + '/api/import_stock.php' : BASE + '/api/export_stock.php';
-    apiFetch(endpoint + '?action=detail&ma_phieu=' + encodeURIComponent(maPhieu))
+    ajaxCall(endpoint + '?action=detail&ma_phieu=' + encodeURIComponent(maPhieu))
         .then(data => {
             if (!data.success || !data.items || data.items.length === 0) {
                 infoDiv.innerHTML = '<p style="color:#dc2626;">Không tìm thấy phiếu.</p>';
@@ -562,10 +562,12 @@ function removeFromList(type, productId) {
 
 function clearList(type) {
     const cfg = getListConfig(type);
-    if (!confirm(cfg.clearMsg)) return;
-    saveList(type, []);
-    renderListSuggestions(type);
-    showToast(cfg.clearDoneMsg, 'success');
+    showConfirm(cfg.clearMsg).then(confirmed => {
+        if (!confirmed) return;
+        saveList(type, []);
+        renderListSuggestions(type);
+        showToast(cfg.clearDoneMsg, 'success');
+    });
 }
 
 function renderListSuggestions(type) {

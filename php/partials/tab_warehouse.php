@@ -66,7 +66,7 @@
           <div class="search_field_wrapper action_buttons_wrapper">
             <span class="search_label">Thao tác</span>
             <div class="action_buttons_group">
-              <?php if ($is_admin): ?>
+              <?php if ($is_admin || $is_manager): ?>
               <button class="add_product_button" id="btn_add_product" title="Thêm sản phẩm">
                 <span class="material-symbols-outlined">add_box</span>
                 <span>Thêm mới</span>

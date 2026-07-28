@@ -339,11 +339,12 @@ $categories_list  = $categories_list  ?? [];
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
+</div>
+  </div>
+</div>
+
   <?php endif; ?>
 
   <!-- Modal nhập kho (Batch) -->
@@ -832,6 +833,31 @@ $categories_list  = $categories_list  ?? [];
           Hủy
         </button>
         <button class="btn_primary" id="btnConfirmQuantityPrompt" type="button" style="background-color:#16a34a;">
+          <span class="material-symbols-outlined">check</span>
+          Xác nhận
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal xác nhận (thay thế confirm()) -->
+  <div class="modal_overlay" id="confirmModal">
+    <div class="modal_card modal_card_sm">
+      <div class="modal_header">
+        <h3>
+          <span class="material-symbols-outlined confirm_icon">warning</span>
+          <span>Xác nhận</span>
+        </h3>
+      </div>
+      <div class="modal_body">
+        <p class="confirm_text" id="confirmMessage"></p>
+      </div>
+      <div class="modal_footer">
+        <button class="btn_secondary" id="btnCancelAction" type="button">
+          <span class="material-symbols-outlined">close</span>
+          Hủy
+        </button>
+        <button class="btn_primary" id="btnConfirmAction" type="button">
           <span class="material-symbols-outlined">check</span>
           Xác nhận
         </button>

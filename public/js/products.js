@@ -41,7 +41,7 @@ function fetchFilteredProducts(page) {
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="' + colspan + '" style="text-align: center; padding: 32px; color: #64748b;">Đang tải dữ liệu...</td></tr>';
 
-    apiFetch(BASE + '/api/filter_products.php?' + params.toString())
+    ajaxCall(BASE + '/api/filter_products.php?' + params.toString())
         .then(data => {
             const totalPages = Math.ceil(data.total / data.per_page);
             renderProductPagination(totalPages, data.page);
@@ -185,7 +185,7 @@ function openProductDetail(maSp) {
 
     modal.classList.add('open');
 
-    apiFetch(BASE + '/api/edit_product.php?action=detail&id=' + maSp)
+    ajaxCall(BASE + '/api/edit_product.php?action=detail&id=' + maSp)
         .then(data => {
             if (!data.success) { showToast(data.message, 'error'); modal.classList.remove('open'); return; }
             currentDetailProduct = data;
@@ -253,16 +253,18 @@ function switchProductHistoryTab(type) {
 
 function toggleProductActive(maSp, newActive) {
     const label = newActive == 1 ? 'khôi phục' : 'ẩn';
-    if (!confirm(`Bạn có chắc muốn ${label} sản phẩm này?`)) return;
-    const fd = new FormData();
-    fd.append('ma_sp', maSp);
-    fd.append('is_active', newActive);
-    apiFetch(BASE + '/api/edit_product.php?action=toggle_active', { method: 'POST', body: fd })
-        .then(data => {
-            showToast(data.message, data.success ? 'success' : 'error');
-            if (data.success) fetchFilteredProducts(productCurrentPage);
-        })
-        .catch(() => showToast('Lỗi kết nối máy chủ.', 'error'));
+    showConfirm('Bạn có chắc muốn ' + label + ' sản phẩm này?').then(confirmed => {
+        if (!confirmed) return;
+        const fd = new FormData();
+        fd.append('ma_sp', maSp);
+        fd.append('is_active', newActive);
+        ajaxCall(BASE + '/api/edit_product.php?action=toggle_active', { method: 'POST', body: fd })
+            .then(data => {
+                showToast(data.message, data.success ? 'success' : 'error');
+                if (data.success) fetchFilteredProducts(productCurrentPage);
+            })
+            .catch(() => showToast('Lỗi kết nối máy chủ.', 'error'));
+    });
 }
 
 // ─── Product Detail Modal ────────────────────────────────────────────────
@@ -336,7 +338,7 @@ if (prodDetailModal) {
             onSuccess: () => {
                 fetchFilteredProducts(productCurrentPage);
                 const maSp = document.getElementById('detail_prod_id').value;
-                apiFetch(BASE + '/api/edit_product.php?action=detail&id=' + maSp)
+                ajaxCall(BASE + '/api/edit_product.php?action=detail&id=' + maSp)
                     .then(d => {
                         if (d.success) {
                             currentDetailProduct = d;

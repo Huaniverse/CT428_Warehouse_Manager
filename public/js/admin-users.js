@@ -265,7 +265,7 @@ function loadUsers() {
     const tbody = document.getElementById('usersTableBody');
     tbody.innerHTML = '<tr><td colspan="7" class="table_loading">Đang tải...</td></tr>';
 
-    apiFetch(BASE + '/api/users.php?action=list')
+    ajaxCall(BASE + '/api/users.php?action=list')
         .then(data => {
             if (!data.success) { tbody.innerHTML = '<tr><td colspan="7" class="table_loading">Lỗi tải dữ liệu.</td></tr>'; return; }
             if (data.users.length === 0) {
@@ -344,19 +344,21 @@ function toggleUser(id, newStatus) {
     const fd = new FormData();
     fd.append('id', id);
     fd.append('is_active', newStatus);
-    apiFetch(BASE + '/api/users.php?action=toggle', { method: 'POST', body: fd })
+    ajaxCall(BASE + '/api/users.php?action=toggle', { method: 'POST', body: fd })
         .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadUsers(); })
         .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
 }
 
 // ── Xóa tài khoản ────────────────────────────────────────────────────────
 function deleteUser(id, name) {
-    if (!confirm(`Bạn có chắc muốn xóa tài khoản "${name}"? Hành động này không thể hoàn tác.`)) return;
-    const fd = new FormData();
-    fd.append('id', id);
-    apiFetch(BASE + '/api/users.php?action=delete', { method: 'POST', body: fd })
-        .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadUsers(); })
-        .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
+    showConfirm('Bạn có chắc muốn xóa tài khoản "' + name + '"? Hành động này không thể hoàn tác.').then(confirmed => {
+        if (!confirmed) return;
+        const fd = new FormData();
+        fd.append('id', id);
+        ajaxCall(BASE + '/api/users.php?action=delete', { method: 'POST', body: fd })
+            .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadUsers(); })
+            .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
+    });
 }
 
 // ── Modal quyền ──────────────────────────────────────────────────────────
@@ -398,7 +400,7 @@ function openScheduleModal(userId, userName, role, hasSchedule, startTime, endTi
 
 // ── Modal chi tiết / sửa tài khoản ───────────────────────────────────────
 function openUserDetail(userId) {
-    apiFetch(BASE + '/api/users.php?action=get_detail&id=' + userId)
+    ajaxCall(BASE + '/api/users.php?action=get_detail&id=' + userId)
         .then(data => {
             if (!data.success) { showToast(data.message, 'error'); return; }
             const u = data.user;
@@ -518,7 +520,7 @@ function loadSessions() {
     const list = document.getElementById('sessionList');
     list.innerHTML = '<div class="table_loading">Đang tải...</div>';
 
-    apiFetch(BASE + '/api/users.php?action=sessions')
+    ajaxCall(BASE + '/api/users.php?action=sessions')
         .then(data => {
             if (!data.success || data.sessions.length === 0) {
                 list.innerHTML = '<div class="empty_state"><span class="material-symbols-outlined">sensors_off</span><p>Không có phiên hoạt động nào.</p></div>';
@@ -546,12 +548,14 @@ function loadSessions() {
 }
 
 function kickUser(userId) {
-    if (!confirm('Đăng xuất người dùng này khỏi tất cả phiên?')) return;
-    const fd = new FormData();
-    fd.append('user_id', userId);
-    apiFetch(BASE + '/api/users.php?action=kick', { method: 'POST', body: fd })
-        .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadSessions(); })
-        .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
+    showConfirm('Đăng xuất người dùng này khỏi tất cả phiên?').then(confirmed => {
+        if (!confirmed) return;
+        const fd = new FormData();
+        fd.append('user_id', userId);
+        ajaxCall(BASE + '/api/users.php?action=kick', { method: 'POST', body: fd })
+            .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadSessions(); })
+            .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
+    });
 }
 
 // ── Cấp quyền truy cập tạm thời ────────────────────────────────────────
@@ -584,12 +588,14 @@ function grantTempAccess() {
 }
 
 function revokeTempAccess(userId) {
-    if (!confirm('Thu hồi quyền truy cập tạm thời? Tài khoản sẽ bị khóa theo lịch trình ngay lập tức.')) return;
-    var fd = new FormData();
-    fd.append('user_id', userId);
-    apiFetch(BASE + '/api/users.php?action=revoke_temp_access', { method: 'POST', body: fd })
-        .then(function(data) { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadUsers(); })
-        .catch(function(err) { showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'); });
+    showConfirm('Thu hồi quyền truy cập tạm thời? Tài khoản sẽ bị khóa theo lịch trình ngay lập tức.').then(confirmed => {
+        if (!confirmed) return;
+        var fd = new FormData();
+        fd.append('user_id', userId);
+        ajaxCall(BASE + '/api/users.php?action=revoke_temp_access', { method: 'POST', body: fd })
+            .then(function(data) { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadUsers(); })
+            .catch(function(err) { showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'); });
+    });
 }
 
 var _tempCountdownInterval = null;

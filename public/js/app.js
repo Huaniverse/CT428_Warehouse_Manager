@@ -62,38 +62,100 @@ function debounce(fn, delay) {
     };
 }
 
-// ─── Session-aware fetch wrapper ──────────────────────────────────────────
+// ─── Session-aware AJAX wrapper ──────────────────────────────────────────
 const _csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
-function apiFetch(url, options = {}) {
-    const method = (options.method || 'GET').toUpperCase();
-    const defaultHeaders = { 'X-Requested-With': 'XMLHttpRequest' };
+function ajaxCall(url, options = {}) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        const method = (options.method || 'GET').toUpperCase();
 
-    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-        defaultHeaders['X-CSRF-Token'] = _csrfToken;
-    }
+        xhr.open(method, url);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
-    options.headers = Object.assign(defaultHeaders, options.headers || {});
-    return fetch(url, options)
-        .then(r => {
-            if (r.status === 401) {
-                return r.json().then(data => {
+        if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+            xhr.setRequestHeader('X-CSRF-Token', _csrfToken);
+        }
+
+        if (options.headers) {
+            for (const [key, val] of Object.entries(options.headers)) {
+                xhr.setRequestHeader(key, val);
+            }
+        }
+
+        xhr.onload = function() {
+            if (xhr.status === 401) {
+                try {
+                    const data = JSON.parse(xhr.responseText);
                     window.location.href = data.redirect || (BASE + '/index.php?page=login&expired=1');
-                    return new Promise(() => {});
-                });
+                } catch (e) {
+                    window.location.href = BASE + '/index.php?page=login&expired=1';
+                }
+                return;
             }
-            if (!r.ok) {
-                return Promise.reject(new Error('Lỗi máy chủ: HTTP ' + r.status));
+            if (xhr.status < 200 || xhr.status >= 300) {
+                reject(new Error('Lỗi máy chủ: HTTP ' + xhr.status));
+                return;
             }
-            return r.json();
-        })
-        .then(data => {
-            if (data && data.redirect) {
-                window.location.href = data.redirect;
-                return new Promise(() => {});
+            try {
+                const data = JSON.parse(xhr.responseText);
+                if (data && data.redirect) {
+                    window.location.href = data.redirect;
+                    return;
+                }
+                resolve(data);
+            } catch (e) {
+                reject(e);
             }
-            return data;
-        });
+        };
+
+        xhr.onerror = function() {
+            reject(new Error('Lỗi kết nối máy chủ.'));
+        };
+
+        xhr.send(options.body || null);
+    });
+}
+
+// ─── Confirm modal (thay thế confirm()) ─────────────────────────────────
+function showConfirm(message) {
+    return new Promise(function(resolve) {
+        var modal = document.getElementById('confirmModal');
+        var msgEl = document.getElementById('confirmMessage');
+        var btnConfirm = document.getElementById('btnConfirmAction');
+        var btnCancel = document.getElementById('btnCancelAction');
+        if (!modal || !msgEl || !btnConfirm || !btnCancel) {
+            resolve(false);
+            return;
+        }
+        msgEl.textContent = message;
+        modal.classList.add('open');
+
+        function cleanup() {
+            modal.classList.remove('open');
+            btnConfirm.removeEventListener('click', onConfirm);
+            btnCancel.removeEventListener('click', onCancel);
+            modal.removeEventListener('click', onOverlay);
+        }
+
+        function onConfirm() {
+            cleanup();
+            resolve(true);
+        }
+
+        function onCancel() {
+            cleanup();
+            resolve(false);
+        }
+
+        function onOverlay(e) {
+            if (e.target === modal) onCancel();
+        }
+
+        btnConfirm.addEventListener('click', onConfirm);
+        btnCancel.addEventListener('click', onCancel);
+        modal.addEventListener('click', onOverlay);
+    });
 }
 
 // ─── Toast ────────────────────────────────────────────────────────────────
@@ -132,7 +194,7 @@ async function submitForm(btn, url, fd, { loadingText, successLabel, onSuccess, 
     btn.disabled = true;
     btn.innerHTML = loadingText || '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang xử lý...';
     try {
-        const data = await apiFetch(url, { method: 'POST', body: fd });
+        const data = await ajaxCall(url, { method: 'POST', body: fd });
         showToast(data.message, data.success ? 'success' : 'error');
         if (data.success && onSuccess) await onSuccess(data);
     } catch {

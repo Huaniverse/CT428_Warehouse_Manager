@@ -38,14 +38,14 @@ extract(getDashboardData($conn));
     };
   </script>
 <?php $p = defined('ROOT_CONTEXT') ? '' : '../../'; ?>
-  <script src="<?= $p ?>public/js/app.js"></script>
-  <script src="<?= $p ?>public/js/products.js"></script>
+  <script src="<?= $p ?>public/js/app.js?v=<?= filemtime(ROOT_PATH . '/public/js/app.js') ?>"></script>
+  <script src="<?= $p ?>public/js/products.js?v=<?= filemtime(ROOT_PATH . '/public/js/products.js') ?>"></script>
   <?php if (canImportExport()): ?>
-    <script src="<?= $p ?>public/js/stock.js"></script>
-    <script src="<?= $p ?>public/js/combobox.js"></script>
+    <script src="<?= $p ?>public/js/stock.js?v=<?= filemtime(ROOT_PATH . '/public/js/stock.js') ?>"></script>
+    <script src="<?= $p ?>public/js/combobox.js?v=<?= filemtime(ROOT_PATH . '/public/js/combobox.js') ?>"></script>
   <?php endif; ?>
   <?php if ($is_admin || $is_manager): ?>
-    <script src="<?= $p ?>public/js/admin-users.js"></script>
+    <script src="<?= $p ?>public/js/admin-users.js?v=<?= filemtime(ROOT_PATH . '/public/js/admin-users.js') ?>"></script>
   <?php endif; ?>
 
   <script>
@@ -61,7 +61,7 @@ extract(getDashboardData($conn));
     const chartTopLabels = <?php echo json_encode($chart_top_labels); ?>;
     const chartTopData = <?php echo json_encode($chart_top_data); ?>;
   </script>
-  <script src="<?= $p ?>public/js/dashboard.js"></script>
+  <script src="<?= $p ?>public/js/dashboard.js?v=<?= filemtime(ROOT_PATH . '/public/js/dashboard.js') ?>"></script>
 </body>
 <?php if ($conn) $conn->close(); ?>
 
