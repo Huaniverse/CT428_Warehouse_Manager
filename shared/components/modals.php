@@ -1,5 +1,4 @@
 <?php
-// shared/components/modals.php — Bảo đảm biến role tồn tại (tránh lỗi Undefined khi include độc lập)
 $is_admin         = $is_admin         ?? isAdmin();
 $is_store_manager = $is_store_manager ?? isStoreManager();
 $categories_list  = $categories_list  ?? [];

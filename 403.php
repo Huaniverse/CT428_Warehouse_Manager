@@ -1,8 +1,4 @@
 <?php
-/**
- * WarehouseManager - 403 Page
- * Standalone error page (no auth/session dependencies)
- */
 http_response_code(403);
 ?>
 <!DOCTYPE html>

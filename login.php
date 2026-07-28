@@ -1,5 +1,4 @@
 <?php
-// login.php — Trang đăng nhập
 session_start();
 
 // Nếu đã đăng nhập → chuyển thẳng vào trang chính
@@ -10,7 +9,6 @@ if (isset($_SESSION['user_id'])) {
 
 require_once __DIR__ . '/shared/config.php';
 require_once __DIR__ . '/shared/db.php';
-require_once __DIR__ . '/modules/users/helpers.php';
 
 $error   = '';
 $success = '';

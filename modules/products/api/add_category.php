@@ -1,6 +1,4 @@
 <?php
-// shared/api/add_category.php — API thêm danh mục mới (chỉ dành cho Admin)
-// Response trả về dạng JSON chứa danh sách danh mục đã cập nhật
 
 require_once __DIR__ . '/../../../shared/db.php';
 require_once __DIR__ . '/../../../shared/auth.php';

@@ -1,6 +1,4 @@
 <?php
-// shared/api/add_product.php — API thêm sản phẩm mới (chỉ dành cho Admin)
-// Response trả về dạng JSON
 
 require_once __DIR__ . '/../../../shared/db.php';
 require_once __DIR__ . '/../../../shared/auth.php';

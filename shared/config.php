@@ -1,12 +1,4 @@
 <?php
-// config.php — Cấu hình kết nối cơ sở dữ liệu
-// [SEC-06] Credentials được tách ra config.local.php (ngoài version control)
-//
-// Hướng dẫn setup:
-//   1. Sao chép: cp config.local.example.php config.local.php
-//   2. Điền thông tin DB thật vào config.local.php
-//   3. config.local.php đã được thêm vào .gitignore, KHÔNG commit file đó
-
 if (file_exists(__DIR__ . '/config.local.php')) {
     // Môi trường có file local (dev/production đã setup đúng)
     require_once __DIR__ . '/config.local.php';
@@ -20,6 +12,8 @@ if (file_exists(__DIR__ . '/config.local.php')) {
 }
 
 define('ROOT_PATH', dirname(__DIR__));
+
+require_once __DIR__ . '/helpers.php';
 
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 

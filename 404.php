@@ -1,8 +1,4 @@
 <?php
-/**
- * WarehouseManager - 404 Page
- * Standalone error page (no auth/session dependencies)
- */
 http_response_code(404);
 ?>
 <!DOCTYPE html>

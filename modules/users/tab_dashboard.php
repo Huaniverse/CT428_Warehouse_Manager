@@ -1,5 +1,4 @@
       <?php
-      // shared/components/tab_dashboard.php — Bảo đảm biến dashboard tồn tại (tránh lỗi Undefined khi include độc lập)
       $total_categories    = $total_categories    ?? 0;
       $total_quantity      = $total_quantity      ?? 0;
       $total_val           = $total_val           ?? 0;

@@ -1,14 +1,4 @@
 <?php
-// modules/products/helpers.php — Helper functions cho module Sản phẩm
-
-/**
- * Validate input dùng chung cho add_product và edit_product.
- *
- * @param mysqli $conn    Kết nối CSDL (để check danh mục)
- * @param array  $post    Mảng dữ liệu POST ($_POST)
- * @param bool   $isEdit  Cờ xác định có phải đang edit hay không (không bắt buộc số lượng)
- * @return array ['success' => bool, 'message' => string, 'data' => array]
- */
 function validateProductInput(mysqli $conn, array $post, bool $isEdit = false): array
 {
     $ten_sp   = trim($post['ten_sp'] ?? '');

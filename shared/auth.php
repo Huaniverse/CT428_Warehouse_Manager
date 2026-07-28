@@ -1,18 +1,10 @@
 <?php
-// auth.php — Session Guard
-// Require file này ở đầu mỗi trang cần bảo vệ (SAU khi include db.php)
-// Sử dụng: require_once 'auth.php'; (hoặc đường dẫn tương ứng)
-
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 // ── CSRF Protection ───────────────────────────────────────────────────────────
 
-/**
- * Sinh CSRF token vào session nếu chưa có.
- * Sử dụng random_bytes(32) → bin2hex để đạt entropy 256-bit.
- */
 function generateCsrfToken(): string {
     if (empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -20,10 +12,6 @@ function generateCsrfToken(): string {
     return $_SESSION['csrf_token'];
 }
 
-/**
- * Xác minh CSRF token từ header X-CSRF-Token hoặc POST field csrf_token.
- * Nếu không hợp lệ → trả 403 JSON và dừng thực thi.
- */
 function verifyCsrfToken(): void {
     $expected = $_SESSION['csrf_token'] ?? '';
     // Ưu tiên lấy từ header (AJAX pattern), fallback về POST field
@@ -99,30 +87,16 @@ if ($conn) {
             redirectToLogin('expired');
         }
 
-        // Kiểm tra lịch truy cập — admin luôn được phép
-        if (($session_data['role'] ?? '') !== 'admin' && !empty($session_data['has_schedule'])) {
-            $now   = (new DateTime())->format('H:i:s');
-            $start = $session_data['access_start'];
-            $end   = $session_data['access_end'];
-            if ($start && $end) {
-                $inRange = ($start <= $end)
-                    ? ($now >= $start && $now <= $end)
-                    : ($now >= $start || $now <= $end);
-                if (!$inRange) {
-                    $tempUntil = $session_data['temp_access_until'] ?? null;
-                    if ($tempUntil && $tempUntil > date('Y-m-d H:i:s')) {
-                        //仍在 temporary access window — cho phép truy cập
-                    } else {
-                        $del = $conn->prepare("DELETE FROM sessions WHERE session_token = ?");
-                        $del->bind_param("s", $token);
-                        $del->execute();
-                        $del->close();
-                        $_SESSION = [];
-                        session_destroy();
-                        redirectToLogin('expired');
-                    }
-                }
-            }
+        // Kiểm tra lịch truy cập
+        $scheduleCheck = checkAccessSchedule($session_data);
+        if (!$scheduleCheck['allowed']) {
+            $del = $conn->prepare("DELETE FROM sessions WHERE session_token = ?");
+            $del->bind_param("s", $token);
+            $del->execute();
+            $del->close();
+            $_SESSION = [];
+            session_destroy();
+            redirectToLogin('expired');
         }
 
         // Đồng bộ dữ liệu role và quyền (phòng trường hợp thay đổi)
@@ -175,10 +149,6 @@ function requireCanImportExport(): void {
 
 // ── Data-scope Helpers ───────────────────────────────────────────────────────
 
-/**
- * Xác định staff có quyền xem tất cả hay chỉ phiếu của mình.
- * @return int|null User ID nếu bị giới hạn, null nếu xem tất cả
- */
 function staffViewScope(): ?int {
     $role = $_SESSION['role'] ?? '';
     if ($role === 'staff' && !($_SESSION['allow_import_export'] ?? 0)) {

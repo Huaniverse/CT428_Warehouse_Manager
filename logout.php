@@ -1,5 +1,4 @@
 <?php
-// logout.php — Xử lý đăng xuất
 session_start();
 
 require_once __DIR__ . '/shared/db.php';

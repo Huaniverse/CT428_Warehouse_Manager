@@ -1,5 +1,4 @@
       <?php
-      // shared/components/tab_users.php — Bảo đảm biến role tồn tại (tránh lỗi Undefined khi include độc lập)
       $is_admin         = $is_admin         ?? isAdmin();
       $is_store_manager = $is_store_manager ?? isStoreManager();
       if ($is_admin || $is_store_manager):
