@@ -113,7 +113,7 @@
             </div>
           </div>
           <div class="chart_card">
-            <h3>Giá trị tồn kho theo danh mục (triệu VNĐ)</h3>
+            <h3>Giá trị tồn kho theo danh mục (nghìn VNĐ)</h3>
             <div style="position: relative; height: 240px;">
               <canvas id="valueChart"></canvas>
             </div>
@@ -157,8 +157,8 @@
                 <thead>
                   <tr>
                     <th>Tên sản phẩm</th>
-                    <th style="width:80px;">SL</th>
-                    <th style="width:120px;">Danh mục</th>
+                    <th style="text-align:center;">SL</th>
+                    <th>Danh mục</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -189,8 +189,8 @@
                 <thead>
                   <tr>
                     <th>Tên sản phẩm</th>
-                    <th style="width:80px;">Đã bán</th>
-                    <th style="width:100px;">Giá</th>
+                    <th style="text-align:center;">Đã bán</th>
+                    <th style="text-align:right;">Giá</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -201,7 +201,7 @@
                       <tr>
                         <td><strong><?php echo htmlspecialchars($item['TenSP']); ?></strong></td>
                         <td style="text-align:center;"><span class="top_selling_badge"><?php echo number_format($item['TongBan']); ?></span></td>
-                        <td style="font-size:13px;"><?php echo number_format($item['Gia']); ?>đ</td>
+                        <td style="text-align:right; font-size:13px;"><?php echo number_format($item['Gia']); ?>đ</td>
                       </tr>
                     <?php endforeach; ?>
                   <?php endif; ?>
@@ -220,12 +220,12 @@
               <table class="product_table">
                 <thead>
                   <tr>
-                    <th style="width:80px;">Loại</th>
+                    <th>Loại</th>
                     <th>Mã phiếu</th>
-                    <th style="width:80px;">SL loại</th>
-                    <th style="width:80px;">Tổng SL</th>
+                    <th style="text-align:center;">SL loại</th>
+                    <th style="text-align:center;">Tổng SL</th>
                     <th>Người tạo</th>
-                    <th style="width:150px;">Ngày tạo</th>
+                    <th>Ngày tạo</th>
                   </tr>
                 </thead>
                 <tbody>

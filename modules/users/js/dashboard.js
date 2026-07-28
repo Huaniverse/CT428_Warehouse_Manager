@@ -36,13 +36,13 @@
     // ── Biểu đồ 2: Giá trị theo danh mục (donut) ──────────────────────
     const ctxVal = document.getElementById('valueChart');
     if (ctxVal) {
-        const chart2DataMillion = chart2Data.map(val => (val / 1000000).toFixed(2));
+        const chart2DataMillion = chart2Data.map(val => (val / 1000).toFixed(2));
         new Chart(ctxVal.getContext('2d'), {
             type: 'doughnut',
             data: {
                 labels: chart2Labels,
                 datasets: [{
-                    label: 'Giá trị (Triệu VNĐ)',
+                    label: 'Giá trị (Nghìn VNĐ)',
                     data: chart2DataMillion,
                     backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4'],
                     borderWidth: 2,

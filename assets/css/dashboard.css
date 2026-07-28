@@ -55,6 +55,7 @@
     color: #6b7a8d;
     font-weight: 500;
     white-space: nowrap;
+    text-align: left;
 }
 
 .kpi_value {
@@ -64,6 +65,10 @@
     margin-top: 2px;
     letter-spacing: -0.02em;
     line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
 }
 
 /* ===== CHART GRID ===== */
@@ -115,7 +120,7 @@
 
 .dashboard_table_card .table_container table {
     width: 100%;
-    table-layout: fixed;
+    table-layout: auto;
 }
 
 .dashboard_table_card .table_container td,
