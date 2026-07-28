@@ -219,7 +219,7 @@ $expired = isset($_GET['expired']) && $_GET['expired'] == '1' && $_SERVER['REQUE
             </form>
 
             <p class="login_footer_note">
-                <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">info</span>
+                <span class="material-symbols-outlined icon_inline">info</span>
                 Liên hệ quản trị viên nếu quên mật khẩu.
             </p>
         </div>

@@ -6,7 +6,7 @@ require_once __DIR__ . '/../partials/helpers-users.php';
 
 $current_user    = getCurrentUser();
 $is_admin        = isAdmin();
-$is_store_manager = isStoreManager();
+$is_manager = isManager();
 
 extract(getDashboardData($conn));
 ?>
@@ -30,9 +30,9 @@ extract(getDashboardData($conn));
       window.BASE_URL = '<?php echo BASE_URL; ?>';
     window.APP_CONFIG = {
       isAdmin: <?php echo $is_admin ? 'true' : 'false'; ?>,
-      isStoreManager: <?php echo $is_store_manager ? 'true' : 'false'; ?>,
-      canManageProducts: <?php echo ($is_admin || $is_store_manager) ? 'true' : 'false'; ?>,
-      canViewProducts: <?php echo ($is_admin || $is_store_manager || canImportExport()) ? 'true' : 'false'; ?>,
+      isManager: <?php echo $is_manager ? 'true' : 'false'; ?>,
+      canManageProducts: <?php echo ($is_admin || $is_manager) ? 'true' : 'false'; ?>,
+      canViewProducts: <?php echo ($is_admin || $is_manager || canImportExport()) ? 'true' : 'false'; ?>,
       role: '<?php echo $current_user['role']; ?>',
       currentUserId: <?php echo $current_user['id']; ?>
     };
@@ -44,7 +44,7 @@ extract(getDashboardData($conn));
     <script src="<?= $p ?>public/js/stock.js"></script>
     <script src="<?= $p ?>public/js/combobox.js"></script>
   <?php endif; ?>
-  <?php if ($is_admin || $is_store_manager): ?>
+  <?php if ($is_admin || $is_manager): ?>
     <script src="<?= $p ?>public/js/admin-users.js"></script>
   <?php endif; ?>
 

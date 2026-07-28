@@ -3,7 +3,7 @@
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/auth.php';
 require_once __DIR__ . '/../php/partials/helpers-users.php';
-requireAdminOrStoreManager();
+requireAdminOrManager();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -22,7 +22,7 @@ switch ($action) {
                        creator.full_name AS created_by_name
                 FROM users u
                 LEFT JOIN users creator ON u.created_by = creator.id";
-        if ($caller_role === 'store_manager') {
+        if ($caller_role === 'manager') {
             $sql .= " WHERE u.role = 'staff'";
         }
         $sql .= " ORDER BY u.created_at DESC";
@@ -68,11 +68,11 @@ switch ($action) {
             echo json_encode(['success' => false, 'message' => 'Mật khẩu phải có ít nhất 6 ký tự.']);
             exit;
         }
-        if (!in_array($new_role, ['store_manager', 'staff'])) {
+        if (!in_array($new_role, ['manager', 'staff'])) {
             $new_role = 'staff';
         }
         $caller_role = $_SESSION['role'] ?? '';
-        if ($caller_role === 'store_manager' && $new_role !== 'staff') {
+        if ($caller_role === 'manager' && $new_role !== 'staff') {
             echo json_encode(['success' => false, 'message' => 'Bạn chỉ có thể tạo tài khoản Staff.']);
             exit;
         }
@@ -95,7 +95,7 @@ switch ($action) {
                 echo json_encode(['success' => false, 'message' => 'Định dạng giờ không hợp lệ.']);
                 exit;
             }
-        } elseif ($new_role === 'store_manager') {
+        } elseif ($new_role === 'manager') {
             $has_schedule = (int)($_POST['has_schedule'] ?? 0);
             if ($has_schedule) {
                 $access_start = $_POST['access_start'] ?? null;
@@ -139,7 +139,7 @@ switch ($action) {
 
         denyIfSelf($target_id);
 
-        $check = checkStoreManagerTarget($conn, $target_id);
+        $check = checkManagerTarget($conn, $target_id);
         if (!$check['allowed']) {
             echo json_encode(['success' => false, 'message' => $check['message']]);
             exit;
@@ -179,7 +179,7 @@ switch ($action) {
             echo json_encode(['success' => false, 'message' => 'Không thể xóa tài khoản admin.']);
             exit;
         }
-        $check = checkStoreManagerTarget($conn, $target_id);
+        $check = checkManagerTarget($conn, $target_id);
         if (!$check['allowed']) {
             echo json_encode(['success' => false, 'message' => $check['message']]);
             exit;
@@ -202,7 +202,7 @@ switch ($action) {
         $caller_role = $_SESSION['role'] ?? '';
         $my_user_id  = (int)$_SESSION['user_id'];
 
-        if ($caller_role === 'store_manager') {
+        if ($caller_role === 'manager') {
             $sql = "SELECT s.session_token, s.user_id, u.username, u.full_name, u.role,
                            s.ip_address, s.user_agent, s.created_at, s.expires_at
                     FROM sessions s
@@ -244,7 +244,7 @@ switch ($action) {
 
         denyIfSelf($kick_user_id);
 
-        $check = checkStoreManagerTarget($conn, $kick_user_id);
+        $check = checkManagerTarget($conn, $kick_user_id);
         if (!$check['allowed']) {
             echo json_encode(['success' => false, 'message' => $check['message']]);
             exit;
@@ -323,7 +323,7 @@ switch ($action) {
             exit;
         }
 
-        $check = checkStoreManagerTarget($conn, $target_id);
+        $check = checkManagerTarget($conn, $target_id);
         if (!$check['allowed']) {
             echo json_encode(['success' => false, 'message' => 'Bạn không có quyền xem tài khoản này.']);
             exit;
@@ -358,7 +358,7 @@ switch ($action) {
             exit;
         }
 
-        $check = checkStoreManagerTarget($conn, $target_id);
+        $check = checkManagerTarget($conn, $target_id);
         if (!$check['allowed']) {
             echo json_encode(['success' => false, 'message' => $check['message']]);
             exit;
@@ -422,7 +422,7 @@ switch ($action) {
             exit;
         }
 
-        $check = checkStoreManagerTarget($conn, $target_id);
+        $check = checkManagerTarget($conn, $target_id);
         if (!$check['allowed']) {
             echo json_encode(['success' => false, 'message' => $check['message']]);
             exit;
@@ -476,18 +476,18 @@ switch ($action) {
             exit;
         }
 
-        $check = checkStoreManagerTarget($conn, $target_id);
+        $check = checkManagerTarget($conn, $target_id);
         if (!$check['allowed']) {
             echo json_encode(['success' => false, 'message' => $check['message']]);
             exit;
         }
 
         $caller_role = $_SESSION['role'] ?? '';
-        if ($caller_role === 'store_manager') {
+        if ($caller_role === 'manager') {
             $new_role = $target_role;
         }
 
-        if (!in_array($new_role, ['admin', 'store_manager', 'staff'])) {
+        if (!in_array($new_role, ['admin', 'manager', 'staff'])) {
             echo json_encode(['success' => false, 'message' => 'Vai trò không hợp lệ.']);
             exit;
         }
@@ -551,7 +551,7 @@ switch ($action) {
             exit;
         }
 
-        $permCheck = checkStoreManagerTarget($conn, $target_id);
+        $permCheck = checkManagerTarget($conn, $target_id);
         if (!$permCheck['allowed']) {
             echo json_encode(['success' => false, 'message' => $permCheck['message']]);
             exit;
@@ -585,7 +585,7 @@ switch ($action) {
             exit;
         }
 
-        $permCheck = checkStoreManagerTarget($conn, $target_id);
+        $permCheck = checkManagerTarget($conn, $target_id);
         if (!$permCheck['allowed']) {
             echo json_encode(['success' => false, 'message' => $permCheck['message']]);
             exit;

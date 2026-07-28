@@ -1,6 +1,6 @@
 <?php
 $is_admin         = $is_admin         ?? isAdmin();
-$is_store_manager = $is_store_manager ?? isStoreManager();
+$is_manager = $is_manager ?? isManager();
 $categories_list  = $categories_list  ?? [];
 ?>
   <!-- Modal tạo tài khoản -->
@@ -44,7 +44,7 @@ $categories_list  = $categories_list  ?? [];
             <span class="material-symbols-outlined form_icon">admin_panel_settings</span>
             <select id="new_role" class="form_input" style="cursor:pointer;">
               <option value="staff">Staff — Nhân viên kho</option>
-              <option value="store_manager">Cửa hàng trưởng</option>
+              <option value="manager">Quản lý kho</option>
             </select>
           </div>
         </div>
@@ -54,8 +54,8 @@ $categories_list  = $categories_list  ?? [];
           Nhân viên bắt buộc phải có lịch truy cập.
         </div>
         <div class="form_group sched_toggle_row hidden" id="create_sched_toggle_group">
-          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-            <input type="checkbox" id="create_has_schedule" style="width:18px; height:18px; cursor:pointer;">
+          <label class="checkbox_label">
+            <input type="checkbox" id="create_has_schedule" class="checkbox_input">
             <span>Bật giới hạn giờ truy cập</span>
           </label>
         </div>
@@ -137,7 +137,7 @@ $categories_list  = $categories_list  ?? [];
           <label for="new_prod_desc">Mô tả sản phẩm</label>
           <div class="form_input_wrapper" style="align-items: flex-start; padding: 6px 12px;">
             <span class="material-symbols-outlined form_icon" style="margin-top:6px;">description</span>
-            <textarea id="new_prod_desc" class="form_input" rows="3" placeholder="Nhập mô tả..." style="resize:vertical; border:none; outline:none; background:transparent; width:100%; font-family:inherit;"></textarea>
+            <textarea id="new_prod_desc" class="form_input form_textarea" rows="3" placeholder="Nhập mô tả..."></textarea>
           </div>
         </div>
       </div>
@@ -154,7 +154,7 @@ $categories_list  = $categories_list  ?? [];
   <!-- Modal thêm danh mục -->
   <?php if ($is_admin): ?>
   <div class="modal_overlay" id="addCategoryModal">
-    <div class="modal_card" style="width: 380px;">
+    <div class="modal_card modal_card_sm">
       <div class="modal_header">
         <h3>
           <span class="material-symbols-outlined">library_add</span>
@@ -191,9 +191,9 @@ $categories_list  = $categories_list  ?? [];
   <?php endif; ?>
 
   <!-- Modal chi tiết sản phẩm -->
-  <?php if ($is_admin || $is_store_manager || canImportExport()): ?>
+  <?php if ($is_admin || $is_manager || canImportExport()): ?>
   <div class="modal_overlay" id="productDetailModal">
-    <div class="modal_card" style="width: 800px; max-height: 90vh; display: flex; flex-direction: column;">
+    <div class="modal_card modal_card_lg">
       <div class="modal_header">
         <h3>
           <span class="material-symbols-outlined">inventory_2</span>
@@ -203,27 +203,27 @@ $categories_list  = $categories_list  ?? [];
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
-      <div class="modal_body" style="overflow-y: auto; flex: 1; padding: 20px 24px 16px;">
+      <div class="modal_body modal_body_scroll">
         <input type="hidden" id="detail_prod_id">
 
         <!-- Thông tin sản phẩm (hiển thị) -->
         <div id="productInfoDisplay">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-            <div style="display:flex; align-items:center; gap:12px;">
+          <div class="flex_between">
+            <div class="flex_center">
               <span id="detail_prod_status_badge" class="badge in_stock"></span>
-              <span id="detail_prod_stock_info" style="font-size:13px; color:#64748b;"></span>
+              <span id="detail_prod_stock_info" class="text_muted"></span>
             </div>
-            <div style="display:flex; gap:8px;">
-              <button class="btn_primary" id="btnAddToImportList" style="padding:6px 14px; font-size:13px; height:36px; background:#16a34a;">
+            <div class="flex_row">
+              <button class="btn_primary btn_sm" id="btnAddToImportList" style="background:#16a34a;">
                 <span class="material-symbols-outlined" style="font-size:18px;">bookmark_add</span>
                 Nhập hàng
               </button>
-              <button class="btn_primary" id="btnAddToExportList" style="padding:6px 14px; font-size:13px; height:36px; background:#ea580c;">
+              <button class="btn_primary btn_sm" id="btnAddToExportList" style="background:#ea580c;">
                 <span class="material-symbols-outlined" style="font-size:18px;">bookmark_add</span>
                 Xuất hàng
               </button>
-              <?php if ($is_admin || $is_store_manager): ?>
-              <button class="btn_primary" id="btnToggleProdEditMode" style="padding:6px 14px; font-size:13px; height:36px; background:#3b82f6;">
+              <?php if ($is_admin || $is_manager): ?>
+              <button class="btn_primary btn_sm" id="btnToggleProdEditMode" style="background:#3b82f6;">
                 <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
                 Chỉnh sửa
               </button>
@@ -249,17 +249,17 @@ $categories_list  = $categories_list  ?? [];
             </div>
             <div class="detail_field detail_field_full">
               <span class="detail_field_label">Mô tả</span>
-              <span class="detail_field_value" id="detail_prod_desc_display" style="white-space:pre-wrap;"></span>
+              <span class="detail_field_value" style="white-space:pre-wrap;" id="detail_prod_desc_display"></span>
             </div>
           </div>
         </div>
 
-        <!-- Form chỉnh sửa sản phẩm (ẩn mặc định, chỉ admin/store_manager) -->
-        <?php if ($is_admin || $is_store_manager): ?>
-        <div id="productInfoEdit" style="display:none;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-            <span style="font-weight:600; font-size:15px; color:#0f172a;">Chỉnh sửa thông tin</span>
-            <button class="btn_secondary" id="btnCancelProdEdit" style="padding:6px 14px; font-size:13px; height:36px;">
+        <!-- Form chỉnh sửa sản phẩm (ẩn mặc định, chỉ admin/manager) -->
+        <?php if ($is_admin || $is_manager): ?>
+        <div id="productInfoEdit" class="display_none">
+          <div class="flex_between">
+            <span class="text_section_title">Chỉnh sửa thông tin</span>
+            <button class="btn_secondary btn_sm" id="btnCancelProdEdit">
               <span class="material-symbols-outlined" style="font-size:18px;">close</span>
               Hủy
             </button>
@@ -292,12 +292,12 @@ $categories_list  = $categories_list  ?? [];
             <label for="edit_prod_desc">Mô tả sản phẩm</label>
             <div class="form_input_wrapper" style="align-items: flex-start; padding: 6px 12px;">
               <span class="material-symbols-outlined form_icon" style="margin-top:6px;">description</span>
-              <textarea id="edit_prod_desc" class="form_input" rows="3" style="resize:vertical; border:none; outline:none; background:transparent; width:100%; font-family:inherit;"></textarea>
+              <textarea id="edit_prod_desc" class="form_input form_textarea" rows="3"></textarea>
             </div>
           </div>
-          <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:16px;">
-            <button class="btn_secondary" id="btnCancelProdEditBottom" style="padding:6px 14px; font-size:13px; height:36px;">Hủy</button>
-            <button class="btn_primary" id="btnSubmitEditProduct" style="padding:6px 14px; font-size:13px; height:36px; background:#16a34a;">
+          <div class="flex_end">
+            <button class="btn_secondary btn_sm" id="btnCancelProdEditBottom">Hủy</button>
+            <button class="btn_primary btn_sm" id="btnSubmitEditProduct" style="background:#16a34a;">
               <span class="material-symbols-outlined" style="font-size:18px;">save</span>
               Lưu thay đổi
             </button>
@@ -306,12 +306,12 @@ $categories_list  = $categories_list  ?? [];
         <?php endif; ?>
 
         <!-- Lịch sử nhập/xuất kho -->
-        <div style="margin-top:24px; border-top:1px solid #e8ecf0; padding-top:20px;">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+        <div class="section_block">
+          <div class="flex_center_gap8 section_block_mb">
             <span class="material-symbols-outlined" style="font-size:20px; color:#475569;">history</span>
-            <span style="font-weight:600; font-size:15px; color:#0f172a;">Lịch sử nhập/xuất kho</span>
+            <span class="text_section_title">Lịch sử nhập/xuất kho</span>
           </div>
-          <div style="display:flex; gap:8px; margin-bottom:14px;">
+          <div class="flex_row section_block_mb">
             <button class="filter_button product_history_tab active" id="prod_hist_tab_import" onclick="switchProductHistoryTab('import')">
               <span class="material-symbols-outlined" style="font-size:16px;">download</span>
               <span>Nhập kho</span>
@@ -322,8 +322,8 @@ $categories_list  = $categories_list  ?? [];
             </button>
           </div>
           <div id="productHistoryContent">
-            <div class="table_container" style="border-radius:8px;">
-              <table class="product_table" style="margin:0; font-size:13px;">
+            <div class="table_container history_table_wrap">
+              <table class="product_table history_table_wrap">
                 <thead>
                   <tr>
                     <th style="width:160px;">Mã phiếu</th>
@@ -349,7 +349,7 @@ $categories_list  = $categories_list  ?? [];
   <!-- Modal nhập kho (Batch) -->
   <?php if (canImportExport()): ?>
   <div class="modal_overlay" id="importStockModal">
-    <div class="modal_card" style="width: 780px; max-height: 90vh; display: flex; flex-direction: column;">
+    <div class="modal_card modal_card_lg">
       <div class="modal_header">
         <h3>
           <span class="material-symbols-outlined" style="color:#16a34a;">download</span>
@@ -359,14 +359,14 @@ $categories_list  = $categories_list  ?? [];
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
-      <div class="modal_body" style="overflow-y: auto; flex: 1;">
+      <div class="modal_body modal_body_scroll">
         <!-- Bảng danh sách hàng đã thêm vào phiếu -->
-        <div id="importBatchTableWrapper" style="margin-bottom: 16px; display: none;">
-          <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 8px; display: block;">
+        <div id="importBatchTableWrapper" class="section_block_mb display_none">
+          <label class="label_section">
             <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle; margin-right:4px;">list_alt</span>
             Danh sách hàng nhập
           </label>
-          <div style="border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;">
+          <div class="batch_table_wrapper">
             <table class="data_table" style="margin: 0; font-size: 13px;">
               <thead>
                 <tr>
@@ -383,8 +383,8 @@ $categories_list  = $categories_list  ?? [];
         </div>
 
         <!-- Form thêm từng sản phẩm -->
-        <div style="background: #f8fafc; border-radius: 10px; padding: 16px; border: 1px dashed #cbd5e1;">
-          <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 10px; display: block;">
+        <div class="add_form_card">
+          <label class="label_section section_block_mb">
             <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle; margin-right:4px;">add_box</span>
             Thêm sản phẩm vào phiếu
           </label>
@@ -416,16 +416,16 @@ $categories_list  = $categories_list  ?? [];
               </div>
             </div>
           </div>
-          <button class="btn_primary" id="btnAddToBatch" type="button" style="background-color: #3b82f6; width: 100%; padding: 8px; font-size: 13px;">
+          <button class="btn_primary btn_full" id="btnAddToBatch" type="button" style="background-color: #3b82f6;">
             <span class="material-symbols-outlined" style="font-size: 18px;">playlist_add</span>
             Thêm vào phiếu
           </button>
         </div>
 
         <!-- Danh sách hàng cần nhập (gợi ý) -->
-        <div id="importListSuggestions" style="margin-top:16px; display:none;">
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
-            <label style="font-weight:600; font-size:13px; color:#334155; display:flex; align-items:center; gap:6px;">
+        <div id="importListSuggestions" class="suggestion_wrap">
+          <div class="flex_between_wrap">
+            <label class="label_section_inline">
               <span class="material-symbols-outlined" style="font-size:16px; color:#ea580c;">bookmark</span>
               Hàng cần nhập (<span id="importListCount">0</span>)
             </label>
@@ -434,7 +434,7 @@ $categories_list  = $categories_list  ?? [];
               Xóa hết
             </button>
           </div>
-          <div id="importListItems" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+          <div id="importListItems" class="suggestion_items"></div>
         </div>
       </div>
       <div class="modal_footer">
@@ -450,7 +450,7 @@ $categories_list  = $categories_list  ?? [];
   <!-- Modal xuất kho -->
   <?php if (canImportExport()): ?>
   <div class="modal_overlay" id="exportStockModal">
-    <div class="modal_card" style="width: 780px; max-height: 90vh; display: flex; flex-direction: column;">
+    <div class="modal_card modal_card_lg">
       <div class="modal_header">
         <h3>
           <span class="material-symbols-outlined" style="color:#ea580c;">upload</span>
@@ -460,14 +460,14 @@ $categories_list  = $categories_list  ?? [];
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
-      <div class="modal_body" style="overflow-y: auto; flex: 1;">
+      <div class="modal_body modal_body_scroll">
         <!-- Bảng danh sách hàng đã thêm vào phiếu -->
-        <div id="exportBatchTableWrapper" style="margin-bottom: 16px; display: none;">
-          <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 8px; display: block;">
+        <div id="exportBatchTableWrapper" class="section_block_mb display_none">
+          <label class="label_section">
             <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle; margin-right:4px;">list_alt</span>
             Danh sách hàng xuất
           </label>
-          <div style="border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;">
+          <div class="batch_table_wrapper">
             <table class="data_table" style="margin: 0; font-size: 13px;">
               <thead>
                 <tr>
@@ -501,10 +501,10 @@ $categories_list  = $categories_list  ?? [];
               <div class="combobox_dropdown" id="export_combobox_dropdown"></div>
             </div>
           </div>
-          <div id="export_stock_info" style="display:none; background:#fef3c7; border:1px solid #fbbf24; border-radius:8px; padding:10px 14px; margin-bottom:12px; font-size:13px; color:#92400e;">
+          <div id="export_stock_info" class="stock_info_box">
             Tồn kho hiện tại: <strong id="export_current_stock">0</strong>
           </div>
-          <div style="display: flex; gap: 12px;">
+          <div class="flex_row_gap12">
             <div class="form_group" style="margin-bottom: 10px; flex: 1;">
               <label for="export_quantity">Số lượng xuất</label>
               <div class="form_input_wrapper">
@@ -520,16 +520,16 @@ $categories_list  = $categories_list  ?? [];
               </div>
             </div>
           </div>
-          <button class="btn_primary" id="btnAddToExportBatch" type="button" style="background-color: #3b82f6; width: 100%; padding: 8px; font-size: 13px;">
+          <button class="btn_primary btn_full" id="btnAddToExportBatch" type="button" style="background-color: #3b82f6;">
             <span class="material-symbols-outlined" style="font-size: 18px;">playlist_add</span>
             Thêm vào phiếu
           </button>
         </div>
 
         <!-- Danh sách hàng cần xuất (gợi ý) -->
-        <div id="exportListSuggestions" style="margin-top:16px; display:none;">
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
-            <label style="font-weight:600; font-size:13px; color:#334155; display:flex; align-items:center; gap:6px;">
+        <div id="exportListSuggestions" class="suggestion_wrap">
+          <div class="flex_between_wrap">
+            <label class="label_section_inline">
               <span class="material-symbols-outlined" style="font-size:16px; color:#ea580c;">bookmark</span>
               Hàng cần xuất (<span id="exportListCount">0</span>)
             </label>
@@ -538,7 +538,7 @@ $categories_list  = $categories_list  ?? [];
               Xóa hết
             </button>
           </div>
-          <div id="exportListItems" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+          <div id="exportListItems" class="suggestion_items"></div>
         </div>
       </div>
       <div class="modal_footer">
@@ -552,9 +552,9 @@ $categories_list  = $categories_list  ?? [];
   <?php endif; ?>
 
   <!-- Modal cấp quyền cho staff -->
-  <?php if ($is_admin || $is_store_manager): ?>
+  <?php if ($is_admin || $is_manager): ?>
   <div class="modal_overlay" id="permissionsModal">
-    <div class="modal_card" style="width: 380px;">
+    <div class="modal_card modal_card_sm">
       <div class="modal_header">
         <h3>
           <span class="material-symbols-outlined">admin_panel_settings</span>
@@ -570,8 +570,8 @@ $categories_list  = $categories_list  ?? [];
           Cấp quyền cho: <strong id="perm_user_name"></strong>
         </p>
         <div class="form_group">
-          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-            <input type="checkbox" id="perm_import_export" style="width:18px; height:18px; cursor:pointer;">
+          <label class="checkbox_label">
+            <input type="checkbox" id="perm_import_export" class="checkbox_input">
             <span>Cho phép nhập/xuất kho</span>
           </label>
         </div>
@@ -587,7 +587,7 @@ $categories_list  = $categories_list  ?? [];
   <?php endif; ?>
 
   <!-- Modal lịch truy cập -->
-  <?php if ($is_admin || $is_store_manager): ?>
+  <?php if ($is_admin || $is_manager): ?>
   <div class="modal_overlay" id="scheduleModal">
     <div class="modal_card" style="width: 420px;">
       <div class="modal_header">
@@ -602,29 +602,29 @@ $categories_list  = $categories_list  ?? [];
       <div class="modal_body">
         <input type="hidden" id="sched_user_id">
         <input type="hidden" id="sched_user_role">
-        <p style="font-size:14px; color:#475569; margin-bottom:16px;">
+        <p class="text_info">
           Thiết lập lịch cho: <strong id="sched_user_name"></strong>
         </p>
-        <div id="sched_staff_note" style="display:none; background:#fef3c7; border:1px solid #fbbf24; border-radius:8px; padding:10px 14px; margin-bottom:12px; font-size:13px; color:#92400e;">
+        <div id="sched_staff_note" class="stock_info_box" style="display:none;">
           <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">info</span>
           Nhân viên bắt buộc phải có lịch truy cập.
         </div>
         <div class="form_group" id="sched_toggle_group">
-          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-            <input type="checkbox" id="sched_has_schedule" style="width:18px; height:18px; cursor:pointer;">
+          <label class="checkbox_label">
+            <input type="checkbox" id="sched_has_schedule" class="checkbox_input">
             <span>Bật giới hạn giờ truy cập</span>
           </label>
         </div>
-        <div id="sched_time_fields" style="display:none;">
-          <div style="display:flex; gap:12px;">
-            <div class="form_group" style="flex:1;">
+        <div id="sched_time_fields" class="time_fields_hidden">
+          <div class="time_fields_row">
+            <div class="form_group form_group_flex">
               <label for="sched_start">Giờ bắt đầu</label>
               <div class="form_input_wrapper">
                 <span class="material-symbols-outlined form_icon">schedule</span>
                 <input type="time" id="sched_start" class="form_input" value="06:00">
               </div>
             </div>
-            <div class="form_group" style="flex:1;">
+            <div class="form_group form_group_flex">
               <label for="sched_end">Giờ kết thúc</label>
               <div class="form_input_wrapper">
                 <span class="material-symbols-outlined form_icon">schedule</span>
@@ -645,9 +645,9 @@ $categories_list  = $categories_list  ?? [];
   <?php endif; ?>
 
   <!-- Modal cấp quyền truy cập tạm thời -->
-  <?php if ($is_admin || $is_store_manager): ?>
+  <?php if ($is_admin || $is_manager): ?>
   <div class="modal_overlay" id="tempAccessModal">
-    <div class="modal_card" style="width: 380px;">
+    <div class="modal_card modal_card_sm">
       <div class="modal_header">
         <h3>
           <span class="material-symbols-outlined">timer</span>
@@ -659,17 +659,17 @@ $categories_list  = $categories_list  ?? [];
       </div>
       <div class="modal_body">
         <input type="hidden" id="temp_user_id">
-        <p style="font-size:14px; color:#475569; margin-bottom:16px;">
+        <p class="text_info">
           Cho phép <strong id="temp_user_name"></strong> truy cập ngoài lịch trong:
         </p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+        <div class="flex_row section_block_mb" style="flex-wrap:wrap;">
           <button class="temp_duration_btn active" data-minutes="5">5 phút</button>
           <button class="temp_duration_btn" data-minutes="10">10 phút</button>
           <button class="temp_duration_btn" data-minutes="15">15 phút</button>
           <button class="temp_duration_btn" data-minutes="30">30 phút</button>
           <button class="temp_duration_btn" data-minutes="60">1 giờ</button>
         </div>
-        <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:10px 14px; font-size:13px; color:#0369a1;">
+        <div class="note_box">
           <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">info</span>
           Sau khi hết giờ, tài khoản sẽ tự động khóa theo lịch trình.
         </div>
@@ -685,9 +685,9 @@ $categories_list  = $categories_list  ?? [];
   <?php endif; ?>
 
   <!-- Modal chi tiết / sửa tài khoản -->
-  <?php if ($is_admin || $is_store_manager): ?>
+  <?php if ($is_admin || $is_manager): ?>
   <div class="modal_overlay" id="userDetailModal">
-    <div class="modal_card" style="width: 560px;">
+    <div class="modal_card modal_card_md">
       <div class="modal_header">
         <h3>
           <span class="material-symbols-outlined">edit</span>
@@ -697,7 +697,7 @@ $categories_list  = $categories_list  ?? [];
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
-      <div class="modal_body" style="padding:20px 24px 16px;">
+      <div class="modal_body modal_body_scroll">
         <input type="hidden" id="detail_user_id">
         <div class="user_detail_info">
           <div class="detail_row">
@@ -716,7 +716,7 @@ $categories_list  = $categories_list  ?? [];
               <div class="form_input_wrapper">
                 <select id="detail_role_select" class="form_input" style="cursor:pointer;">
                   <option value="staff">Nhân viên kho</option>
-                  <option value="store_manager">Cửa hàng trưởng</option>
+                  <option value="manager">Quản lý kho</option>
                 </select>
               </div>
             </div>
@@ -729,7 +729,7 @@ $categories_list  = $categories_list  ?? [];
           <div class="detail_row" id="detail_perm_row" style="display:none;">
             <span class="detail_label">Quyền nhập/xuất:</span>
             <label id="detail_perm_label" style="display:flex; align-items:center; gap:6px; cursor:pointer;">
-              <input type="checkbox" id="detail_allow_import_export" style="width:18px; height:18px; cursor:pointer;">
+              <input type="checkbox" id="detail_allow_import_export" class="checkbox_input">
               <span style="font-size:13px;">Cho phép</span>
             </label>
           </div>
@@ -737,7 +737,7 @@ $categories_list  = $categories_list  ?? [];
             <span class="detail_label">Lịch truy cập:</span>
             <div id="detail_schedule_edit" class="detail_right" style="display:flex; align-items:center; gap:8px;">
               <label id="detail_sched_toggle_label" style="display:flex; align-items:center; gap:4px; cursor:pointer; flex-shrink:0;">
-                <input type="checkbox" id="detail_has_schedule" style="width:18px; height:18px; cursor:pointer;">
+                <input type="checkbox" id="detail_has_schedule" class="checkbox_input">
                 <span style="font-size:13px;">Bật</span>
               </label>
               <div id="detail_sched_time_fields" style="display:none; flex:1 1 auto; min-width:0;">
@@ -787,7 +787,7 @@ $categories_list  = $categories_list  ?? [];
   <!-- Modal chi tiết phiếu nhập/xuất -->
   <?php if (canImportExport()): ?>
   <div class="modal_overlay" id="receiptDetailModal">
-    <div class="modal_card" style="width: 800px; max-height: 90vh; display: flex; flex-direction: column;">
+    <div class="modal_card modal_card_lg">
       <div class="modal_header">
         <h3>
           <span class="material-symbols-outlined">receipt_long</span>
@@ -797,7 +797,7 @@ $categories_list  = $categories_list  ?? [];
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
-      <div class="modal_body" style="overflow-y: auto; flex: 1;">
+      <div class="modal_body modal_body_scroll">
         <div id="receiptDetailInfo" style="margin-bottom: 16px;"></div>
         <div id="receiptDetailItems"></div>
       </div>
@@ -807,7 +807,7 @@ $categories_list  = $categories_list  ?? [];
 
   <!-- Modal nhập số lượng từ danh sách -->
   <div class="modal_overlay" id="quantityPromptModal">
-    <div class="modal_card" style="width: 380px;">
+    <div class="modal_card modal_card_sm">
       <div class="modal_header">
         <h3>
           <span class="material-symbols-outlined" style="color:#ea580c;">edit_note</span>

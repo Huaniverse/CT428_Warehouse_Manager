@@ -190,9 +190,9 @@ function getDashboardData(mysqli $conn): array
     return $data;
 }
 
-function checkStoreManagerTarget(mysqli $conn, int $target_id): array
+function checkManagerTarget(mysqli $conn, int $target_id): array
 {
-    if (($_SESSION['role'] ?? '') !== 'store_manager') {
+    if (($_SESSION['role'] ?? '') !== 'manager') {
         return ['allowed' => true];
     }
     $stmt = $conn->prepare("SELECT role FROM users WHERE id = ?");

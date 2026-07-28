@@ -17,7 +17,7 @@ $page         = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $limit_param  = isset($_GET['limit']) ? $_GET['limit'] : '10';
 $active_only  = isset($_GET['active_only']) ? (int)$_GET['active_only'] : 0;
 
-$can_manage_products = isAdmin() || isStoreManager();
+$can_manage_products = isAdmin() || isManager();
 $can_view_products = $can_manage_products || canImportExport();
 
 $where = "1=1";

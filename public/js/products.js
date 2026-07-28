@@ -34,7 +34,7 @@ function fetchFilteredProducts(page) {
     });
 
     const cfg = window.APP_CONFIG || {};
-    const canManage = !!cfg.canManageProducts || !!cfg.isAdmin || cfg.role === 'store_manager';
+    const canManage = !!cfg.canManageProducts || !!cfg.isAdmin || cfg.role === 'manager';
     const canView = canManage || !!cfg.canViewProducts;
     const colspan = canView ? 8 : 7;
     const tbody = document.getElementById('product_table_body');

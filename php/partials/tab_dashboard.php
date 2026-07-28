@@ -18,8 +18,8 @@
       }
       ?>
       <div id="content_tongquan" class="tab_content active_tab">
-        <h1 style="font-size: 24px; font-weight: 600; color: #0f172a; margin: 0 0 4px 0;">Tổng quan kho hàng</h1>
-        <p style="font-size: 14px; color: #64748b; margin: 0 0 24px 0;">Thống kê và báo cáo số lượng, giá trị tồn kho theo thời gian thực</p>
+        <h1 class="page_title">Tổng quan kho hàng</h1>
+        <p class="page_subtitle">Thống kê và báo cáo số lượng, giá trị tồn kho theo thời gian thực</p>
 
         <!-- KPI Cards -->
         <div class="dashboard_grid">
@@ -108,13 +108,13 @@
         <div class="chart_grid">
           <div class="chart_card">
             <h3>Số lượng sản phẩm theo danh mục</h3>
-            <div style="position: relative; height: 240px;">
+            <div class="chart_canvas_wrap">
               <canvas id="quantityChart"></canvas>
             </div>
           </div>
           <div class="chart_card">
             <h3>Giá trị tồn kho theo danh mục (nghìn VNĐ)</h3>
-            <div style="position: relative; height: 240px;">
+            <div class="chart_canvas_wrap">
               <canvas id="valueChart"></canvas>
             </div>
           </div>
@@ -123,13 +123,13 @@
         <div class="chart_grid">
           <div class="chart_card">
             <h3>Xu hướng nhập / xuất kho (6 tháng)</h3>
-            <div style="position: relative; height: 240px;">
+            <div class="chart_canvas_wrap">
               <canvas id="trendChart"></canvas>
             </div>
           </div>
           <div class="chart_card">
             <h3>Phân loại trạng thái kho</h3>
-            <div style="position: relative; height: 240px;">
+            <div class="chart_canvas_wrap">
               <canvas id="statusChart"></canvas>
             </div>
           </div>
@@ -138,7 +138,7 @@
         <div class="chart_grid" style="grid-template-columns: 1fr;">
           <div class="chart_card">
             <h3>Top 5 sản phẩm bán chạy nhất</h3>
-            <div style="position: relative; height: 200px;">
+            <div class="chart_canvas_wrap short">
               <canvas id="topSellingChart"></canvas>
             </div>
           </div>
@@ -163,7 +163,7 @@
                 </thead>
                 <tbody>
                   <?php if (empty($low_stock_list)): ?>
-                    <tr><td colspan="3" style="text-align:center; color:#94a3b8; padding:20px;">Không có sản phẩm sắp hết</td></tr>
+                    <tr><td colspan="3" class="empty_state">Không có sản phẩm sắp hết</td></tr>
                   <?php else: ?>
                     <?php foreach ($low_stock_list as $item): ?>
                       <tr>
@@ -195,13 +195,13 @@
                 </thead>
                 <tbody>
                   <?php if (empty($top_selling_list)): ?>
-                    <tr><td colspan="3" style="text-align:center; color:#94a3b8; padding:20px;">Chưa có dữ liệu bán hàng</td></tr>
+                    <tr><td colspan="3" class="empty_state">Chưa có dữ liệu bán hàng</td></tr>
                   <?php else: ?>
                     <?php foreach ($top_selling_list as $item): ?>
                       <tr>
                         <td><strong><?php echo htmlspecialchars($item['TenSP']); ?></strong></td>
                         <td style="text-align:center;"><span class="top_selling_badge"><?php echo number_format($item['TongBan']); ?></span></td>
-                        <td style="text-align:right; font-size:13px;"><?php echo number_format($item['Gia']); ?>đ</td>
+                        <td class="price_cell"><?php echo number_format($item['Gia']); ?>đ</td>
                       </tr>
                     <?php endforeach; ?>
                   <?php endif; ?>
@@ -230,7 +230,7 @@
                 </thead>
                 <tbody>
                   <?php if (empty($recent_receipts)): ?>
-                    <tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:20px;">Chưa có hoạt động nào</td></tr>
+                    <tr><td colspan="6" class="empty_state">Chưa có hoạt động nào</td></tr>
                   <?php else: ?>
                     <?php foreach ($recent_receipts as $r): ?>
                       <?php
@@ -241,7 +241,7 @@
                       ?>
                       <tr>
                         <td><span class="<?php echo $type_class; ?>"><?php echo $type_label; ?></span></td>
-                        <td><span style="font-family:monospace; font-weight:600;"><?php echo htmlspecialchars($r['ma_phieu']); ?></span></td>
+                        <td><span class="code_mono"><?php echo htmlspecialchars($r['ma_phieu']); ?></span></td>
                         <td style="text-align:center;"><?php echo (int)$r['so_loai']; ?></td>
                         <td style="text-align:center;"><strong><?php echo number_format($r['tong_sl']); ?></strong></td>
                         <td><?php echo htmlspecialchars($r['nguoi_tao']); ?></td>

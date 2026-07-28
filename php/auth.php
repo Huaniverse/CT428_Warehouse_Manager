@@ -116,13 +116,13 @@ function isAdmin(): bool {
     return ($_SESSION['role'] ?? '') === 'admin';
 }
 
-function isStoreManager(): bool {
-    return ($_SESSION['role'] ?? '') === 'store_manager';
+function isManager(): bool {
+    return ($_SESSION['role'] ?? '') === 'manager';
 }
 
 function canImportExport(): bool {
     $role = $_SESSION['role'] ?? '';
-    if ($role === 'admin' || $role === 'store_manager') return true;
+    if ($role === 'admin' || $role === 'manager') return true;
     if ($role === 'staff') return ($_SESSION['allow_import_export'] ?? 0) == 1;
     return false;
 }
@@ -139,8 +139,8 @@ function requireAdmin(): void {
     if (!isAdmin()) deny403();
 }
 
-function requireAdminOrStoreManager(): void {
-    if (!isAdmin() && !isStoreManager()) deny403();
+function requireAdminOrManager(): void {
+    if (!isAdmin() && !isManager()) deny403();
 }
 
 function requireCanImportExport(): void {

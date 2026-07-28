@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateCreateScheduleUI(role) {
         if (!createSchedNote || !createSchedToggle || !createTimeFields || !createSchedToggleGroup) return;
         var isStaff = (role === 'staff');
-        var isManager = (role === 'store_manager');
+        var isManager = (role === 'manager');
         createSchedNote.classList.toggle('hidden', !isStaff);
         createSchedToggleGroup.classList.toggle('hidden', !isManager);
         if (isStaff) {
@@ -82,11 +82,11 @@ document.addEventListener('DOMContentLoaded', function() {
         fd.append('password',  document.getElementById('new_password').value);
         fd.append('role',      document.getElementById('new_role').value);
         const role = document.getElementById('new_role').value;
-        if (role === 'staff' || (role === 'store_manager' && createSchedToggle.checked)) {
+        if (role === 'staff' || (role === 'manager' && createSchedToggle.checked)) {
             fd.append('has_schedule', 1);
             fd.append('access_start', document.getElementById('create_start').value);
             fd.append('access_end',   document.getElementById('create_end').value);
-        } else if (role === 'store_manager') {
+        } else if (role === 'manager') {
             fd.append('has_schedule', 0);
         }
 
@@ -282,8 +282,8 @@ function loadUsers() {
                     : '<span class="status_badge inactive">Vô hiệu hóa</span>';
                 const roleBadge   = u.role === 'admin'
                     ? '<span class="user_role_badge admin">Admin</span>'
-                    : u.role === 'store_manager'
-                    ? '<span class="user_role_badge store_manager">Cửa hàng trưởng</span>'
+                    : u.role === 'manager'
+                    ? '<span class="user_role_badge manager">Quản lý kho</span>'
                     : '<span class="user_role_badge staff">Nhân viên</span>';
                 const lastLogin   = u.last_login ? new Date(u.last_login).toLocaleString('vi-VN') : '— Chưa đăng nhập';
                 const createdBy   = safeCreatedBy || '— Hệ thống';
@@ -408,7 +408,7 @@ function openUserDetail(userId) {
             // Họ và tên — editable input
             document.getElementById('detail_fullname').value = u.full_name;
 
-            // Vai trò — admin thấy select, store_manager thấy badge readonly
+            // Vai trò — admin thấy select, manager thấy badge readonly
             const roleEdit    = document.getElementById('detail_role_edit');
             const roleDisplay = document.getElementById('detail_role_display');
             if (window.APP_CONFIG?.isAdmin) {
@@ -420,8 +420,8 @@ function openUserDetail(userId) {
                 roleDisplay.style.display = 'block';
                 const badge = u.role === 'admin'
                     ? '<span class="user_role_badge admin">Admin</span>'
-                    : u.role === 'store_manager'
-                    ? '<span class="user_role_badge store_manager">Cửa hàng trưởng</span>'
+                    : u.role === 'manager'
+                    ? '<span class="user_role_badge manager">Quản lý kho</span>'
                     : '<span class="user_role_badge staff">Nhân viên</span>';
                 roleDisplay.innerHTML = badge;
             }
@@ -531,7 +531,7 @@ function loadSessions() {
                 const currentTag   = s.is_current ? '<span class="current_tag">Phiên này</span>' : '';
                 const loginTime    = new Date(s.created_at).toLocaleString('vi-VN');
                 const expireTime   = new Date(s.expires_at).toLocaleString('vi-VN');
-                const roleLabel    = s.role === 'admin' ? 'Admin' : s.role === 'store_manager' ? 'Cửa hàng trưởng' : 'Nhân viên';
+                const roleLabel    = s.role === 'admin' ? 'Admin' : s.role === 'manager' ? 'Quản lý kho' : 'Nhân viên';
                 const kickBtn      = !s.is_current
                     ? `<button class="btn_icon danger" title="Kick user" onclick="kickUser(${s.user_id})"><span class="material-symbols-outlined">logout</span></button>`
                     : '';

@@ -1,11 +1,11 @@
       <?php
       $is_admin         = $is_admin         ?? isAdmin();
-      $is_store_manager = $is_store_manager ?? isStoreManager();
+      $is_manager = $is_manager ?? isManager();
       $categories_list  = $categories_list  ?? [];
       ?>
       <div id="content_khohang" class="tab_content">
-        <h1 style="font-size: 24px; font-weight: 600; color: #0f172a; margin: 0 0 4px 0;">Kho hàng</h1>
-        <p style="font-size: 14px; color: #64748b; margin: 0 0 24px 0;">Quản lý và theo dõi tồn kho theo thời gian thực</p>
+        <h1 class="page_title">Kho hàng</h1>
+        <p class="page_subtitle">Quản lý và theo dõi tồn kho theo thời gian thực</p>
         <div class="main_content_sort">
           <div class="search_field_wrapper">
             <label for="search_input_sort" class="search_label">Tìm kiếm</label>
@@ -103,7 +103,7 @@
                   <th>Giá bán</th>
                   <th>Số lượng</th>
                   <th style="width: 120px;">Trạng thái</th>
-                  <?php if ($is_admin || $is_store_manager || canImportExport()): ?>
+                  <?php if ($is_admin || $is_manager || canImportExport()): ?>
                   <th style="width: 90px;">Thao tác</th>
                   <?php endif; ?>
                 </tr>
@@ -113,6 +113,6 @@
               </tbody>
             </table>
           </div>
-          <div id="productPagination" style="padding:12px 0; display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-top: 10px;"></div>
+          <div id="productPagination" class="pagination_wrap"></div>
         </div>
       </div>

@@ -263,6 +263,37 @@
     }
 }
 
+/* ===== PAGE TITLES ===== */
+.page_title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+}
+
+.page_subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0 0 24px 0;
+}
+
+/* ===== TABLE CELLS ===== */
+.empty_state {
+    text-align: center;
+    color: #94a3b8;
+    padding: 20px;
+}
+
+.price_cell {
+    text-align: right;
+    font-size: 13px;
+}
+
+.code_mono {
+    font-family: monospace;
+    font-weight: 600;
+}
+
 /* ===== CHART CANVAS WRAPPER ===== */
 .chart_canvas_wrap {
     position: relative;

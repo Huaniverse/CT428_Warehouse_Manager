@@ -388,3 +388,247 @@
     border-radius: 10px;
     overflow: hidden;
 }
+
+/* ===== MODAL CARD SIZES ===== */
+.modal_card_sm {
+    width: 380px;
+}
+
+.modal_card_md {
+    width: 560px;
+}
+
+.modal_card_lg {
+    width: 800px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== MODAL BODY SCROLL ===== */
+.modal_body_scroll {
+    overflow-y: auto;
+    flex: 1;
+    padding: 20px 24px 16px;
+}
+
+/* ===== FLEX HELPERS ===== */
+.flex_row {
+    display: flex;
+    gap: 8px;
+}
+
+.flex_row_gap12 {
+    display: flex;
+    gap: 12px;
+}
+
+.flex_center {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.flex_center_gap8 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.flex_between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.flex_between_no_mb {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flex_between_wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.flex_end {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
+.form_group_flex {
+    flex: 1;
+}
+
+.form_group_flex15 {
+    flex: 1.5;
+}
+
+/* ===== TEXT HELPERS ===== */
+.text_muted {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.text_section_title {
+    font-weight: 600;
+    font-size: 15px;
+    color: #0f172a;
+}
+
+.text_info {
+    font-size: 14px;
+    color: #475569;
+    margin-bottom: 16px;
+}
+
+/* ===== BUTTON SMALL ===== */
+.btn_sm {
+    padding: 6px 14px;
+    font-size: 13px;
+    height: 36px;
+}
+
+.btn_full {
+    width: 100%;
+    padding: 8px;
+    font-size: 13px;
+}
+
+/* ===== DASHED ADD FORM CARD ===== */
+.add_form_card {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px dashed #cbd5e1;
+}
+
+/* ===== LABEL HELPERS ===== */
+.label_section {
+    font-weight: 600;
+    font-size: 13px;
+    color: #334155;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.label_section_inline {
+    font-weight: 600;
+    font-size: 13px;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ===== SECTION BLOCK ===== */
+.section_block {
+    margin-top: 24px;
+    border-top: 1px solid #e8ecf0;
+    padding-top: 20px;
+}
+
+.section_block_mb {
+    margin-bottom: 16px;
+}
+
+/* ===== PRODUCT HISTORY WRAPPER ===== */
+.history_table_wrap {
+    border-radius: 8px;
+}
+
+.history_table_wrap table {
+    margin: 0;
+    font-size: 13px;
+}
+
+/* ===== STOCK INFO BOX ===== */
+.stock_info_box {
+    display: none;
+    background: #fef3c7;
+    border: 1px solid #fbbf24;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #92400e;
+}
+
+/* ===== NOTE BOX ===== */
+.note_box {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #0369a1;
+}
+
+/* ===== SUGGESTION WRAPPER ===== */
+.suggestion_wrap {
+    margin-top: 16px;
+    display: none;
+}
+
+.suggestion_items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* ===== HIDDEN TIME FIELDS ===== */
+.time_fields_hidden {
+    display: none;
+}
+
+.time_fields_row {
+    display: flex;
+    gap: 12px;
+}
+
+/* ===== PADDING RESET ===== */
+.padding_reset {
+    padding: 0;
+}
+
+/* ===== HIDDEN DISPLAY ===== */
+.display_none {
+    display: none;
+}
+
+/* ===== TEXTAREA ===== */
+.form_textarea {
+    resize: vertical;
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 100%;
+    font-family: inherit;
+}
+
+/* ===== CHECKBOX LABEL ===== */
+.checkbox_label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.checkbox_input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* ===== CHECKBOX INLINE HELPERS ===== */
+.flex_center_gap6 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}

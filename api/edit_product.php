@@ -9,11 +9,11 @@ header('Content-Type: application/json; charset=utf-8');
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 // action=detail và action=get: staff có import perm được phép xem
-// action=update và action=toggle_active: chỉ admin/store_manager
+// action=update và action=toggle_active: chỉ admin/manager
 $isEditAction = in_array($action, ['update', 'toggle_active'], true);
 if ($isEditAction) {
-    requireAdminOrStoreManager();
-} elseif (!isAdmin() && !isStoreManager() && !canImportExport()) {
+    requireAdminOrManager();
+} elseif (!isAdmin() && !isManager() && !canImportExport()) {
     deny403();
 }
 
@@ -48,7 +48,7 @@ switch ($action) {
         echo json_encode([
             'success' => true,
             'product' => $product,
-            'can_edit' => isAdmin() || isStoreManager(),
+            'can_edit' => isAdmin() || isManager(),
         ]);
         break;
 
@@ -208,7 +208,7 @@ switch ($action) {
             'product'        => $product,
             'import_history' => $import_history,
             'export_history' => $export_history,
-            'can_edit'       => isAdmin() || isStoreManager(),
+            'can_edit'       => isAdmin() || isManager(),
         ]);
         break;
 
