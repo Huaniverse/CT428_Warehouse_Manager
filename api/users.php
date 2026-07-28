@@ -7,7 +7,7 @@ requireAdminOrStoreManager();
 
 header('Content-Type: application/json; charset=utf-8');
 
-$action = ($_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST['action'] : $_GET['action']) ?? '';
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 switch ($action) {
 

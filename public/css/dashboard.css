@@ -263,6 +263,29 @@
     }
 }
 
+/* ===== CHART CANVAS WRAPPER ===== */
+.chart_canvas_wrap {
+    position: relative;
+    height: 240px;
+}
+
+.chart_canvas_wrap.short {
+    height: 200px;
+}
+
+.chart_grid_full {
+    grid-template-columns: 1fr;
+}
+
+/* ===== DASHBOARD TABLE CELL ALIGN ===== */
+.cell_center {
+    text-align: center;
+}
+
+.cell_right {
+    text-align: right;
+}
+
 /* ===== ADD PRODUCT BUTTON ===== */
 .add_product_button {
     display: flex;

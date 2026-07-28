@@ -20,7 +20,7 @@ date_default_timezone_set('Asia/Ho_Chi_Minh');
 // Tự động phát hiện URL base path
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
-// Entry scripts nằm ở php/Pages/, cần đi lên 2 cấp để tới project root
 $scriptDir = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/\\');
-$baseUrlPath = dirname(dirname($scriptDir));
+// Nếu script nằm trong php/Pages/ → đi lên 2 cấp, nếu là root index.php → giữ nguyên
+$baseUrlPath = (basename($scriptDir) === 'Pages') ? dirname(dirname($scriptDir)) : $scriptDir;
 define('BASE_URL', $protocol . '://' . $host . $baseUrlPath);

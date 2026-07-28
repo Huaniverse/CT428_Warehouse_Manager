@@ -57,6 +57,12 @@
               </select>
             </div>
           </div>
+          <div class="search_field_wrapper action_buttons_wrapper clear_btn_wrapper filter-active">
+            <button id="btnClearProductFilter" class="filter_button" onclick="resetProductFilter()">
+              <span class="material-symbols-outlined" style="font-size:18px;">filter_list_off</span>
+              <span>Xóa lọc</span>
+            </button>
+          </div>
           <div class="search_field_wrapper action_buttons_wrapper">
             <span class="search_label">Thao tác</span>
             <div class="action_buttons_group">
@@ -97,7 +103,7 @@
                   <th>Giá bán</th>
                   <th>Số lượng</th>
                   <th style="width: 120px;">Trạng thái</th>
-                  <?php if ($is_admin || $is_store_manager): ?>
+                  <?php if ($is_admin || $is_store_manager || canImportExport()): ?>
                   <th style="width: 90px;">Thao tác</th>
                   <?php endif; ?>
                 </tr>

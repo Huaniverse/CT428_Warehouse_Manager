@@ -8,7 +8,7 @@
   <meta name="description" content="Hệ thống quản lý kho hàng, theo dõi tồn kho theo thời gian thực.">
   <!-- CSRF token — được sinh bởi auth.php::generateCsrfToken(), dùng bởi apiFetch() -->
   <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-  <link rel="stylesheet" href="../../public/css/style.css?v=<?php echo filemtime(__DIR__ . '/../../public/css/style.css'); ?>">
+  <link rel="stylesheet" href="<?= defined('ROOT_CONTEXT') ? '' : '../../' ?>public/css/style.css?v=<?php echo filemtime(__DIR__ . '/../../public/css/style.css'); ?>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">

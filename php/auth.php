@@ -40,7 +40,7 @@ function isAjaxRequest(): bool {
 }
 
 function redirectToLogin(string $reason = 'expired'): void {
-    $login_url = (defined('BASE_URL') ? BASE_URL : '') . '/login.php?expired=1';
+    $login_url = (defined('BASE_URL') ? BASE_URL : '') . '/index.php?page=login&expired=1';
 
     if (isAjaxRequest()) {
         http_response_code(401);

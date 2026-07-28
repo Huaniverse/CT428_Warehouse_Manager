@@ -35,7 +35,8 @@ function fetchFilteredProducts(page) {
 
     const cfg = window.APP_CONFIG || {};
     const canManage = !!cfg.canManageProducts || !!cfg.isAdmin || cfg.role === 'store_manager';
-    const colspan = canManage ? 8 : 7;
+    const canView = canManage || !!cfg.canViewProducts;
+    const colspan = canView ? 8 : 7;
     const tbody = document.getElementById('product_table_body');
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="' + colspan + '" style="text-align: center; padding: 32px; color: #64748b;">Đang tải dữ liệu...</td></tr>';
@@ -45,8 +46,10 @@ function fetchFilteredProducts(page) {
             const totalPages = Math.ceil(data.total / data.per_page);
             renderProductPagination(totalPages, data.page);
             const apiManage = (data.can_manage_products === true);
+            const apiView = (data.can_view_products === true);
             const managePerm = canManage || apiManage;
-            const col = managePerm ? 8 : 7;
+            const viewPerm = canView || apiView;
+            const col = viewPerm ? 8 : 7;
 
             if (data.records.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="' + col + '" class="no_results">Không tìm thấy sản phẩm nào phù hợp với bộ lọc.</td></tr>';
@@ -58,11 +61,14 @@ function fetchFilteredProducts(page) {
                 const rowCls = r.is_active == 0 ? ' class="row_hidden"' : '';
                 const desc = escapeHtml(r.MoTa || '');
                 let actionCell = '';
-                if (managePerm) {
+                if (viewPerm) {
                     const viewBtn = '<button class="btn_icon" title="Xem chi tiết" onclick="openProductDetail(' + r.MaSP + ')"><span class="material-symbols-outlined">visibility</span></button>';
-                    const toggleBtn = r.is_active == 1
-                        ? '<button class="btn_icon" title="Ẩn sản phẩm" onclick="toggleProductActive(' + r.MaSP + ', 0)"><span class="material-symbols-outlined">visibility_off</span></button>'
-                        : '<button class="btn_icon" title="Khôi phục sản phẩm" onclick="toggleProductActive(' + r.MaSP + ', 1)"><span class="material-symbols-outlined">restore</span></button>';
+                    let toggleBtn = '';
+                    if (managePerm) {
+                        toggleBtn = r.is_active == 1
+                            ? '<button class="btn_icon" title="Ẩn sản phẩm" onclick="toggleProductActive(' + r.MaSP + ', 0)"><span class="material-symbols-outlined">visibility_off</span></button>'
+                            : '<button class="btn_icon" title="Khôi phục sản phẩm" onclick="toggleProductActive(' + r.MaSP + ', 1)"><span class="material-symbols-outlined">restore</span></button>';
+                    }
                     actionCell = '<td class="action_cell"><div class="action_group">' + viewBtn + toggleBtn + '</div></td>';
                 }
                 return '<tr' + rowCls + '>'
@@ -131,7 +137,17 @@ function resetProductFilter() {
     fetchFilteredProducts(1);
 }
 
-['select_category', 'select_price', 'select_quantity', 'select_limit'].forEach(id => {
+document.getElementById('select_price')?.addEventListener('change', function () {
+    const qtyEl = document.getElementById('select_quantity');
+    if (qtyEl) qtyEl.value = '';
+    fetchFilteredProducts(1);
+});
+document.getElementById('select_quantity')?.addEventListener('change', function () {
+    const priceEl = document.getElementById('select_price');
+    if (priceEl) priceEl.value = '';
+    fetchFilteredProducts(1);
+});
+['select_category', 'select_limit'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('change', () => fetchFilteredProducts(1));
 });
@@ -161,7 +177,8 @@ function openProductDetail(maSp) {
     if (!modal) return;
 
     document.getElementById('productInfoDisplay').style.display = '';
-    document.getElementById('productInfoEdit').style.display = 'none';
+    const editForm = document.getElementById('productInfoEdit');
+    if (editForm) editForm.style.display = 'none';
 
     const tbody = document.getElementById('productHistoryBody');
     if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="table_loading">Đang tải...</td></tr>';

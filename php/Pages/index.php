@@ -32,18 +32,20 @@ extract(getDashboardData($conn));
       isAdmin: <?php echo $is_admin ? 'true' : 'false'; ?>,
       isStoreManager: <?php echo $is_store_manager ? 'true' : 'false'; ?>,
       canManageProducts: <?php echo ($is_admin || $is_store_manager) ? 'true' : 'false'; ?>,
+      canViewProducts: <?php echo ($is_admin || $is_store_manager || canImportExport()) ? 'true' : 'false'; ?>,
       role: '<?php echo $current_user['role']; ?>',
       currentUserId: <?php echo $current_user['id']; ?>
     };
   </script>
-  <script src="../../public/js/app.js"></script>
-  <script src="../../public/js/products.js"></script>
+<?php $p = defined('ROOT_CONTEXT') ? '' : '../../'; ?>
+  <script src="<?= $p ?>public/js/app.js"></script>
+  <script src="<?= $p ?>public/js/products.js"></script>
   <?php if (canImportExport()): ?>
-    <script src="../../public/js/stock.js"></script>
-    <script src="../../public/js/combobox.js"></script>
+    <script src="<?= $p ?>public/js/stock.js"></script>
+    <script src="<?= $p ?>public/js/combobox.js"></script>
   <?php endif; ?>
   <?php if ($is_admin || $is_store_manager): ?>
-    <script src="../../public/js/admin-users.js"></script>
+    <script src="<?= $p ?>public/js/admin-users.js"></script>
   <?php endif; ?>
 
   <script>
@@ -59,7 +61,7 @@ extract(getDashboardData($conn));
     const chartTopLabels = <?php echo json_encode($chart_top_labels); ?>;
     const chartTopData = <?php echo json_encode($chart_top_data); ?>;
   </script>
-  <script src="../../public/js/dashboard.js"></script>
+  <script src="<?= $p ?>public/js/dashboard.js"></script>
 </body>
 <?php if ($conn) $conn->close(); ?>
 

@@ -18,6 +18,7 @@ $limit_param  = isset($_GET['limit']) ? $_GET['limit'] : '10';
 $active_only  = isset($_GET['active_only']) ? (int)$_GET['active_only'] : 0;
 
 $can_manage_products = isAdmin() || isStoreManager();
+$can_view_products = $can_manage_products || canImportExport();
 
 $where = "1=1";
 $params = [];
@@ -121,6 +122,7 @@ echo json_encode([
     'per_page'           => $limit,
     'is_admin'           => isAdmin(),
     'can_manage_products'=> $can_manage_products,
+    'can_view_products'  => $can_view_products,
 ]);
 
 $conn->close();

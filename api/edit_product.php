@@ -3,11 +3,19 @@
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/auth.php';
 require_once __DIR__ . '/../php/partials/helpers-products.php';
-requireAdminOrStoreManager();
 
 header('Content-Type: application/json; charset=utf-8');
 
-$action = ($_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST['action'] : $_GET['action']) ?? '';
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
+
+// action=detail và action=get: staff có import perm được phép xem
+// action=update và action=toggle_active: chỉ admin/store_manager
+$isEditAction = in_array($action, ['update', 'toggle_active'], true);
+if ($isEditAction) {
+    requireAdminOrStoreManager();
+} elseif (!isAdmin() && !isStoreManager() && !canImportExport()) {
+    deny403();
+}
 
 if (!$conn) {
     echo json_encode(['success' => false, 'message' => 'Lỗi kết nối cơ sở dữ liệu.']);
@@ -37,7 +45,11 @@ switch ($action) {
             echo json_encode(['success' => false, 'message' => 'Không tìm thấy sản phẩm.']);
             exit;
         }
-        echo json_encode(['success' => true, 'product' => $product]);
+        echo json_encode([
+            'success' => true,
+            'product' => $product,
+            'can_edit' => isAdmin() || isStoreManager(),
+        ]);
         break;
 
     // ── Cập nhật thông tin sản phẩm ───────────────────────────────────────
@@ -196,6 +208,7 @@ switch ($action) {
             'product'        => $product,
             'import_history' => $import_history,
             'export_history' => $export_history,
+            'can_edit'       => isAdmin() || isStoreManager(),
         ]);
         break;
 

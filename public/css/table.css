@@ -91,6 +91,19 @@
     color: #97a5b8;
 }
 
+/* ===== COLUMN WIDTH UTILITIES ===== */
+.col_40 { width: 40px; }
+.col_50 { width: 50px; }
+.col_80 { width: 80px; }
+.col_90 { width: 90px; }
+.col_100 { width: 100px; }
+.col_120 { width: 120px; }
+.col_140 { width: 140px; }
+.col_150 { width: 150px; }
+.col_160 { width: 160px; }
+.col_180 { width: 180px; }
+.col_35 { width: 35%; }
+
 /* ===== NO RESULTS ===== */
 .no_results {
     padding: 32px;

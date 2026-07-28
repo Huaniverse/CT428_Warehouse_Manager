@@ -191,7 +191,7 @@ $categories_list  = $categories_list  ?? [];
   <?php endif; ?>
 
   <!-- Modal chi tiết sản phẩm -->
-  <?php if ($is_admin || $is_store_manager): ?>
+  <?php if ($is_admin || $is_store_manager || canImportExport()): ?>
   <div class="modal_overlay" id="productDetailModal">
     <div class="modal_card" style="width: 800px; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal_header">
@@ -222,10 +222,12 @@ $categories_list  = $categories_list  ?? [];
                 <span class="material-symbols-outlined" style="font-size:18px;">bookmark_add</span>
                 Xuất hàng
               </button>
+              <?php if ($is_admin || $is_store_manager): ?>
               <button class="btn_primary" id="btnToggleProdEditMode" style="padding:6px 14px; font-size:13px; height:36px; background:#3b82f6;">
                 <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
                 Chỉnh sửa
               </button>
+              <?php endif; ?>
             </div>
           </div>
           <div class="product_detail_grid">
@@ -252,7 +254,8 @@ $categories_list  = $categories_list  ?? [];
           </div>
         </div>
 
-        <!-- Form chỉnh sửa sản phẩm (ẩn mặc định) -->
+        <!-- Form chỉnh sửa sản phẩm (ẩn mặc định, chỉ admin/store_manager) -->
+        <?php if ($is_admin || $is_store_manager): ?>
         <div id="productInfoEdit" style="display:none;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
             <span style="font-weight:600; font-size:15px; color:#0f172a;">Chỉnh sửa thông tin</span>
@@ -300,6 +303,7 @@ $categories_list  = $categories_list  ?? [];
             </button>
           </div>
         </div>
+        <?php endif; ?>
 
         <!-- Lịch sử nhập/xuất kho -->
         <div style="margin-top:24px; border-top:1px solid #e8ecf0; padding-top:20px;">
@@ -800,3 +804,37 @@ $categories_list  = $categories_list  ?? [];
     </div>
   </div>
   <?php endif; ?>
+
+  <!-- Modal nhập số lượng từ danh sách -->
+  <div class="modal_overlay" id="quantityPromptModal">
+    <div class="modal_card" style="width: 380px;">
+      <div class="modal_header">
+        <h3>
+          <span class="material-symbols-outlined" style="color:#ea580c;">edit_note</span>
+          <span id="quantityPromptTitle">Nhập số lượng</span>
+        </h3>
+        <button class="modal_close" id="btnCloseQuantityPrompt" aria-label="Đóng modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal_body">
+        <div class="form_group" style="margin-bottom: 0;">
+          <label for="quantityPromptInput" id="quantityPromptLabel">Sản phẩm</label>
+          <div class="form_input_wrapper">
+            <span class="material-symbols-outlined form_icon">pinch</span>
+            <input type="number" id="quantityPromptInput" class="form_input" min="1" value="10" placeholder="Nhập số lượng...">
+          </div>
+        </div>
+      </div>
+      <div class="modal_footer">
+        <button class="btn_secondary" id="btnCancelQuantityPrompt" type="button">
+          <span class="material-symbols-outlined">close</span>
+          Hủy
+        </button>
+        <button class="btn_primary" id="btnConfirmQuantityPrompt" type="button" style="background-color:#16a34a;">
+          <span class="material-symbols-outlined">check</span>
+          Xác nhận
+        </button>
+      </div>
+    </div>
+  </div>

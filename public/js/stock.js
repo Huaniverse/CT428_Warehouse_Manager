@@ -594,21 +594,56 @@ function renderListSuggestions(type) {
 
 function quickAddFromList(type, productId, productName) {
     const cfg = getListConfig(type);
-    const quantity = parseInt(prompt(`${cfg.promptLabel} "${productName}":`, '10'), 10);
-    if (!quantity || quantity <= 0) return;
+    const modal = document.getElementById('quantityPromptModal');
+    const titleEl = document.getElementById('quantityPromptTitle');
+    const labelEl = document.getElementById('quantityPromptLabel');
+    const inputEl = document.getElementById('quantityPromptInput');
+    const btnConfirm = document.getElementById('btnConfirmQuantityPrompt');
+    const btnCancel = document.getElementById('btnCancelQuantityPrompt');
+    const btnClose = document.getElementById('btnCloseQuantityPrompt');
+    if (!modal || !inputEl) return;
 
-    const batchItems = type === 'import' ? importBatchItems : exportBatchItems;
-    const existing = batchItems.find(item => item.productId === productId);
-    if (existing) {
-        existing.quantity += quantity;
-        showToast(`Đã cộng thêm ${number_format(quantity)} vào "${productName}".`, 'success');
-    } else {
-        batchItems.push({ productId, productName, quantity, note: cfg.quickNote });
-        showToast(`Đã thêm "${productName}" (${number_format(quantity)}) vào phiếu.`, 'success');
+    titleEl.textContent = cfg.promptLabel;
+    labelEl.textContent = `"${productName}"`;
+    inputEl.value = '10';
+    modal.classList.add('open');
+    setTimeout(() => inputEl.focus(), 50);
+
+    function cleanup() {
+        modal.classList.remove('open');
+        btnConfirm.removeEventListener('click', onConfirm);
+        btnCancel.removeEventListener('click', onCancel);
+        btnClose.removeEventListener('click', onCancel);
+        modal.removeEventListener('click', onOverlay);
+        inputEl.removeEventListener('keydown', onKey);
+    }
+    function onOverlay(e) { if (e.target === modal) cleanup(); }
+    function onCancel() { cleanup(); }
+    function onKey(e) { if (e.key === 'Enter') onConfirm(); if (e.key === 'Escape') onCancel(); }
+    function onConfirm() {
+        const quantity = parseInt(inputEl.value, 10);
+        if (!quantity || quantity <= 0) { inputEl.focus(); return; }
+        cleanup();
+
+        const batchItems = type === 'import' ? importBatchItems : exportBatchItems;
+        const existing = batchItems.find(item => item.productId === productId);
+        if (existing) {
+            existing.quantity += quantity;
+            showToast(`Đã cộng thêm ${number_format(quantity)} vào "${productName}".`, 'success');
+        } else {
+            batchItems.push({ productId, productName, quantity, note: cfg.quickNote });
+            showToast(`Đã thêm "${productName}" (${number_format(quantity)}) vào phiếu.`, 'success');
+        }
+
+        renderBatchTable(type);
+        removeFromList(type, productId);
     }
 
-    renderBatchTable(type);
-    removeFromList(type, productId);
+    btnConfirm.addEventListener('click', onConfirm);
+    btnCancel.addEventListener('click', onCancel);
+    btnClose.addEventListener('click', onCancel);
+    modal.addEventListener('click', onOverlay);
+    inputEl.addEventListener('keydown', onKey);
 }
 
 window.removeFromList = removeFromList;

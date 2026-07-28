@@ -82,7 +82,7 @@
               </div>
               <span class="price_range_separator">—</span>
               <div class="input_group">
-                <input type="number" id="hist_price_max" min="0" max="<?php echo $max_price; ?>" value="<?php echo $max_price; ?>" step="100000" placeholder="Đến" class="input_find price_input">
+                <input type="number" id="hist_price_max" min="0" max="<?php echo $max_price; ?>" value="0" step="100000" placeholder="Đến" class="input_find price_input">
               </div>
             </div>
           </div>
