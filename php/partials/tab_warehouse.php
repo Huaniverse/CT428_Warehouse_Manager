@@ -63,6 +63,7 @@
               <span>Xóa lọc</span>
             </button>
           </div>
+          <?php if ($is_admin || $is_manager || canImportExport()): ?>
           <div class="search_field_wrapper action_buttons_wrapper">
             <span class="search_label">Thao tác</span>
             <div class="action_buttons_group">
@@ -88,6 +89,7 @@
               <?php endif; ?>
             </div>
           </div>
+          <?php endif; ?>
         </div>
 
         <!-- Kết quả lọc sản phẩm -->
@@ -103,7 +105,7 @@
                   <th>Giá bán</th>
                   <th>Số lượng</th>
                   <th style="width: 120px;">Trạng thái</th>
-                  <?php if ($is_admin || $is_manager || canImportExport()): ?>
+                  <?php if (canViewProducts()): ?>
                   <th style="width: 90px;">Thao tác</th>
                   <?php endif; ?>
                 </tr>

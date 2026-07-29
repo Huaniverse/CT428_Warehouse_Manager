@@ -13,7 +13,7 @@ $action = $_GET['action'] ?? $_POST['action'] ?? '';
 $isEditAction = in_array($action, ['update', 'toggle_active'], true);
 if ($isEditAction) {
     requireAdminOrManager();
-} elseif (!isAdmin() && !isManager() && !canImportExport()) {
+} elseif (!canViewProducts()) {
     deny403();
 }
 

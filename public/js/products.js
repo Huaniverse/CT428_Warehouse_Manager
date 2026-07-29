@@ -309,7 +309,7 @@ if (prodDetailModal) {
         document.getElementById('edit_prod_price').value = p.Gia;
         document.getElementById('edit_prod_desc').value = p.MoTa || '';
         document.getElementById('productInfoDisplay').style.display = 'none';
-        document.getElementById('productInfoEdit').style.display = '';
+        document.getElementById('productInfoEdit').style.display = 'block';
     });
 
     function cancelProdEdit() {

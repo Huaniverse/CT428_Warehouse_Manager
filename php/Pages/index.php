@@ -32,7 +32,7 @@ extract(getDashboardData($conn));
       isAdmin: <?php echo $is_admin ? 'true' : 'false'; ?>,
       isManager: <?php echo $is_manager ? 'true' : 'false'; ?>,
       canManageProducts: <?php echo ($is_admin || $is_manager) ? 'true' : 'false'; ?>,
-      canViewProducts: <?php echo ($is_admin || $is_manager || canImportExport()) ? 'true' : 'false'; ?>,
+      canViewProducts: <?php echo canViewProducts() ? 'true' : 'false'; ?>,
       role: '<?php echo $current_user['role']; ?>',
       currentUserId: <?php echo $current_user['id']; ?>
     };
@@ -40,8 +40,10 @@ extract(getDashboardData($conn));
 <?php $p = defined('ROOT_CONTEXT') ? '' : '../../'; ?>
   <script src="<?= $p ?>public/js/app.js?v=<?= filemtime(ROOT_PATH . '/public/js/app.js') ?>"></script>
   <script src="<?= $p ?>public/js/products.js?v=<?= filemtime(ROOT_PATH . '/public/js/products.js') ?>"></script>
-  <?php if (canImportExport()): ?>
+  <?php if (canViewProducts()): ?>
     <script src="<?= $p ?>public/js/stock.js?v=<?= filemtime(ROOT_PATH . '/public/js/stock.js') ?>"></script>
+  <?php endif; ?>
+  <?php if (canImportExport()): ?>
     <script src="<?= $p ?>public/js/combobox.js?v=<?= filemtime(ROOT_PATH . '/public/js/combobox.js') ?>"></script>
   <?php endif; ?>
   <?php if ($is_admin || $is_manager): ?>

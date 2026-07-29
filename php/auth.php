@@ -127,6 +127,10 @@ function canImportExport(): bool {
     return false;
 }
 
+function canViewProducts(): bool {
+    return isAdmin() || isManager() || ($_SESSION['role'] ?? '') === 'staff';
+}
+
 // ── Gate Functions (die with 403 if unauthorized) ────────────────────────────
 
 function deny403(): void {
@@ -150,10 +154,6 @@ function requireCanImportExport(): void {
 // ── Data-scope Helpers ───────────────────────────────────────────────────────
 
 function staffViewScope(): ?int {
-    $role = $_SESSION['role'] ?? '';
-    if ($role === 'staff' && !($_SESSION['allow_import_export'] ?? 0)) {
-        return (int)$_SESSION['user_id'];
-    }
     return null;
 }
 

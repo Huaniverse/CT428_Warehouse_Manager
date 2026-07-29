@@ -25,7 +25,7 @@ function renderBatchTable(type) {
         tbody.innerHTML = '';
         return;
     }
-    wrapper.style.display = '';
+        wrapper.style.display = 'block';
     tbody.innerHTML = cfg.items.map((item, idx) => `<tr>
         <td style="text-align:center; color:#64748b;">${idx + 1}</td>
         <td><span class="product_name">${escapeHtml(item.productName)}</span></td>
@@ -299,14 +299,14 @@ function switchHistoryTab(type) {
     if (type === 'import') {
         importBtn.classList.add('active');
         exportBtn.classList.remove('active');
-        importPanel.style.display = '';
-        exportPanel.style.display = 'none';
+        importPanel.classList.remove('panel_hidden');
+        exportPanel.classList.add('panel_hidden');
         loadImportHistory(1);
     } else {
         importBtn.classList.remove('active');
         exportBtn.classList.add('active');
-        importPanel.style.display = 'none';
-        exportPanel.style.display = '';
+        importPanel.classList.add('panel_hidden');
+        exportPanel.classList.remove('panel_hidden');
         loadExportHistory(1);
     }
 }
@@ -581,7 +581,7 @@ function renderListSuggestions(type) {
     countSpan.textContent = list.length;
 
     if (list.length === 0) { container.style.display = 'none'; return; }
-    container.style.display = '';
+    container.style.display = 'block';
 
     itemsDiv.innerHTML = list.map(item => `
         <div class="${cfg.chipClass}" onclick="quickAddFromList('${type}', '${item.productId}', '${escapeHtml(item.productName).replace(/'/g, "\\'")}')" title="${cfg.suggestTitle}">

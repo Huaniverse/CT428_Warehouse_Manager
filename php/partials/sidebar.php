@@ -12,7 +12,7 @@ $is_manager= $is_manager?? isManager();
         <span class="material-symbols-outlined">inventory</span>
         <span>Kho hàng</span>
       </a>
-      <?php if (canImportExport()): ?>
+      <?php if (canViewProducts()): ?>
       <a class="menu_item" data-tab="lichsu">
         <span class="material-symbols-outlined">history</span>
         <span>Lịch sử</span>

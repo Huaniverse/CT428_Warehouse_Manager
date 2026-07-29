@@ -191,7 +191,7 @@ $categories_list  = $categories_list  ?? [];
   <?php endif; ?>
 
   <!-- Modal chi tiết sản phẩm -->
-  <?php if ($is_admin || $is_manager || canImportExport()): ?>
+  <?php if (canViewProducts()): ?>
   <div class="modal_overlay" id="productDetailModal">
     <div class="modal_card modal_card_lg">
       <div class="modal_header">
@@ -214,6 +214,7 @@ $categories_list  = $categories_list  ?? [];
               <span id="detail_prod_stock_info" class="text_muted"></span>
             </div>
             <div class="flex_row">
+              <?php if (canImportExport()): ?>
               <button class="btn_primary btn_sm" id="btnAddToImportList" style="background:#16a34a;">
                 <span class="material-symbols-outlined" style="font-size:18px;">bookmark_add</span>
                 Nhập hàng
@@ -222,6 +223,7 @@ $categories_list  = $categories_list  ?? [];
                 <span class="material-symbols-outlined" style="font-size:18px;">bookmark_add</span>
                 Xuất hàng
               </button>
+              <?php endif; ?>
               <?php if ($is_admin || $is_manager): ?>
               <button class="btn_primary btn_sm" id="btnToggleProdEditMode" style="background:#3b82f6;">
                 <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
@@ -786,7 +788,7 @@ $categories_list  = $categories_list  ?? [];
   <?php endif; ?>
 
   <!-- Modal chi tiết phiếu nhập/xuất -->
-  <?php if (canImportExport()): ?>
+  <?php if (canViewProducts()): ?>
   <div class="modal_overlay" id="receiptDetailModal">
     <div class="modal_card modal_card_lg">
       <div class="modal_header">

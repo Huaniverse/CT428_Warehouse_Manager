@@ -18,7 +18,7 @@ $limit_param  = isset($_GET['limit']) ? $_GET['limit'] : '10';
 $active_only  = isset($_GET['active_only']) ? (int)$_GET['active_only'] : 0;
 
 $can_manage_products = isAdmin() || isManager();
-$can_view_products = $can_manage_products || canImportExport();
+$can_view_products = canViewProducts();
 
 $where = "1=1";
 $params = [];

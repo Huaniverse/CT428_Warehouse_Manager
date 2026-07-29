@@ -6,10 +6,16 @@ require_once __DIR__ . '/../php/partials/helpers-stock.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-requireCanImportExport();
 requireDb($conn);
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
+
+$viewActions = ['list', 'detail'];
+if (in_array($action, $viewActions, true)) {
+    if (!canViewProducts()) deny403();
+} else {
+    requireCanImportExport();
+}
 
 switch ($action) {
 

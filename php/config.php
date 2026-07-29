@@ -21,6 +21,11 @@ date_default_timezone_set('Asia/Ho_Chi_Minh');
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $scriptDir = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/\\');
-// Nếu script nằm trong php/Pages/ → đi lên 2 cấp, nếu là root index.php → giữ nguyên
-$baseUrlPath = (basename($scriptDir) === 'Pages') ? dirname(dirname($scriptDir)) : $scriptDir;
+// Nếu script nằm trong php/Pages/ → lên 2 cấp; nếu nằm trong api/ hay public/ → lên 1 cấp
+$baseDir = basename($scriptDir);
+$baseUrlPath = match ($baseDir) {
+    'Pages' => dirname(dirname($scriptDir)),
+    'api', 'public', 'php' => dirname($scriptDir),
+    default => $scriptDir,
+};
 define('BASE_URL', $protocol . '://' . $host . $baseUrlPath);

@@ -1,4 +1,4 @@
-      <?php if (canImportExport()): ?>
+      <?php if (canViewProducts()): ?>
       <!-- TAB LỊCH SỬ NHẬP/XUẤT KHO -->
       <div id="content_lichsu" class="tab_content">
         <h1 class="page_title">Lịch sử nhập / xuất kho</h1>
