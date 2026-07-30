@@ -1,4 +1,4 @@
-// modules/users/js/dashboard.js — Chart initialization cho Dashboard tab
+// Biểu đồ thống kê trang tổng quan
 
 (function() {
     if (typeof chart1Labels === 'undefined') return;

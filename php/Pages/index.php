@@ -1,4 +1,5 @@
 <?php
+// Trang chính của ứng dụng sau khi đăng nhập
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../auth.php';
@@ -8,6 +9,7 @@ $current_user    = getCurrentUser();
 $is_admin        = isAdmin();
 $is_manager = isManager();
 
+// Lấy dữ liệu dashboard từ database
 extract(getDashboardData($conn));
 ?>
   <?php require_once ROOT_PATH . '/php/partials/head.php'; ?>
@@ -28,6 +30,7 @@ extract(getDashboardData($conn));
 
   <script>
       window.BASE_URL = '<?php echo BASE_URL; ?>';
+    // Cấu hình quyền trên client cho JS
     window.APP_CONFIG = {
       isAdmin: <?php echo $is_admin ? 'true' : 'false'; ?>,
       isManager: <?php echo $is_manager ? 'true' : 'false'; ?>,
@@ -51,6 +54,7 @@ extract(getDashboardData($conn));
   <?php endif; ?>
 
   <script>
+    // Dữ liệu cho các biểu đồ
     const chart1Labels = <?php echo json_encode($chart1_labels); ?>;
     const chart1Data = <?php echo json_encode($chart1_data); ?>;
     const chart2Labels = <?php echo json_encode($chart2_labels); ?>;

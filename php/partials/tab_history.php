@@ -1,10 +1,10 @@
       <?php if (canViewProducts()): ?>
-      <!-- TAB LỊCH SỬ NHẬP/XUẤT KHO -->
+      <!-- Tab lịch sử nhập xuất kho -->
       <div id="content_lichsu" class="tab_content">
         <h1 class="page_title">Lịch sử nhập / xuất kho</h1>
         <p class="page_subtitle">Xem danh sách các phiếu nhập kho và xuất kho đã thực hiện.</p>
 
-        <!-- Tabs con: Nhập / Xuất -->
+        <!-- Tabs con Nhap / Xuat -->
         <div class="tab_buttons_row">
           <button class="filter_button history_tab_btn active" id="hist_tab_import" onclick="switchHistoryTab('import')">
             <span class="material-symbols-outlined">download</span>
@@ -16,7 +16,7 @@
           </button>
         </div>
 
-        <!-- Bộ lọc tìm kiếm -->
+        <!-- Bo loc tim kiem -->
         <?php
         $today = date('Y-m-d');
         $users_list = [];
@@ -94,7 +94,7 @@
           </div>
         </div>
 
-        <!-- Bảng phiếu nhập -->
+        <!-- Bang phieu nhap -->
         <div id="history_import_panel">
           <div class="table_container">
             <table class="product_table">
@@ -116,7 +116,7 @@
           <div id="importHistoryPagination" class="pagination_wrap"></div>
         </div>
 
-        <!-- Bảng phiếu xuất (ẩn mặc định) -->
+        <!-- Bang phieu xuat (an mac dinh) -->
         <div id="history_export_panel" class="panel_hidden">
           <div class="table_container">
             <table class="product_table">

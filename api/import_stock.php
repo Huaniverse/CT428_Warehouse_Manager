@@ -1,4 +1,5 @@
 <?php
+// Xử lý nhập kho (đơn lẻ và hàng loạt)
 
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/auth.php';
@@ -19,7 +20,7 @@ if (in_array($action, $viewActions, true)) {
 
 switch ($action) {
 
-    // ── Tạo phiếu nhập ────────────────────────────────────────────────────
+    // Tạo phiếu nhập đơn lẻ
     case 'create':
         requirePost();
         verifyCsrfToken();
@@ -92,7 +93,7 @@ switch ($action) {
         }
         break;
 
-    // ── Tạo phiếu nhập hàng loạt ─────────────────────────────────────────
+    // Tạo phiếu nhập hàng loạt
     case 'create_batch':
         requirePost();
         verifyCsrfToken();
@@ -172,12 +173,12 @@ switch ($action) {
         }
         break;
 
-    // ── Danh sách phiếu nhập ──────────────────────────────────────────────
+    // Danh sách phiếu nhập
     case 'list':
         echo json_encode(getStockList($conn, 'import'));
         break;
 
-    // ── Chi tiết phiếu nhập ───────────────────────────────────────────────
+    // Chi tiết phiếu nhập
     case 'detail':
         $ma_phieu = trim($_GET['ma_phieu'] ?? '');
         if ($ma_phieu === '') {

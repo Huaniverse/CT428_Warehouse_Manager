@@ -1,4 +1,5 @@
       <?php
+      // Tab tổng quan kho hàng
       $total_categories    = $total_categories    ?? 0;
       $total_quantity      = $total_quantity      ?? 0;
       $total_val           = $total_val           ?? 0;
@@ -21,7 +22,7 @@
         <h1 class="page_title">Tổng quan kho hàng</h1>
         <p class="page_subtitle">Thống kê và báo cáo số lượng, giá trị tồn kho theo thời gian thực</p>
 
-        <!-- KPI Cards -->
+        <!-- Cac the KPI -->
         <div class="dashboard_grid">
           <div class="kpi_card">
             <div class="kpi_icon blue">
@@ -104,7 +105,7 @@
           </div>
         </div>
 
-        <!-- Biểu đồ -->
+        <!-- Bieu do -->
         <div class="chart_grid">
           <div class="chart_card">
             <h3>Số lượng sản phẩm theo danh mục</h3>
@@ -144,9 +145,9 @@
           </div>
         </div>
 
-        <!-- Bảng danh sách -->
+        <!-- Bang danh sach -->
         <div class="dashboard_tables_grid">
-          <!-- Sắp hết hàng -->
+          <!-- Sap het hang -->
           <div class="dashboard_table_card">
             <div class="dashboard_table_header">
               <span class="material-symbols-outlined" style="color:#f59e0b;">warning</span>
@@ -178,7 +179,7 @@
             </div>
           </div>
 
-          <!-- Bán chạy nhất -->
+          <!-- Ban chay nhat -->
           <div class="dashboard_table_card">
             <div class="dashboard_table_header">
               <span class="material-symbols-outlined" style="color:#10b981;">local_fire_department</span>
@@ -210,7 +211,7 @@
             </div>
           </div>
 
-          <!-- Phiếu gần đây -->
+          <!-- Hoat dong gan day -->
           <div class="dashboard_table_card dashboard_table_full">
             <div class="dashboard_table_header">
               <span class="material-symbols-outlined" style="color:#3b82f6;">history</span>

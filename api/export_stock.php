@@ -1,4 +1,5 @@
 <?php
+// Xử lý xuất kho (đơn lẻ và hàng loạt)
 
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/auth.php';
@@ -19,7 +20,7 @@ if (in_array($action, $viewActions, true)) {
 
 switch ($action) {
 
-    // ── Tạo phiếu xuất ────────────────────────────────────────────────────
+    // Tạo phiếu xuất đơn lẻ
     case 'create':
         requirePost();
         verifyCsrfToken();
@@ -108,7 +109,7 @@ switch ($action) {
         }
         break;
 
-    // ── Tạo phiếu xuất hàng loạt ─────────────────────────────────────────
+    // Tạo phiếu xuất hàng loạt
     case 'create_batch':
         requirePost();
         verifyCsrfToken();
@@ -197,12 +198,12 @@ switch ($action) {
         }
         break;
 
-    // ── Danh sách phiếu xuất ──────────────────────────────────────────────
+    // Danh sách phiếu xuất
     case 'list':
         echo json_encode(getStockList($conn, 'export'));
         break;
 
-    // ── Chi tiết phiếu xuất ───────────────────────────────────────────────
+    // Chi tiết phiếu xuất
     case 'detail':
         $ma_phieu = trim($_GET['ma_phieu'] ?? '');
         if ($ma_phieu === '') {

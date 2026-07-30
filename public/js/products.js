@@ -1,3 +1,4 @@
+// Quản lý sản phẩm: lọc, tìm kiếm, chi tiết, thêm, sửa
 let productCurrentPage = 1;
 
 function getProductStatus(r) {

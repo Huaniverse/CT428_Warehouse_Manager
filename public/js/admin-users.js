@@ -1,3 +1,4 @@
+// Quản lý tài khoản người dùng, phân quyền, lịch truy cập
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btnRefreshSessions')?.addEventListener('click', loadSessions);
 

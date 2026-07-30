@@ -1,4 +1,4 @@
-/* ===== HEADER ===== */
+/* Bố cục header, sidebar, main */
 header {
     display: flex;
     justify-content: space-between;
@@ -67,7 +67,7 @@ header {
     font-size: 20px;
 }
 
-/* ===== SIDEBAR ===== */
+/* Sidebar */
 main {
     display: flex;
     min-height: calc(100vh - 73px);
@@ -122,7 +122,7 @@ aside {
     font-size: 22px;
 }
 
-/* ===== MAIN CONTENT ===== */
+/* Nội dung chính */
 .main_content {
     flex-grow: 1;
     padding: 36px 40px;
@@ -270,7 +270,7 @@ aside {
     background-size: 16px;
 }
 
-/* ===== TABS ===== */
+/* Tab content */
 .tab_content {
     display: none;
 }
@@ -279,7 +279,7 @@ aside {
     display: block;
 }
 
-/* ===== PRICE RANGE INPUTS ===== */
+/* Input khoảng giá */
 .price_range_inputs {
     display: flex;
     align-items: center;
@@ -315,7 +315,7 @@ aside {
     -moz-appearance: textfield;
 }
 
-/* ===== RESPONSIVE ===== */
+/* Responsive */
 @media (max-width: 1024px) {
     .main_content_sort {
         gap: 12px;

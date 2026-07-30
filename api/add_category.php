@@ -1,8 +1,9 @@
 <?php
+// Thêm danh mục sản phẩm
 
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/auth.php';
-requireAdminOrManager(); // Yêu cầu quyền Admin hoặc Manager
+requireAdminOrManager();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -11,7 +12,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// [SEC-01] Xác minh CSRF token — chống CSRF attack
 verifyCsrfToken();
 
 if (!$conn) {
@@ -19,18 +19,17 @@ if (!$conn) {
     exit;
 }
 
-// Nhận và làm sạch dữ liệu đầu vào
+// Nhận và làm sạch dữ liệu
 $ma_dm  = strtoupper(trim($_POST['ma_dm'] ?? ''));
 $ten_dm = trim($_POST['ten_dm'] ?? '');
 
-// Kiểm tra dữ liệu đầu vào
 if ($ma_dm === '') {
     echo json_encode(['success' => false, 'message' => 'Mã danh mục không được để trống.']);
     exit;
 }
 
 if (!preg_match('/^[a-zA-Z0-9_]{2,10}$/', $ma_dm)) {
-    echo json_encode(['success' => false, 'message' => 'Mã danh mục chỉ gồm chữ cái, số, gạch dưới (2–10 ký tự).']);
+    echo json_encode(['success' => false, 'message' => 'Mã danh mục chỉ gồm chữ cái, số, gạch dưới (2-10 ký tự).']);
     exit;
 }
 
@@ -39,7 +38,7 @@ if ($ten_dm === '') {
     exit;
 }
 
-// Kiểm tra trùng lặp mã danh mục
+// Kiểm tra mã danh mục đã tồn tại chưa
 $check = $conn->prepare("SELECT MaDM FROM danhmuc WHERE MaDM = ?");
 $check->bind_param("s", $ma_dm);
 $check->execute();
@@ -51,12 +50,12 @@ if ($res->num_rows > 0) {
 }
 $check->close();
 
-// Thực hiện thêm danh mục mới
+// Thêm danh mục mới
 $stmt = $conn->prepare("INSERT INTO danhmuc (MaDM, TenDM) VALUES (?, ?)");
 $stmt->bind_param("ss", $ma_dm, $ten_dm);
 
 if ($stmt->execute()) {
-    // Lấy lại toàn bộ danh sách danh mục để cập nhật giao diện
+    // Lấy danh sách danh mục để cập nhật giao diện
     $categories = [];
     $result = $conn->query("SELECT MaDM, TenDM FROM danhmuc ORDER BY TenDM ASC");
     if ($result) {

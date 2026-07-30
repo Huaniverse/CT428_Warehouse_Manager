@@ -1,3 +1,4 @@
+// Combobox tìm kiếm sản phẩm tự động
 const _comboData = {};
 
 function loadProductDropdown(inputId) {

@@ -1,4 +1,5 @@
 <?php
+// Lọc và tìm kiếm sản phẩm (có phân trang)
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/auth.php';
 

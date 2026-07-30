@@ -1,4 +1,5 @@
       <?php
+      // Tab quản lý kho hàng
       $is_admin         = $is_admin         ?? isAdmin();
       $is_manager = $is_manager ?? isManager();
       $categories_list  = $categories_list  ?? [];
@@ -92,7 +93,7 @@
           <?php endif; ?>
         </div>
 
-        <!-- Kết quả lọc sản phẩm -->
+        <!-- Bang san pham -->
         <div id="filter_results_container" style="margin-top: 24px;">
           <div class="table_container">
             <table class="product_table">
@@ -111,7 +112,7 @@
                 </tr>
               </thead>
               <tbody id="product_table_body">
-                <!-- AJAX elements will render here -->
+                  <!-- AJAX se render du lieu vao day -->
               </tbody>
             </table>
           </div>

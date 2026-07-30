@@ -1,4 +1,4 @@
-/* ===== PRODUCT TABLE ===== */
+/* Bảng sản phẩm */
 .table_container {
     background: #ffffff;
     border: none;
@@ -61,7 +61,7 @@
     color: #1a1d23;
 }
 
-/* ===== BADGES ===== */
+/* Badges */
 .badge {
     display: inline-flex;
     align-items: center;
@@ -91,7 +91,7 @@
     color: #97a5b8;
 }
 
-/* ===== COLUMN WIDTH UTILITIES ===== */
+/* Do rong cot */
 .col_40 { width: 40px; }
 .col_50 { width: 50px; }
 .col_80 { width: 80px; }
@@ -104,7 +104,7 @@
 .col_180 { width: 180px; }
 .col_35 { width: 35%; }
 
-/* ===== NO RESULTS ===== */
+/* Không có kết quả */
 .no_results {
     padding: 32px;
     text-align: center;
@@ -112,7 +112,7 @@
     font-size: 15px;
 }
 
-/* ===== FILTER BUTTON ===== */
+/* Nut loc */
 .filter_button {
     display: flex;
     align-items: center;
@@ -147,7 +147,7 @@
     font-size: 20px;
 }
 
-/* ===== IMPORT / EXPORT STOCK BUTTONS ===== */
+/* Nút nhập xuất kho */
 .import_stock_button {
     background-color: #10b981;
     color: #fff;
@@ -186,7 +186,7 @@
     background-color: #d97706;
 }
 
-/* ===== ACTION CELL (PRODUCT TABLE) ===== */
+/* Ô thao tác trên bảng sản phẩm */
 .action_cell {
     white-space: nowrap;
     display: flex;
@@ -222,12 +222,12 @@
     font-size: 18px;
 }
 
-/* ===== HIDDEN PRODUCT ROW ===== */
+/* Sản phẩm bị ẩn */
 .row_hidden {
     opacity: 0.55;
 }
 
-/* ===== FILTER CHECKBOX ===== */
+/* Checkbox loc */
 .filter_row {
     display: flex;
     align-items: center;

@@ -1,4 +1,5 @@
 <?php
+// Đăng xuất và hủy session
 session_start();
 
 require_once __DIR__ . '/../db.php';

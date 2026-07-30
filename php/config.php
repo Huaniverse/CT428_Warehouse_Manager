@@ -1,4 +1,5 @@
 <?php
+// Cấu hình hệ thống
 if (file_exists(dirname(__DIR__) . '/config.local.php')) {
     // Môi trường có file local (dev/production đã setup đúng)
     require_once dirname(__DIR__) . '/config.local.php';
@@ -11,17 +12,19 @@ if (file_exists(dirname(__DIR__) . '/config.local.php')) {
     define('DB_NAME', 'warehouse_manager');
 }
 
+// Đường dẫn gốc của project
 define('ROOT_PATH', dirname(__DIR__));
 
 require_once __DIR__ . '/helpers.php';
 
+// Thiết lập múi giờ
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
 // Tự động phát hiện URL base path
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $scriptDir = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/\\');
-// Nếu script nằm trong php/Pages/ → lên 2 cấp; nếu nằm trong api/ hay public/ → lên 1 cấp
+// Xác định số cấp thư mục để quay về root
 $baseDir = basename($scriptDir);
 $baseUrlPath = match ($baseDir) {
     'Pages' => dirname(dirname($scriptDir)),

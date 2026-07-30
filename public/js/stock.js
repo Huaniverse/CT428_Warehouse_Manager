@@ -1,3 +1,4 @@
+// Quản lý nhập xuất kho, lịch sử, danh sách lưu
 // ─── Import/Export Stock Modal (Batch) ─────────────────────────────────────
 let importModal, exportModal;
 let importBatchItems = [], exportBatchItems = [];

@@ -1,3 +1,4 @@
+// Các hàm tiện ích chung: tab, dropdown, toast, ajax, confirm
 const BASE = window.BASE_URL || '';
 
 function switchTab(tabId) {

@@ -1,4 +1,5 @@
 <?php
+// Quản lý tài khoản người dùng (CRUD, phân quyền, session)
 
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/auth.php';
@@ -11,7 +12,7 @@ $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 switch ($action) {
 
-    // ── Danh sách users ──────────────────────────────────────────────────────
+    // Danh sách users
     case 'list':
         requireDb($conn);
 
@@ -36,7 +37,7 @@ switch ($action) {
         echo json_encode(['success' => true, 'users' => $users]);
         break;
 
-    // ── Tạo tài khoản staff mới ──────────────────────────────────────────────
+    // Tạo tài khoản mới
     case 'create':
         requirePost();
         verifyCsrfToken();
@@ -128,7 +129,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Vô hiệu hóa / Kích hoạt lại tài khoản ──────────────────────────────
+    // Vô hiệu hóa / Kích hoạt lại tài khoản
     case 'toggle':
         requirePost();
         verifyCsrfToken();
@@ -160,7 +161,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Xóa tài khoản ────────────────────────────────────────────────────────
+    // Xóa tài khoản
     case 'delete':
         requirePost();
         verifyCsrfToken();
@@ -195,7 +196,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Danh sách phiên đăng nhập đang hoạt động ────────────────────────────
+    // Danh sách phiên đăng nhập đang hoạt động
     case 'sessions':
         requireDb($conn);
 
@@ -234,7 +235,7 @@ switch ($action) {
         echo json_encode(['success' => true, 'sessions' => $sessions]);
         break;
 
-    // ── Kick user (xóa phiên từ xa) ─────────────────────────────────────────
+    // Kick user (xóa phiên từ xa)
     case 'kick':
         requirePost();
         verifyCsrfToken();
@@ -261,7 +262,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Cấp quyền nhập/xuất kho cho staff ────────────────────────────────
+    // Cấp quyền nhập/xuất kho cho staff
     case 'update_permissions':
         requirePost();
         verifyCsrfToken();
@@ -294,7 +295,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Lấy chi tiết tài khoản ─────────────────────────────────────────────
+    // Lấy chi tiết tài khoản
     case 'get_detail':
         requireDb($conn);
 
@@ -332,7 +333,7 @@ switch ($action) {
         echo json_encode(['success' => true, 'user' => $user]);
         break;
 
-    // ── Cập nhật lịch truy cập ─────────────────────────────────────────────
+    // Cập nhật lịch truy cập
     case 'update_schedule':
         requirePost();
         verifyCsrfToken();
@@ -389,7 +390,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Đặt lại mật khẩu ──────────────────────────────────────────────────
+    // Đặt lại mật khẩu
     case 'reset_password':
         requirePost();
         verifyCsrfToken();
@@ -441,7 +442,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Cập nhật thông tin tài khoản ───────────────────────────────────────
+    // Cập nhật thông tin tài khoản
     case 'update':
         requirePost();
         verifyCsrfToken();
@@ -530,7 +531,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Cấp quyền truy cập tạm thời ──────────────────────────────────────
+    // Cấp quyền truy cập tạm thời
     case 'grant_temp_access':
         requirePost();
         verifyCsrfToken();
@@ -573,7 +574,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Thu hồi quyền truy cập tạm thời ───────────────────────────────────
+    // Thu hồi quyền truy cập tạm thời
     case 'revoke_temp_access':
         requirePost();
         verifyCsrfToken();

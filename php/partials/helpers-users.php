@@ -1,4 +1,7 @@
 <?php
+// Các hàm lấy dữ liệu dashboard và kiểm tra quyền
+
+// Lấy toàn bộ dữ liệu thống kê cho trang dashboard
 function getDashboardData(mysqli $conn): array
 {
     $data = [
@@ -29,7 +32,7 @@ function getDashboardData(mysqli $conn): array
 
     if (!$conn) return $data;
 
-    // ── KPI cơ bản ──────────────────────────────────────────────────────
+    // KPI cơ bản
     if ($res = $conn->query("SELECT COUNT(*) as total FROM danhmuc")) {
         $data['total_categories'] = $res->fetch_assoc()['total'];
     }
@@ -46,7 +49,7 @@ function getDashboardData(mysqli $conn): array
         $data['total_out'] = $res->fetch_assoc()['total'];
     }
 
-    // ── KPI tháng này ───────────────────────────────────────────────────
+    // KPI tháng này
     $month_start = date('Y-m-01');
     $month_end   = date('Y-m-t 23:59:59');
 
@@ -66,7 +69,7 @@ function getDashboardData(mysqli $conn): array
         $data['revenue_this_month'] = (int)($res->fetch_assoc()['total'] ?? 0);
     }
 
-    // ── Biểu đồ 1: Số lượng theo danh mục ──────────────────────────────
+    // Biểu đồ 1: Số lượng theo danh mục
     $sql_chart1 = "SELECT d.TenDM, SUM(s.SoLuong) as TongSoLuong
                   FROM sanpham s JOIN danhmuc d ON s.DanhMuc = d.MaDM
                   GROUP BY d.MaDM, d.TenDM";
@@ -77,7 +80,7 @@ function getDashboardData(mysqli $conn): array
         }
     }
 
-    // ── Biểu đồ 2: Giá trị theo danh mục ──────────────────────────────
+    // Biểu đồ 2: Giá trị theo danh mục
     $sql_chart2 = "SELECT d.TenDM, SUM(s.SoLuong * s.Gia) as TongGiaTri
                   FROM sanpham s JOIN danhmuc d ON s.DanhMuc = d.MaDM
                   GROUP BY d.MaDM, d.TenDM";
@@ -88,7 +91,7 @@ function getDashboardData(mysqli $conn): array
         }
     }
 
-    // ── Biểu đồ xu hướng 6 tháng ──────────────────────────────────────
+    // Biểu đồ xu hướng 6 tháng
     for ($i = 5; $i >= 0; $i--) {
         $m_start = date('Y-m-01', strtotime("-{$i} months"));
         $m_end   = date('Y-m-t 23:59:59', strtotime("-{$i} months"));
@@ -103,7 +106,7 @@ function getDashboardData(mysqli $conn): array
         $data['chart_trend_export'][] = (int)($res_exp->fetch_assoc()['total'] ?? 0);
     }
 
-    // ── Biểu đồ trạng thái kho ─────────────────────────────────────────
+    // Biểu đồ trạng thái kho
     if ($res = $conn->query("SELECT
         SUM(CASE WHEN SoLuong >= 30 THEN 1 ELSE 0 END) as in_stock,
         SUM(CASE WHEN SoLuong > 0 AND SoLuong < 30 THEN 1 ELSE 0 END) as low_stock,
@@ -118,7 +121,7 @@ function getDashboardData(mysqli $conn): array
         ];
     }
 
-    // ── Biểu đồ top 5 sản phẩm bán chạy ────────────────────────────────
+    // Biểu đồ top 5 sản phẩm bán chạy
     $sql_top = "SELECT sp.TenSP, SUM(ct.so_luong) as TongBan
                 FROM chi_tiet_phieu_xuat ct
                 JOIN sanpham sp ON ct.san_pham = sp.MaSP
@@ -132,7 +135,7 @@ function getDashboardData(mysqli $conn): array
         }
     }
 
-    // ── Danh sách sắp hết hàng ──────────────────────────────────────────
+    // Danh sách sắp hết hàng
     $sql_low = "SELECT sp.MaSP, sp.TenSP, sp.SoLuong, sp.Gia, d.TenDM
                 FROM sanpham sp JOIN danhmuc d ON sp.DanhMuc = d.MaDM
                 WHERE sp.SoLuong > 0 AND sp.SoLuong < 30 AND sp.is_active = 1
@@ -143,7 +146,7 @@ function getDashboardData(mysqli $conn): array
         }
     }
 
-    // ── Danh sách bán chạy nhất ────────────────────────────────────────
+    // Danh sách bán chạy nhất
     $sql_top5 = "SELECT sp.MaSP, sp.TenSP, sp.Gia, d.TenDM, IFNULL(SUM(ct.so_luong), 0) as TongBan
                  FROM sanpham sp
                  JOIN danhmuc d ON sp.DanhMuc = d.MaDM
@@ -158,7 +161,7 @@ function getDashboardData(mysqli $conn): array
         }
     }
 
-    // ── Phiếu nhập/xuất gần đây ────────────────────────────────────────
+    // Phiếu nhập/xuất gần đây
     $sql_recent = "(SELECT 'import' as type, pn.ma_phieu, pn.ngay_tao, u.full_name as nguoi_tao,
                     COUNT(ct.id) as so_loai, IFNULL(SUM(ct.so_luong), 0) as tong_sl
                     FROM phieu_nhap pn
@@ -180,7 +183,7 @@ function getDashboardData(mysqli $conn): array
         }
     }
 
-    // ── Danh mục cho filter ─────────────────────────────────────────────
+    // Danh mục cho filter
     if ($res = $conn->query("SELECT MaDM, TenDM FROM danhmuc ORDER BY TenDM ASC")) {
         while ($row = $res->fetch_assoc()) {
             $data['categories_list'][] = $row;

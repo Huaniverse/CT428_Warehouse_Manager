@@ -1,4 +1,7 @@
 <?php
+// Hàm kiểm tra dữ liệu sản phẩm
+
+// Kiểm tra tính hợp lệ của dữ liệu nhập từ form
 function validateProductInput(mysqli $conn, array $post, bool $isEdit = false): array
 {
     $ten_sp   = trim($post['ten_sp'] ?? '');
@@ -31,7 +34,7 @@ function validateProductInput(mysqli $conn, array $post, bool $isEdit = false): 
         return ['success' => false, 'message' => 'Số lượng tồn kho phải lớn hơn hoặc bằng 0.'];
     }
 
-    // Kiểm tra danh mục tồn tại trong CSDL
+    // Kiểm tra danh mục có tồn tại trong CSDL
     $check_dm = $conn->prepare("SELECT MaDM FROM danhmuc WHERE MaDM = ?");
     $check_dm->bind_param("s", $danhmuc);
     $check_dm->execute();

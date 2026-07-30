@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// ── CSRF Protection ───────────────────────────────────────────────────────────
+// CSRF Protection
 
 function generateCsrfToken(): string {
     if (empty($_SESSION['csrf_token'])) {
@@ -110,7 +110,7 @@ if ($conn) {
 // Sinh CSRF token cho session (dùng ở mọi trang cần bảo vệ)
 generateCsrfToken();
 
-// ── Tiện ích kiểm tra quyền ──────────────────────────────────────────────────
+// Tiện ích kiểm tra quyền
 
 function isAdmin(): bool {
     return ($_SESSION['role'] ?? '') === 'admin';
@@ -131,7 +131,7 @@ function canViewProducts(): bool {
     return isAdmin() || isManager() || ($_SESSION['role'] ?? '') === 'staff';
 }
 
-// ── Gate Functions (die with 403 if unauthorized) ────────────────────────────
+// Gate Functions (die with 403 if unauthorized)
 
 function deny403(): void {
     http_response_code(403);
@@ -151,13 +151,13 @@ function requireCanImportExport(): void {
     if (!canImportExport()) deny403();
 }
 
-// ── Data-scope Helpers ───────────────────────────────────────────────────────
+// Data-scope Helpers
 
 function staffViewScope(): ?int {
     return null;
 }
 
-// ── User Helpers ─────────────────────────────────────────────────────────────
+// User Helpers
 
 function getCurrentUser(): array {
     return [

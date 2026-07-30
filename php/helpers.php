@@ -1,5 +1,7 @@
 <?php
+// Các hàm tiện ích dùng chung
 
+// Kiểm tra phương thức request phải là POST
 function requirePost(): void {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         header('Content-Type: application/json; charset=utf-8');
@@ -8,6 +10,7 @@ function requirePost(): void {
     }
 }
 
+// Kiểm tra kết nối database còn hoạt động
 function requireDb(mysqli $conn): void {
     if (!$conn) {
         header('Content-Type: application/json; charset=utf-8');
@@ -16,6 +19,7 @@ function requireDb(mysqli $conn): void {
     }
 }
 
+// Từ chối nếu thao tác trên tài khoản của chính mình
 function denyIfSelf(int $target_id): void {
     if ($target_id === (int)$_SESSION['user_id']) {
         header('Content-Type: application/json; charset=utf-8');
@@ -24,6 +28,7 @@ function denyIfSelf(int $target_id): void {
     }
 }
 
+// Lấy vai trò của user theo ID
 function getUserRole(mysqli $conn, int $user_id): ?string {
     $stmt = $conn->prepare("SELECT role FROM users WHERE id = ?");
     $stmt->bind_param("i", $user_id);
@@ -33,10 +38,12 @@ function getUserRole(mysqli $conn, int $user_id): ?string {
     return $role;
 }
 
+// Kiểm tra định dạng thời gian HH:MM
 function isValidTime(string $time): bool {
     return (bool)preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $time);
 }
 
+// Xóa tất cả session của một user
 function deleteUserSessions(mysqli $conn, int $user_id): void {
     $stmt = $conn->prepare("DELETE FROM sessions WHERE user_id = ?");
     $stmt->bind_param("i", $user_id);
@@ -44,6 +51,7 @@ function deleteUserSessions(mysqli $conn, int $user_id): void {
     $stmt->close();
 }
 
+// Tạo HTML option cho dropdown danh mục
 function renderCategoryOptions(array $categories, string $selected = ''): string {
     $html = '';
     foreach ($categories as $row) {
@@ -54,6 +62,7 @@ function renderCategoryOptions(array $categories, string $selected = ''): string
     return $html;
 }
 
+// Kiểm tra lịch truy cập của user
 function checkAccessSchedule(array $user): array {
     if (($user['role'] ?? '') === 'admin') {
         return ['allowed' => true, 'message' => ''];
