@@ -67,7 +67,7 @@ header {
     font-size: 20px;
 }
 
-/* Sidebar */
+/* Thanh bên */
 main {
     display: flex;
     min-height: calc(100vh - 73px);
@@ -295,7 +295,7 @@ aside {
     background-size: 16px;
 }
 
-/* Tab content */
+/* Nội dung tab */
 .tab_content {
     display: none;
 }
@@ -329,7 +329,7 @@ aside {
     min-width: 0;
 }
 
-/* Hide number input spinners */
+/* Ẩn nút tăng giảm input số */
 .price_input::-webkit-outer-spin-button,
 .price_input::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -340,7 +340,7 @@ aside {
     -moz-appearance: textfield;
 }
 
-/* Responsive */
+/* Giao diện thích ứng */
 @media (max-width: 1024px) {
     .main_content_sort {
         gap: 12px;

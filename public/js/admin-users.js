@@ -2,7 +2,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btnRefreshSessions')?.addEventListener('click', loadSessions);
 
-    // ── Modal tạo tài khoản ────────────────────────────────────────────────
+    // Modal tạo tài khoản
     const createModal    = document.getElementById('createUserModal');
     const btnOpenModal   = document.getElementById('btnOpenCreateModal');
     const btnCloseModal  = document.getElementById('btnCloseModal');
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // ── Modal quyền ────────────────────────────────────────────────────────
+    // Modal quyền
     const permModal = document.getElementById('permissionsModal');
     if (permModal) {
         document.getElementById('btnClosePermissionsModal')?.addEventListener('click', () => permModal.classList.remove('open'));
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ── Modal lịch truy cập ───────────────────────────────────────────────
+    // Modal lịch truy cập
     const schedModal = document.getElementById('scheduleModal');
     if (schedModal) {
         document.getElementById('btnCloseScheduleModal')?.addEventListener('click', () => schedModal.classList.remove('open'));
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ── Modal cấp quyền tạm thời ──────────────────────────────────────────
+    // Modal cấp quyền tạm thời
     const tempAccessModal = document.getElementById('tempAccessModal');
     if (tempAccessModal) {
         document.getElementById('btnCloseTempAccessModal')?.addEventListener('click', () => tempAccessModal.classList.remove('open'));
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ── Modal chi tiết / sửa tài khoản ─────────────────────────────────────
+    // Modal chi tiết / sửa tài khoản
     const detailModal = document.getElementById('userDetailModal');
     if (detailModal) {
         document.getElementById('btnCloseUserDetail')?.addEventListener('click', () => detailModal.classList.remove('open'));
@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const isAdmin = this.value === 'admin';
                 const permRow = document.getElementById('detail_perm_row');
                 permRow.style.display = isStaff ? 'flex' : 'none';
-                // Schedule
+                // Lịch truy cập
                 const schedRow       = document.getElementById('detail_sched_row');
                 const schedEdit      = document.getElementById('detail_schedule_edit');
                 const schedDisplay   = document.getElementById('detail_schedule_display');
@@ -261,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// ── Hàm tải danh sách users ──────────────────────────────────────────────
+// Hàm tải danh sách người dùng
 function loadUsers() {
     const tbody = document.getElementById('usersTableBody');
     tbody.innerHTML = '<tr><td colspan="7" class="table_loading">Đang tải...</td></tr>';
@@ -340,7 +340,7 @@ function loadUsers() {
         .catch(() => { tbody.innerHTML = '<tr><td colspan="7" class="table_loading">Lỗi kết nối.</td></tr>'; });
 }
 
-// ── Vô hiệu hóa / Kích hoạt ─────────────────────────────────────────────
+// Vô hiệu hóa / Kích hoạt tài khoản
 function toggleUser(id, newStatus) {
     const fd = new FormData();
     fd.append('id', id);
@@ -350,7 +350,7 @@ function toggleUser(id, newStatus) {
         .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
 }
 
-// ── Xóa tài khoản ────────────────────────────────────────────────────────
+// Xóa tài khoản
 function deleteUser(id, name) {
     showConfirm('Bạn có chắc muốn xóa tài khoản "' + name + '"? Hành động này không thể hoàn tác.').then(confirmed => {
         if (!confirmed) return;
@@ -362,7 +362,7 @@ function deleteUser(id, name) {
     });
 }
 
-// ── Modal quyền ──────────────────────────────────────────────────────────
+// Modal quyền
 function openPermissionsModal(userId, userName, currentVal) {
     document.getElementById('perm_user_id').value = userId;
     document.getElementById('perm_user_name').textContent = userName;
@@ -370,7 +370,7 @@ function openPermissionsModal(userId, userName, currentVal) {
     document.getElementById('permissionsModal').classList.add('open');
 }
 
-// ── Modal lịch truy cập ──────────────────────────────────────────────────
+// Modal lịch truy cập
 function openScheduleModal(userId, userName, role, hasSchedule, startTime, endTime) {
     document.getElementById('sched_user_id').value   = userId;
     document.getElementById('sched_user_role').value = role;
@@ -399,7 +399,7 @@ function openScheduleModal(userId, userName, role, hasSchedule, startTime, endTi
     document.getElementById('scheduleModal').classList.add('open');
 }
 
-// ── Modal chi tiết / sửa tài khoản ───────────────────────────────────────
+// Modal chi tiết / sửa tài khoản
 function openUserDetail(userId) {
     ajaxCall(BASE + '/api/users.php?action=get_detail&id=' + userId)
         .then(data => {
@@ -501,7 +501,7 @@ function openUserDetail(userId) {
         .catch(() => showToast('Lỗi kết nối máy chủ.', 'error'));
 }
 
-// ── Toggle hiện/ẩn mật khẩu trong modal chi tiết ────────────────────────
+// Toggle hiện/ẩn mật khẩu trong modal chi tiết
 function toggleDetailPassword(inputId) {
     const input = document.getElementById(inputId);
     if (!input) return;
@@ -516,7 +516,7 @@ function toggleDetailPassword(inputId) {
     }
 }
 
-// ── Phiên đăng nhập ─────────────────────────────────────────────────────
+// Phiên đăng nhập
 function loadSessions() {
     const list = document.getElementById('sessionList');
     list.innerHTML = '<div class="table_loading">Đang tải...</div>';
@@ -559,7 +559,7 @@ function kickUser(userId) {
     });
 }
 
-// ── Cấp quyền truy cập tạm thời ────────────────────────────────────────
+// Cấp quyền truy cập tạm thời
 let _tempSelectedMinutes = 10;
 
 function openTempAccessModal(userId, userName) {

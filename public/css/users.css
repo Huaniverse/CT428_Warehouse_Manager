@@ -1,5 +1,4 @@
 /* Quản lý người dùng */
-/* ===== USER MANAGEMENT TAB ===== */
 .settings_section {
     background: #ffffff;
     border: none;
@@ -36,7 +35,7 @@
     padding: 24px;
 }
 
-/* ===== USERS TABLE ===== */
+/* Bảng người dùng */
 .users_table {
     width: 100%;
     border-collapse: collapse;
@@ -158,7 +157,7 @@
     font-size: 16px;
 }
 
-/* ===== SESSIONS LIST ===== */
+/* Danh sách phiên */
 .session_list {
     display: flex;
     flex-direction: column;

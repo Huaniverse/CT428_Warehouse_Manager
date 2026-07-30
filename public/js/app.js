@@ -1,4 +1,4 @@
-// Các hàm tiện ích chung: tab, dropdown, toast, ajax, confirm
+// Các hàm tiện ích chung: chuyển đổi tab, menu thả, thông báo, ajax, xác nhận
 const BASE = window.BASE_URL || '';
 
 function switchTab(tabId) {
@@ -17,7 +17,7 @@ function switchTab(tabId) {
     if (tabId === 'users')  { loadUsers(); loadSessions(); }
 }
 
-// ─── Tab switching ────────────────────────────────────────────────────────
+// Chuyển đổi tab
 document.querySelectorAll('.sidebar_menu .menu_item').forEach(item => {
     item.addEventListener('click', function(e) {
         e.preventDefault();
@@ -25,7 +25,7 @@ document.querySelectorAll('.sidebar_menu .menu_item').forEach(item => {
     });
 });
 
-// ─── Restore active tab from localStorage ────────────────────────────────
+// Khôi phục tab đang hoạt động từ localStorage
 (function() {
     const saved = localStorage.getItem('activeTab');
     if (saved && document.getElementById('content_' + saved)) {
@@ -40,7 +40,7 @@ document.querySelectorAll('.sidebar_menu .menu_item').forEach(item => {
     }
 })();
 
-// ─── User Dropdown ────────────────────────────────────────────────────────
+// Menu thả người dùng
 const dropdownTrigger = document.getElementById('userDropdownTrigger');
 const dropdownMenu    = document.getElementById('userDropdownMenu');
 
@@ -63,7 +63,7 @@ function debounce(fn, delay) {
     };
 }
 
-// ─── Session-aware AJAX wrapper ──────────────────────────────────────────
+// AJAX wrapper có kiểm tra phiên đăng nhập
 const _csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
 function ajaxCall(url, options = {}) {
@@ -118,7 +118,7 @@ function ajaxCall(url, options = {}) {
     });
 }
 
-// ─── Confirm modal (thay thế confirm()) ─────────────────────────────────
+// Modal xác nhận (thay thế confirm())
 function showConfirm(message) {
     return new Promise(function(resolve) {
         var modal = document.getElementById('confirmModal');
@@ -159,7 +159,7 @@ function showConfirm(message) {
     });
 }
 
-// ─── Toast ────────────────────────────────────────────────────────────────
+// Thông báo toast
 function showToast(message, type = 'success') {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
@@ -173,7 +173,7 @@ function showToast(message, type = 'success') {
     }, 3500);
 }
 
-// Helper escape HTML chống XSS
+// Hàm escape HTML chống XSS
 function escapeHtml(text) {
     if (!text) return '';
     return text
@@ -184,12 +184,12 @@ function escapeHtml(text) {
         .replace(/'/g, "&#039;");
 }
 
-// Helper number format
+// Hàm định dạng số
 function number_format(num) {
     return parseInt(num).toLocaleString('vi-VN');
 }
 
-// ─── Submit form helper ────────────────────────────────────────────────────
+// Hỗ trợ gửi form
 async function submitForm(btn, url, fd, { loadingText, successLabel, onSuccess, onError } = {}) {
     const originalLabel = btn.innerHTML;
     btn.disabled = true;
