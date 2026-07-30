@@ -26,17 +26,17 @@ switch ($action) {
 
     // ── Lấy thông tin sản phẩm ─────────────────────────────────────────────
     case 'get':
-        $ma_sp = (int)($_GET['id'] ?? 0);
-        if ($ma_sp <= 0) {
+        $product_id = (int)($_GET['id'] ?? 0);
+        if ($product_id <= 0) {
             echo json_encode(['success' => false, 'message' => 'Mã sản phẩm không hợp lệ.']);
             exit;
         }
 
         $stmt = $conn->prepare(
-            "SELECT MaSP, TenSP, MoTa, Gia, SoLuong, DanhMuc, is_active FROM sanpham WHERE MaSP = ?"
+            "SELECT id, name, description, price, stock, category_code, is_active FROM sanpham WHERE id = ?"
         );
 
-        $stmt->bind_param("i", $ma_sp);
+        $stmt->bind_param("i", $product_id);
         $stmt->execute();
         $product = $stmt->get_result()->fetch_assoc();
         $stmt->close();
@@ -61,8 +61,8 @@ switch ($action) {
         // [SEC-01] Xác minh CSRF token
         verifyCsrfToken();
 
-        $ma_sp = (int)($_POST['ma_sp'] ?? 0);
-        if ($ma_sp <= 0) {
+        $product_id = (int)($_POST['id'] ?? 0);
+        if ($product_id <= 0) {
             echo json_encode(['success' => false, 'message' => 'Mã sản phẩm không hợp lệ.']);
             exit;
         }
@@ -76,14 +76,14 @@ switch ($action) {
         }
 
         $data = $validation['data'];
-        $ten_sp   = $data['ten_sp'];
-        $danhmuc  = $data['danhmuc'];
-        $mota     = $data['mota'];
-        $gia      = $data['gia'];
+        $name          = $data['name'];
+        $category_code = $data['category_code'];
+        $description   = $data['description'];
+        $price         = $data['price'];
 
         // Kiểm tra sản phẩm tồn tại
-        $check_sp = $conn->prepare("SELECT MaSP FROM sanpham WHERE MaSP = ?");
-        $check_sp->bind_param("i", $ma_sp);
+        $check_sp = $conn->prepare("SELECT id FROM sanpham WHERE id = ?");
+        $check_sp->bind_param("i", $product_id);
         $check_sp->execute();
         if ($check_sp->get_result()->num_rows === 0) {
             echo json_encode(['success' => false, 'message' => 'Không tìm thấy sản phẩm.']);
@@ -93,9 +93,9 @@ switch ($action) {
         $check_sp->close();
 
         $stmt = $conn->prepare(
-            "UPDATE sanpham SET TenSP = ?, MoTa = ?, Gia = ?, DanhMuc = ? WHERE MaSP = ?"
+            "UPDATE sanpham SET name = ?, description = ?, price = ?, category_code = ? WHERE id = ?"
         );
-        $stmt->bind_param("ssdsi", $ten_sp, $mota, $gia, $danhmuc, $ma_sp);
+        $stmt->bind_param("ssdsi", $name, $description, $price, $category_code, $product_id);
 
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Cập nhật sản phẩm thành công.']);
@@ -114,16 +114,16 @@ switch ($action) {
         // [SEC-01] Xác minh CSRF token
         verifyCsrfToken();
 
-        $ma_sp     = (int)($_POST['ma_sp'] ?? 0);
+        $product_id = (int)($_POST['id'] ?? 0);
         $new_state = (int)($_POST['is_active'] ?? 0) ? 1 : 0;
 
-        if ($ma_sp <= 0) {
+        if ($product_id <= 0) {
             echo json_encode(['success' => false, 'message' => 'Mã sản phẩm không hợp lệ.']);
             exit;
         }
 
-        $stmt = $conn->prepare("UPDATE sanpham SET is_active = ? WHERE MaSP = ?");
-        $stmt->bind_param("ii", $new_state, $ma_sp);
+        $stmt = $conn->prepare("UPDATE sanpham SET is_active = ? WHERE id = ?");
+        $stmt->bind_param("ii", $new_state, $product_id);
 
         if ($stmt->execute() && $stmt->affected_rows > 0) {
             $label = $new_state ? 'khôi phục' : 'ẩn';
@@ -136,20 +136,20 @@ switch ($action) {
 
     // ── Chi tiết sản phẩm + lịch sử nhập/xuất ──────────────────────────────
     case 'detail':
-        $ma_sp = (int)($_GET['id'] ?? 0);
-        if ($ma_sp <= 0) {
+        $product_id = (int)($_GET['id'] ?? 0);
+        if ($product_id <= 0) {
             echo json_encode(['success' => false, 'message' => 'Mã sản phẩm không hợp lệ.']);
             exit;
         }
 
         $stmt = $conn->prepare(
-            "SELECT s.MaSP, s.TenSP, s.MoTa, s.Gia, s.SoLuong, s.DanhMuc, s.is_active,
-                    d.TenDM
+            "SELECT s.id, s.name, s.description, s.price, s.stock, s.category_code, s.is_active,
+                    d.name AS category_name
              FROM sanpham s
-             JOIN danhmuc d ON s.DanhMuc = d.MaDM
-             WHERE s.MaSP = ?"
+             JOIN danhmuc d ON s.category_code = d.code
+             WHERE s.id = ?"
         );
-        $stmt->bind_param("i", $ma_sp);
+        $stmt->bind_param("i", $product_id);
         $stmt->execute();
         $product = $stmt->get_result()->fetch_assoc();
         $stmt->close();
@@ -162,18 +162,18 @@ switch ($action) {
         $history_limit = 20;
 
         // Lịch sử nhập kho
-        $import_sql = "SELECT pn.ma_phieu, ct.so_luong, sp.Gia AS don_gia,
-                              (ct.so_luong * sp.Gia) AS thanh_tien,
-                              u.full_name AS nguoi_tao_name, pn.ngay_tao
+        $import_sql = "SELECT pn.code, ct.quantity, sp.price AS unit_price,
+                              (ct.quantity * sp.price) AS total_amount,
+                              u.full_name AS created_by_name, pn.created_at
                        FROM phieu_nhap pn
-                       JOIN chi_tiet_phieu_nhap ct ON ct.ma_phieu = pn.ma_phieu
-                       JOIN sanpham sp ON ct.san_pham = sp.MaSP
-                       JOIN users u ON pn.nguoi_tao = u.id
-                       WHERE ct.san_pham = ?
-                       ORDER BY pn.ngay_tao DESC
+                       JOIN chi_tiet_phieu_nhap ct ON ct.receipt_code = pn.code
+                       JOIN sanpham sp ON ct.product_id = sp.id
+                       JOIN users u ON pn.created_by = u.id
+                       WHERE ct.product_id = ?
+                       ORDER BY pn.created_at DESC
                        LIMIT $history_limit";
         $import_stmt = $conn->prepare($import_sql);
-        $import_stmt->bind_param("i", $ma_sp);
+        $import_stmt->bind_param("i", $product_id);
         $import_stmt->execute();
         $import_result = $import_stmt->get_result();
         $import_history = [];
@@ -183,18 +183,18 @@ switch ($action) {
         $import_stmt->close();
 
         // Lịch sử xuất kho
-        $export_sql = "SELECT px.ma_phieu, ct.so_luong, sp.Gia AS don_gia,
-                              (ct.so_luong * sp.Gia) AS thanh_tien,
-                              u.full_name AS nguoi_tao_name, px.ngay_tao
+        $export_sql = "SELECT px.code, ct.quantity, sp.price AS unit_price,
+                              (ct.quantity * sp.price) AS total_amount,
+                              u.full_name AS created_by_name, px.created_at
                        FROM phieu_xuat px
-                       JOIN chi_tiet_phieu_xuat ct ON ct.ma_phieu = px.ma_phieu
-                       JOIN sanpham sp ON ct.san_pham = sp.MaSP
-                       JOIN users u ON px.nguoi_tao = u.id
-                       WHERE ct.san_pham = ?
-                       ORDER BY px.ngay_tao DESC
+                       JOIN chi_tiet_phieu_xuat ct ON ct.receipt_code = px.code
+                       JOIN sanpham sp ON ct.product_id = sp.id
+                       JOIN users u ON px.created_by = u.id
+                       WHERE ct.product_id = ?
+                       ORDER BY px.created_at DESC
                        LIMIT $history_limit";
         $export_stmt = $conn->prepare($export_sql);
-        $export_stmt->bind_param("i", $ma_sp);
+        $export_stmt->bind_param("i", $product_id);
         $export_stmt->execute();
         $export_result = $export_stmt->get_result();
         $export_history = [];

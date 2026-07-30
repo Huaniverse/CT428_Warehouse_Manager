@@ -28,7 +28,7 @@
                     $users_list[] = $row;
                 }
             }
-            $res2 = $conn->query("SELECT MAX(Gia) as max_price FROM sanpham");
+            $res2 = $conn->query("SELECT MAX(price) as max_price FROM sanpham");
             if ($res2) {
                 $max_price = (int)($res2->fetch_assoc()['max_price'] ?? 0);
             }

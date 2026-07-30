@@ -96,7 +96,7 @@ if (importModal) {
 
         const fd = new FormData();
         fd.append('items', JSON.stringify(importBatchItems.map(item => ({
-            san_pham: item.productId, so_luong: item.quantity, ghi_chu: item.note
+            product_id: item.productId, quantity: item.quantity, note: item.note
         }))));
         const originalLabel = this.innerHTML;
         this.disabled = true;
@@ -139,15 +139,15 @@ if (exportModal) {
     exportModal.addEventListener('click', e => { if (e.target === exportModal) exportModal.classList.remove('open'); });
 
     document.getElementById('export_product')?.addEventListener('productSelected', function() {
-        const spId = document.getElementById('export_product_id').value;
+        const productId = document.getElementById('export_product_id').value;
         const infoDiv = document.getElementById('export_stock_info');
-        if (!spId) { infoDiv.style.display = 'none'; return; }
-        apiFetch(BASE + '/api/edit_product.php?action=get&id=' + spId)
+        if (!productId) { infoDiv.style.display = 'none'; return; }
+        apiFetch(BASE + '/api/edit_product.php?action=get&id=' + productId)
             .then(data => {
                 if (data.success) {
-                    document.getElementById('export_current_stock').textContent = data.product.SoLuong;
+                    document.getElementById('export_current_stock').textContent = data.product.quantity;
                     infoDiv.style.display = 'block';
-                    document.getElementById('export_quantity').max = data.product.SoLuong;
+                    document.getElementById('export_quantity').max = data.product.quantity;
                 }
             });
     });
@@ -192,7 +192,7 @@ if (exportModal) {
 
         const fd = new FormData();
         fd.append('items', JSON.stringify(exportBatchItems.map(item => ({
-            san_pham: item.productId, so_luong: item.quantity, ghi_chu: item.note
+            product_id: item.productId, quantity: item.quantity, note: item.note
         }))));
         const originalLabel = this.innerHTML;
         this.disabled = true;
@@ -260,15 +260,15 @@ function loadHistory(type, page = 1) {
                 return;
             }
             tbody.innerHTML = data.records.map(r => {
-                const date = new Date(r.ngay_tao).toLocaleString('vi-VN');
-                const safeMaPhieu = escapeHtml(r.ma_phieu).replace(/'/g, "\\'");
-                const tongGia = number_format(parseInt(r.tong_gia_tien) || 0);
-                return `<tr style="cursor:pointer;" onclick="openReceiptDetail('${type}', '${safeMaPhieu}')">
-                    <td><span style="font-family:monospace;font-weight:600;">${escapeHtml(r.ma_phieu)}</span></td>
-                    <td style="text-align:center;">${r.so_loai_hang} loại</td>
-                    <td style="text-align:center;"><strong>${number_format(r.tong_so_luong)}</strong></td>
-                    <td style="text-align:right;font-weight:600;color:${cfg.color};">${tongGia}đ</td>
-                    <td>${escapeHtml(r.nguoi_tao_name)}</td>
+                const date = new Date(r.created_at).toLocaleString('vi-VN');
+                const safeCode = escapeHtml(r.code).replace(/'/g, "\\'");
+                const totalAmount = number_format(parseInt(r.total_amount) || 0);
+                return `<tr style="cursor:pointer;" onclick="openReceiptDetail('${type}', '${safeCode}')">
+                    <td><span style="font-family:monospace;font-weight:600;">${escapeHtml(r.code)}</span></td>
+                    <td style="text-align:center;">${r.item_count} loại</td>
+                    <td style="text-align:center;"><strong>${number_format(r.total_quantity)}</strong></td>
+                    <td style="text-align:right;font-weight:600;color:${cfg.color};">${totalAmount}đ</td>
+                    <td>${escapeHtml(r.created_by_name)}</td>
                     <td style="font-size:13px;">${date}</td>
                 </tr>`;
             }).join('');
@@ -318,7 +318,7 @@ if (receiptDetailModal) {
     receiptDetailModal.addEventListener('click', e => { if (e.target === receiptDetailModal) receiptDetailModal.classList.remove('open'); });
 }
 
-function openReceiptDetail(type, maPhieu) {
+function openReceiptDetail(type, code) {
     if (!receiptDetailModal) return;
     const infoDiv = document.getElementById('receiptDetailInfo');
     const itemsDiv = document.getElementById('receiptDetailItems');
@@ -329,13 +329,13 @@ function openReceiptDetail(type, maPhieu) {
     itemsDiv.innerHTML = '';
 
     const endpoint = type === 'import' ? BASE + '/api/import_stock.php' : BASE + '/api/export_stock.php';
-    apiFetch(endpoint + '?action=detail&ma_phieu=' + encodeURIComponent(maPhieu))
+    apiFetch(endpoint + '?action=detail&code=' + encodeURIComponent(code))
         .then(data => {
             if (!data.success || !data.items || data.items.length === 0) {
                 infoDiv.innerHTML = '<p style="color:#dc2626;">Không tìm thấy phiếu.</p>';
                 return;
             }
-            const ngayTao = new Date(data.ngay_tao).toLocaleString('vi-VN');
+            const createdDate = new Date(data.created_at).toLocaleString('vi-VN');
             const icon  = type === 'import' ? 'download' : 'upload';
             const color = type === 'import' ? '#16a34a' : '#ea580c';
             const label = type === 'import' ? 'Nhập kho' : 'Xuất kho';
@@ -344,30 +344,30 @@ function openReceiptDetail(type, maPhieu) {
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
                     <span class="material-symbols-outlined" style="color:${color};font-size:28px;">${icon}</span>
                     <div>
-                        <div style="font-size:16px;font-weight:600;color:#0f172a;">${label} — ${escapeHtml(data.ma_phieu)}</div>
-                        <div style="font-size:13px;color:#64748b;">${ngayTao}</div>
+                        <div style="font-size:16px;font-weight:600;color:#0f172a;">${label} — ${escapeHtml(data.code)}</div>
+                        <div style="font-size:13px;color:#64748b;">${createdDate}</div>
                     </div>
                 </div>
                 <div style="display:flex;gap:24px;font-size:14px;color:#475569;">
-                    <div><strong>Người tạo:</strong> ${escapeHtml(data.nguoi_tao)}</div>
+                    <div><strong>Người tạo:</strong> ${escapeHtml(data.created_by)}</div>
                     <div><strong>Số mặt hàng:</strong> ${data.items.length}</div>
                 </div>
             `;
 
-            let tongTien = 0;
+            let totalAmount = 0;
             let rows = data.items.map((item, idx) => {
-                const gia = parseInt(item.Gia) || 0;
-                const thanhTien = gia * parseInt(item.so_luong);
-                tongTien += thanhTien;
-                const ghiChu = item.ghi_chu || '—';
+                const price = parseInt(item.price) || 0;
+                const lineTotal = price * parseInt(item.quantity);
+                totalAmount += lineTotal;
+                const note = item.note || '—';
                 return `
                     <tr>
                         <td style="text-align:center;">${idx + 1}</td>
-                        <td><span class="product_name">${escapeHtml(item.TenSP)}</span></td>
-                        <td style="text-align:right;">${number_format(gia)}đ</td>
-                        <td style="text-align:center;"><strong>${number_format(item.so_luong)}</strong></td>
-                        <td style="text-align:right;font-weight:600;">${number_format(thanhTien)}đ</td>
-                        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(ghiChu)}">${escapeHtml(ghiChu)}</td>
+                        <td><span class="product_name">${escapeHtml(item.name)}</span></td>
+                        <td style="text-align:right;">${number_format(price)}đ</td>
+                        <td style="text-align:center;"><strong>${number_format(item.quantity)}</strong></td>
+                        <td style="text-align:right;font-weight:600;">${number_format(lineTotal)}đ</td>
+                        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(note)}">${escapeHtml(note)}</td>
                     </tr>
                 `;
             }).join('');
@@ -388,7 +388,7 @@ function openReceiptDetail(type, maPhieu) {
                     <tfoot>
                         <tr>
                             <td colspan="4" style="text-align:right;font-weight:600;color:#0f172a;">Tổng cộng:</td>
-                            <td style="text-align:right;font-weight:700;color:${color};font-size:15px;">${number_format(tongTien)}đ</td>
+                            <td style="text-align:right;font-weight:700;color:${color};font-size:15px;">${number_format(totalAmount)}đ</td>
                             <td></td>
                         </tr>
                     </tfoot>

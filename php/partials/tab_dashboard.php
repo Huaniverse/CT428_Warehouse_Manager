@@ -11,9 +11,9 @@
       $top_selling_list    = $top_selling_list    ?? [];
       $recent_receipts     = $recent_receipts     ?? [];
 
-      function format_receipt_code($ma_phieu) {
-          $prefix = strtoupper(substr($ma_phieu, 0, 2));
-          $label = $prefix === 'PN' ? 'Nhập' : ($prefix === 'PX' ? 'Xuất' : $ma_phieu);
+      function format_receipt_code($code) {
+          $prefix = strtoupper(substr($code, 0, 2));
+          $label = $prefix === 'PN' ? 'Nhập' : ($prefix === 'PX' ? 'Xuất' : $code);
           return $label;
       }
       ?>
@@ -167,9 +167,9 @@
                   <?php else: ?>
                     <?php foreach ($low_stock_list as $item): ?>
                       <tr>
-                        <td><strong><?php echo htmlspecialchars($item['TenSP']); ?></strong></td>
-                        <td style="text-align:center;"><span class="low_stock_badge"><?php echo (int)$item['SoLuong']; ?></span></td>
-                        <td><?php echo htmlspecialchars($item['TenDM']); ?></td>
+                        <td><strong><?php echo htmlspecialchars($item['name']); ?></strong></td>
+                        <td style="text-align:center;"><span class="low_stock_badge"><?php echo (int)$item['stock']; ?></span></td>
+                        <td><?php echo htmlspecialchars($item['category_name']); ?></td>
                       </tr>
                     <?php endforeach; ?>
                   <?php endif; ?>
@@ -199,9 +199,9 @@
                   <?php else: ?>
                     <?php foreach ($top_selling_list as $item): ?>
                       <tr>
-                        <td><strong><?php echo htmlspecialchars($item['TenSP']); ?></strong></td>
-                        <td style="text-align:center;"><span class="top_selling_badge"><?php echo number_format($item['TongBan']); ?></span></td>
-                        <td style="text-align:right; font-size:13px;"><?php echo number_format($item['Gia']); ?>đ</td>
+                        <td><strong><?php echo htmlspecialchars($item['name']); ?></strong></td>
+                        <td style="text-align:center;"><span class="top_selling_badge"><?php echo number_format($item['total_sold']); ?></span></td>
+                        <td style="text-align:right; font-size:13px;"><?php echo number_format($item['price']); ?>đ</td>
                       </tr>
                     <?php endforeach; ?>
                   <?php endif; ?>
@@ -234,18 +234,18 @@
                   <?php else: ?>
                     <?php foreach ($recent_receipts as $r): ?>
                       <?php
-                        $prefix = strtoupper(substr($r['ma_phieu'], 0, 2));
+                        $prefix = strtoupper(substr($r['code'], 0, 2));
                         $is_import = ($prefix === 'PN');
                         $type_label = $is_import ? 'Nhập' : 'Xuất';
                         $type_class = $is_import ? 'import_badge' : 'export_badge';
                       ?>
                       <tr>
                         <td><span class="<?php echo $type_class; ?>"><?php echo $type_label; ?></span></td>
-                        <td><span style="font-family:monospace; font-weight:600;"><?php echo htmlspecialchars($r['ma_phieu']); ?></span></td>
-                        <td style="text-align:center;"><?php echo (int)$r['so_loai']; ?></td>
-                        <td style="text-align:center;"><strong><?php echo number_format($r['tong_sl']); ?></strong></td>
-                        <td><?php echo htmlspecialchars($r['nguoi_tao']); ?></td>
-                        <td style="font-size:13px;"><?php echo date('d/m/Y H:i', strtotime($r['ngay_tao'])); ?></td>
+                        <td><span style="font-family:monospace; font-weight:600;"><?php echo htmlspecialchars($r['code']); ?></span></td>
+                        <td style="text-align:center;"><?php echo (int)$r['item_count']; ?></td>
+                        <td style="text-align:center;"><strong><?php echo number_format($r['total_quantity']); ?></strong></td>
+                        <td><?php echo htmlspecialchars($r['created_by_name']); ?></td>
+                        <td style="font-size:13px;"><?php echo date('d/m/Y H:i', strtotime($r['created_at'])); ?></td>
                       </tr>
                     <?php endforeach; ?>
                   <?php endif; ?>

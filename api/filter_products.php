@@ -25,7 +25,7 @@ $params = [];
 $types = "";
 
 if ($search !== '') {
-    $where .= " AND (s.TenSP LIKE ? OR s.MoTa LIKE ?)";
+    $where .= " AND (s.name LIKE ? OR s.description LIKE ?)";
     $search_param = "%" . $search . "%";
     $params[] = $search_param;
     $params[] = $search_param;
@@ -33,7 +33,7 @@ if ($search !== '') {
 }
 
 if ($category !== '') {
-    $where .= " AND s.DanhMuc = ?";
+    $where .= " AND s.category_code = ?";
     $params[] = $category;
     $types .= "s";
 }
@@ -42,7 +42,7 @@ if ($active_only === 1) {
     $where .= " AND s.is_active = 1";
 }
 
-$sql_count = "SELECT COUNT(*) as total FROM sanpham s JOIN danhmuc d ON s.DanhMuc = d.MaDM WHERE $where";
+$sql_count = "SELECT COUNT(*) as total FROM sanpham s JOIN danhmuc d ON s.category_code = d.code WHERE $where";
 $stmt_count = $conn->prepare($sql_count);
 if ($stmt_count) {
     if ($types !== "") {
@@ -61,28 +61,28 @@ $total_pages = $limit > 0 ? ceil($total_records / $limit) : 1;
 if ($page > $total_pages) $page = max(1, $total_pages);
 $offset = ($page - 1) * $limit;
 
-$sql = "SELECT s.MaSP, s.TenSP, s.MoTa, s.Gia, s.SoLuong, s.is_active, d.TenDM 
+$sql = "SELECT s.id, s.name, s.description, s.price, s.stock, s.is_active, d.name AS category_name 
         FROM sanpham s 
-        JOIN danhmuc d ON s.DanhMuc = d.MaDM 
+        JOIN danhmuc d ON s.category_code = d.code 
         WHERE $where";
 $order_by_clauses = [];
 
 if ($price_sort === 'asc') {
-    $order_by_clauses[] = "s.Gia ASC";
+    $order_by_clauses[] = "s.price ASC";
 } elseif ($price_sort === 'desc') {
-    $order_by_clauses[] = "s.Gia DESC";
+    $order_by_clauses[] = "s.price DESC";
 }
 
 if ($qty_sort === 'asc') {
-    $order_by_clauses[] = "s.SoLuong ASC";
+    $order_by_clauses[] = "s.stock ASC";
 } elseif ($qty_sort === 'desc') {
-    $order_by_clauses[] = "s.SoLuong DESC";
+    $order_by_clauses[] = "s.stock DESC";
 }
 
 if (count($order_by_clauses) > 0) {
     $sql .= " ORDER BY " . implode(", ", $order_by_clauses);
 } else {
-    $sql .= " ORDER BY s.MaSP ASC";
+    $sql .= " ORDER BY s.id ASC";
 }
 
 if ($limit_param !== 'all') {
@@ -101,13 +101,13 @@ if ($stmt) {
     if ($result && $result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             $records[] = [
-                'MaSP'      => (int)$row['MaSP'],
-                'TenSP'     => $row['TenSP'],
-                'MoTa'      => $row['MoTa'] ?? '',
-                'Gia'       => (int)$row['Gia'],
-                'SoLuong'   => (int)$row['SoLuong'],
-                'TenDM'     => $row['TenDM'],
-                'is_active' => (int)$row['is_active'],
+                'id'            => (int)$row['id'],
+                'name'          => $row['name'],
+                'description'   => $row['description'] ?? '',
+                'price'         => (int)$row['price'],
+                'stock'         => (int)$row['stock'],
+                'category_name' => $row['category_name'],
+                'is_active'     => (int)$row['is_active'],
             ];
         }
     }

@@ -28,12 +28,12 @@ function getStockList(mysqli $conn, string $type): array {
     $limit  = 10;
     $offset = ($page - 1) * $limit;
 
-    $filter_sp       = (int)($_GET['san_pham'] ?? 0);
-    $filter_search   = trim($_GET['search'] ?? '');
-    $filter_date_from = trim($_GET['date_from'] ?? '');
-    $filter_date_to   = trim($_GET['date_to'] ?? '');
-    $filter_category  = trim($_GET['category'] ?? '');
-    $filter_user_id   = (int)($_GET['user_id'] ?? 0);
+    $filter_product_id = (int)($_GET['product_id'] ?? 0);
+    $filter_search     = trim($_GET['search'] ?? '');
+    $filter_date_from  = trim($_GET['date_from'] ?? '');
+    $filter_date_to    = trim($_GET['date_to'] ?? '');
+    $filter_category   = trim($_GET['category'] ?? '');
+    $filter_user_id    = (int)($_GET['user_id'] ?? 0);
     $filter_price_min = isset($_GET['price_min']) && $_GET['price_min'] !== '' ? (int)$_GET['price_min'] : -1;
     $filter_price_max = isset($_GET['price_max']) && $_GET['price_max'] !== '' ? (int)$_GET['price_max'] : -1;
     if ($filter_price_min >= 0 && $filter_price_max >= 0 && $filter_price_min > $filter_price_max) {
@@ -46,49 +46,49 @@ function getStockList(mysqli $conn, string $type): array {
 
     $scope_user_id = staffViewScope();
     if ($scope_user_id !== null) {
-        $where .= " AND {$a}.nguoi_tao = ?";
+        $where .= " AND {$a}.created_by = ?";
         $bind_types .= "i";
         $bind_values[] = $scope_user_id;
     }
 
     if ($filter_user_id > 0) {
-        $where .= " AND {$a}.nguoi_tao = ?";
+        $where .= " AND {$a}.created_by = ?";
         $bind_types .= "i";
         $bind_values[] = $filter_user_id;
     }
 
-    if ($filter_sp > 0) {
-        $where .= " AND EXISTS (SELECT 1 FROM {$cfg['detail_table']} ct WHERE ct.ma_phieu = {$a}.ma_phieu AND ct.san_pham = ?)";
+    if ($filter_product_id > 0) {
+        $where .= " AND EXISTS (SELECT 1 FROM {$cfg['detail_table']} ct WHERE ct.receipt_code = {$a}.code AND ct.product_id = ?)";
         $bind_types .= "i";
-        $bind_values[] = $filter_sp;
+        $bind_values[] = $filter_product_id;
     }
 
     if ($filter_search !== '') {
-        $where .= " AND EXISTS (SELECT 1 FROM {$cfg['detail_table']} ct2 JOIN sanpham sp2 ON ct2.san_pham = sp2.MaSP WHERE ct2.ma_phieu = {$a}.ma_phieu AND sp2.TenSP LIKE ?)";
+        $where .= " AND EXISTS (SELECT 1 FROM {$cfg['detail_table']} ct2 JOIN sanpham sp2 ON ct2.product_id = sp2.id WHERE ct2.receipt_code = {$a}.code AND sp2.name LIKE ?)";
         $bind_types .= "s";
         $bind_values[] = "%{$filter_search}%";
     }
 
     if ($filter_date_from !== '') {
-        $where .= " AND {$a}.ngay_tao >= ?";
+        $where .= " AND {$a}.created_at >= ?";
         $bind_types .= "s";
         $bind_values[] = $filter_date_from . ' 00:00:00';
     }
 
     if ($filter_date_to !== '') {
-        $where .= " AND {$a}.ngay_tao <= ?";
+        $where .= " AND {$a}.created_at <= ?";
         $bind_types .= "s";
         $bind_values[] = $filter_date_to . ' 23:59:59';
     }
 
     if ($filter_category !== '') {
-        $where .= " AND EXISTS (SELECT 1 FROM {$cfg['detail_table']} ct3 JOIN sanpham sp3 ON ct3.san_pham = sp3.MaSP WHERE ct3.ma_phieu = {$a}.ma_phieu AND sp3.DanhMuc = ?)";
+        $where .= " AND EXISTS (SELECT 1 FROM {$cfg['detail_table']} ct3 JOIN sanpham sp3 ON ct3.product_id = sp3.id WHERE ct3.receipt_code = {$a}.code AND sp3.category_code = ?)";
         $bind_types .= "s";
         $bind_values[] = $filter_category;
     }
 
     if ($filter_price_min >= 0 || $filter_price_max >= 0) {
-        $where .= " AND COALESCE((SELECT SUM(ct4.so_luong * sp4.Gia) FROM {$cfg['detail_table']} ct4 JOIN sanpham sp4 ON ct4.san_pham = sp4.MaSP WHERE ct4.ma_phieu = {$a}.ma_phieu), 0)";
+        $where .= " AND COALESCE((SELECT SUM(ct4.quantity * sp4.price) FROM {$cfg['detail_table']} ct4 JOIN sanpham sp4 ON ct4.product_id = sp4.id WHERE ct4.receipt_code = {$a}.code), 0)";
         if ($filter_price_min >= 0 && $filter_price_max >= 0) {
             $where .= " BETWEEN ? AND ?";
             $bind_types .= "ii";
@@ -115,19 +115,19 @@ function getStockList(mysqli $conn, string $type): array {
     $total = $count_stmt->get_result()->fetch_assoc()['total'];
     $count_stmt->close();
 
-    $sql = "SELECT {$a}.ma_phieu,
-                   COUNT(ct.san_pham) as so_loai_hang,
-                   SUM(ct.so_luong) as tong_so_luong,
-                   SUM(ct.so_luong * sp.Gia) as tong_gia_tien,
-                   {$a}.ngay_tao,
-                   u.full_name AS nguoi_tao_name
+    $sql = "SELECT {$a}.code,
+                   COUNT(ct.product_id) as item_count,
+                   SUM(ct.quantity) as total_quantity,
+                   SUM(ct.quantity * sp.price) as total_amount,
+                   {$a}.created_at,
+                   u.full_name AS created_by_name
             FROM {$cfg['receipt_table']} {$a}
-            JOIN {$cfg['detail_table']} ct ON ct.ma_phieu = {$a}.ma_phieu
-            JOIN sanpham sp ON ct.san_pham = sp.MaSP
-            JOIN users u ON {$a}.nguoi_tao = u.id
+            JOIN {$cfg['detail_table']} ct ON ct.receipt_code = {$a}.code
+            JOIN sanpham sp ON ct.product_id = sp.id
+            JOIN users u ON {$a}.created_by = u.id
             WHERE $where
-            GROUP BY {$a}.ma_phieu, {$a}.ngay_tao, u.full_name
-            ORDER BY {$a}.ngay_tao DESC
+            GROUP BY {$a}.code, {$a}.created_at, u.full_name
+            ORDER BY {$a}.created_at DESC
             LIMIT $limit OFFSET $offset";
 
     $stmt = $conn->prepare($sql);
@@ -152,7 +152,7 @@ function getStockList(mysqli $conn, string $type): array {
     ];
 }
 
-function getStockDetail(mysqli $conn, string $type, string $ma_phieu): array {
+function getStockDetail(mysqli $conn, string $type, string $code): array {
     $cfg = getStockTableConfig($type);
     $a = $cfg['alias'];
 
@@ -162,24 +162,24 @@ function getStockDetail(mysqli $conn, string $type, string $ma_phieu): array {
     $bind_values = [];
 
     if ($scope_user_id !== null) {
-        $where .= " AND {$a}.nguoi_tao = ?";
+        $where .= " AND {$a}.created_by = ?";
         $bind_types .= "i";
         $bind_values[] = $scope_user_id;
     }
 
-    $sql = "SELECT ct.san_pham, sp.TenSP, sp.Gia,
-                   ct.so_luong, ct.ghi_chu,
-                   {$a}.ngay_tao, u.full_name AS nguoi_tao_name
+    $sql = "SELECT ct.product_id, sp.name, sp.price,
+                   ct.quantity, ct.note,
+                   {$a}.created_at, u.full_name AS created_by_name
             FROM {$cfg['receipt_table']} {$a}
-            JOIN {$cfg['detail_table']} ct ON ct.ma_phieu = {$a}.ma_phieu
-            JOIN sanpham sp ON ct.san_pham = sp.MaSP
-            JOIN users u ON {$a}.nguoi_tao = u.id
-            WHERE {$a}.ma_phieu = ?
+            JOIN {$cfg['detail_table']} ct ON ct.receipt_code = {$a}.code
+            JOIN sanpham sp ON ct.product_id = sp.id
+            JOIN users u ON {$a}.created_by = u.id
+            WHERE {$a}.code = ?
             AND $where
             ORDER BY ct.id ASC";
 
     $bind_types = "s" . $bind_types;
-    array_unshift($bind_values, $ma_phieu);
+    array_unshift($bind_values, $code);
 
     $stmt = $conn->prepare($sql);
     $stmt->bind_param($bind_types, ...$bind_values);
@@ -196,10 +196,10 @@ function getStockDetail(mysqli $conn, string $type, string $ma_phieu): array {
     }
 
     return [
-        'success'   => true,
-        'items'     => $items,
-        'ngay_tao'  => $items[0]['ngay_tao'],
-        'nguoi_tao' => $items[0]['nguoi_tao_name'],
-        'ma_phieu'  => $ma_phieu,
+        'success'    => true,
+        'items'      => $items,
+        'created_at' => $items[0]['created_at'],
+        'created_by' => $items[0]['created_by_name'],
+        'code'       => $code,
     ];
 }

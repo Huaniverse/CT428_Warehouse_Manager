@@ -29,23 +29,23 @@ if (!$validation['success']) {
 }
 
 $data = $validation['data'];
-$ten_sp   = $data['ten_sp'];
-$danhmuc  = $data['danhmuc'];
-$mota     = $data['mota'];
-$gia      = $data['gia'];
-$so_luong = $data['so_luong'];
+$name          = $data['name'];
+$category_code = $data['category_code'];
+$description   = $data['description'];
+$price         = $data['price'];
+$quantity      = $data['quantity'];
 
 // Thực hiện thêm sản phẩm mới
 $stmt = $conn->prepare(
-    "INSERT INTO sanpham (TenSP, DanhMuc, MoTa, Gia, SoLuong) VALUES (?, ?, ?, ?, ?)"
+    "INSERT INTO sanpham (name, category_code, description, price, stock) VALUES (?, ?, ?, ?, ?)"
 );
-$stmt->bind_param("sssdi", $ten_sp, $danhmuc, $mota, $gia, $so_luong);
+$stmt->bind_param("sssdi", $name, $category_code, $description, $price, $quantity);
 
 if ($stmt->execute()) {
     echo json_encode([
         'success' => true,
         'message' => 'Thêm sản phẩm mới thành công.',
-        'ma_sp'   => $conn->insert_id
+        'id'   => $conn->insert_id
     ]);
 } else {
     echo json_encode([

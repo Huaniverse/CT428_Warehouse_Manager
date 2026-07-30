@@ -29,17 +29,17 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `chi_tiet_phieu_nhap` (
   `id` int(11) NOT NULL,
-  `ma_phieu` varchar(50) NOT NULL,
-  `san_pham` int(11) NOT NULL,
-  `so_luong` int(11) NOT NULL,
-  `ghi_chu` text DEFAULT NULL
+  `receipt_code` varchar(50) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `note` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `chi_tiet_phieu_nhap`
 --
 
-INSERT INTO `chi_tiet_phieu_nhap` (`id`, `ma_phieu`, `san_pham`, `so_luong`, `ghi_chu`) VALUES
+INSERT INTO `chi_tiet_phieu_nhap` (`id`, `receipt_code`, `product_id`, `quantity`, `note`) VALUES
 (1, 'PN_20260502083000_1001', 1, 48, 'iPhone 15 Pro Max — lô từ NCC Apple'),
 (2, 'PN_20260502083000_1001', 20, 85, 'iPhone 13 — nhập bổ sung'),
 (3, 'PN_20260502083000_1001', 26, 30, 'iPhone 15 128GB — lô mới'),
@@ -215,17 +215,17 @@ INSERT INTO `chi_tiet_phieu_nhap` (`id`, `ma_phieu`, `san_pham`, `so_luong`, `gh
 
 CREATE TABLE `chi_tiet_phieu_xuat` (
   `id` int(11) NOT NULL,
-  `ma_phieu` varchar(50) NOT NULL,
-  `san_pham` int(11) NOT NULL,
-  `so_luong` int(11) NOT NULL,
-  `ghi_chu` text DEFAULT NULL
+  `receipt_code` varchar(50) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `note` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `chi_tiet_phieu_xuat`
 --
 
-INSERT INTO `chi_tiet_phieu_xuat` (`id`, `ma_phieu`, `san_pham`, `so_luong`, `ghi_chu`) VALUES
+INSERT INTO `chi_tiet_phieu_xuat` (`id`, `receipt_code`, `product_id`, `quantity`, `note`) VALUES
 (1, 'PX_20260505100000_2001', 1, 6, 'Bán iPhone 15 Pro Max — đơn online'),
 (2, 'PX_20260505100000_2001', 20, 12, 'Bán iPhone 13 — đơn lẻ'),
 (3, 'PX_20260505100000_2001', 26, 5, 'Bán iPhone 15 128GB — khách VIP'),
@@ -271,15 +271,15 @@ INSERT INTO `chi_tiet_phieu_xuat` (`id`, `ma_phieu`, `san_pham`, `so_luong`, `gh
 --
 
 CREATE TABLE `danhmuc` (
-  `MaDM` varchar(10) NOT NULL,
-  `TenDM` varchar(100) NOT NULL
+  `code` varchar(10) NOT NULL,
+  `name` varchar(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `danhmuc`
 --
 
-INSERT INTO `danhmuc` (`MaDM`, `TenDM`) VALUES
+INSERT INTO `danhmuc` (`code`, `name`) VALUES
 ('ATH', 'Thiết bị âm thanh'),
 ('DTH', 'Điện thoại'),
 ('GDG', 'Gia dụng'),
@@ -294,16 +294,16 @@ INSERT INTO `danhmuc` (`MaDM`, `TenDM`) VALUES
 --
 
 CREATE TABLE `phieu_nhap` (
-  `ma_phieu` varchar(50) NOT NULL,
-  `nguoi_tao` int(11) NOT NULL,
-  `ngay_tao` timestamp NOT NULL DEFAULT current_timestamp()
+  `code` varchar(50) NOT NULL,
+  `created_by` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `phieu_nhap`
 --
 
-INSERT INTO `phieu_nhap` (`ma_phieu`, `nguoi_tao`, `ngay_tao`) VALUES
+INSERT INTO `phieu_nhap` (`code`, `created_by`, `created_at`) VALUES
 ('PN_20260502083000_1001', 2, '2026-05-02 08:30:00'),
 ('PN_20260504141500_1002', 3, '2026-05-04 14:15:00'),
 ('PN_20260507090000_1003', 2, '2026-05-07 09:00:00'),
@@ -354,16 +354,16 @@ INSERT INTO `phieu_nhap` (`ma_phieu`, `nguoi_tao`, `ngay_tao`) VALUES
 --
 
 CREATE TABLE `phieu_xuat` (
-  `ma_phieu` varchar(50) NOT NULL,
-  `nguoi_tao` int(11) NOT NULL,
-  `ngay_tao` timestamp NOT NULL DEFAULT current_timestamp()
+  `code` varchar(50) NOT NULL,
+  `created_by` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `phieu_xuat`
 --
 
-INSERT INTO `phieu_xuat` (`ma_phieu`, `nguoi_tao`, `ngay_tao`) VALUES
+INSERT INTO `phieu_xuat` (`code`, `created_by`, `created_at`) VALUES
 ('PX_20260505100000_2001', 2, '2026-05-05 10:00:00'),
 ('PX_20260508140000_2002', 1, '2026-05-08 14:00:00'),
 ('PX_20260513090000_2003', 4, '2026-05-13 09:00:00'),
@@ -384,12 +384,12 @@ INSERT INTO `phieu_xuat` (`ma_phieu`, `nguoi_tao`, `ngay_tao`) VALUES
 --
 
 CREATE TABLE `sanpham` (
-  `MaSP` int(11) NOT NULL,
-  `TenSP` varchar(200) NOT NULL,
-  `MoTa` text DEFAULT NULL,
-  `Gia` decimal(15,0) NOT NULL DEFAULT 0,
-  `SoLuong` int(11) NOT NULL DEFAULT 0,
-  `DanhMuc` varchar(10) NOT NULL,
+  `id` int(11) NOT NULL,
+  `name` varchar(200) NOT NULL,
+  `description` text DEFAULT NULL,
+  `price` decimal(15,0) NOT NULL DEFAULT 0,
+  `stock` int(11) NOT NULL DEFAULT 0,
+  `category_code` varchar(10) NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -397,7 +397,7 @@ CREATE TABLE `sanpham` (
 -- Đang đổ dữ liệu cho bảng `sanpham`
 --
 
-INSERT INTO `sanpham` (`MaSP`, `TenSP`, `MoTa`, `Gia`, `SoLuong`, `DanhMuc`, `is_active`) VALUES
+INSERT INTO `sanpham` (`id`, `name`, `description`, `price`, `stock`, `category_code`, `is_active`) VALUES
 (1, 'iPhone 15 Pro Max 256GB', 'Điện thoại Apple chính hãng, màu Titan tự nhiên', 30990000, 50, 'DTH', 1),
 (2, 'Samsung Galaxy S24 Ultra', 'Điện thoại kèm bút S-Pen, hỗ trợ Galaxy AI', 27490000, 40, 'DTH', 1),
 (3, 'iPad Air 6 M2', 'Máy tính bảng Apple hiệu năng cao, màn hình 11 inch', 16290000, 15, 'DTH', 0),
@@ -629,46 +629,46 @@ INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `role`, `is_acti
 --
 ALTER TABLE `chi_tiet_phieu_nhap`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_ctpn_ma_phieu` (`ma_phieu`),
-  ADD KEY `fk_ctpn_sanpham` (`san_pham`);
+  ADD KEY `fk_ctpn_receipt` (`receipt_code`),
+  ADD KEY `fk_ctpn_product` (`product_id`);
 
 --
 -- Chỉ mục cho bảng `chi_tiet_phieu_xuat`
 --
 ALTER TABLE `chi_tiet_phieu_xuat`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_ctpx_ma_phieu` (`ma_phieu`),
-  ADD KEY `fk_ctpx_sanpham` (`san_pham`);
+  ADD KEY `fk_ctpx_receipt` (`receipt_code`),
+  ADD KEY `fk_ctpx_product` (`product_id`);
 
 --
 -- Chỉ mục cho bảng `danhmuc`
 --
 ALTER TABLE `danhmuc`
-  ADD PRIMARY KEY (`MaDM`);
+  ADD PRIMARY KEY (`code`);
 
 --
 -- Chỉ mục cho bảng `phieu_nhap`
 --
 ALTER TABLE `phieu_nhap`
-  ADD PRIMARY KEY (`ma_phieu`),
-  ADD KEY `fk_pn_nguoi_tao` (`nguoi_tao`),
-  ADD KEY `fk_pn_ngay_tao` (`ngay_tao`);
+  ADD PRIMARY KEY (`code`),
+  ADD KEY `fk_pn_created_by` (`created_by`),
+  ADD KEY `fk_pn_created_at` (`created_at`);
 
 --
 -- Chỉ mục cho bảng `phieu_xuat`
 --
 ALTER TABLE `phieu_xuat`
-  ADD PRIMARY KEY (`ma_phieu`),
-  ADD KEY `fk_px_nguoi_tao` (`nguoi_tao`),
-  ADD KEY `fk_px_ngay_tao` (`ngay_tao`);
+  ADD PRIMARY KEY (`code`),
+  ADD KEY `fk_px_created_by` (`created_by`),
+  ADD KEY `fk_px_created_at` (`created_at`);
 
 --
 -- Chỉ mục cho bảng `sanpham`
 --
 ALTER TABLE `sanpham`
-  ADD PRIMARY KEY (`MaSP`),
-  ADD KEY `FK_SP_DanhMuc` (`DanhMuc`);
-ALTER TABLE `sanpham` ADD FULLTEXT KEY `ft_search` (`TenSP`,`MoTa`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `FK_SP_Category` (`category_code`);
+ALTER TABLE `sanpham` ADD FULLTEXT KEY `ft_search` (`name`,`description`);
 
 --
 -- Chỉ mục cho bảng `sessions`
@@ -706,7 +706,7 @@ ALTER TABLE `chi_tiet_phieu_xuat`
 -- AUTO_INCREMENT cho bảng `sanpham`
 --
 ALTER TABLE `sanpham`
-  MODIFY `MaSP` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=167;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=167;
 
 --
 -- AUTO_INCREMENT cho bảng `users`
@@ -722,33 +722,33 @@ ALTER TABLE `users`
 -- Các ràng buộc cho bảng `chi_tiet_phieu_nhap`
 --
 ALTER TABLE `chi_tiet_phieu_nhap`
-  ADD CONSTRAINT `fk_ctpn_ma_phieu` FOREIGN KEY (`ma_phieu`) REFERENCES `phieu_nhap` (`ma_phieu`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_ctpn_sanpham` FOREIGN KEY (`san_pham`) REFERENCES `sanpham` (`MaSP`);
+  ADD CONSTRAINT `fk_ctpn_receipt` FOREIGN KEY (`receipt_code`) REFERENCES `phieu_nhap` (`code`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_ctpn_product` FOREIGN KEY (`product_id`) REFERENCES `sanpham` (`id`);
 
 --
 -- Các ràng buộc cho bảng `chi_tiet_phieu_xuat`
 --
 ALTER TABLE `chi_tiet_phieu_xuat`
-  ADD CONSTRAINT `fk_ctpx_ma_phieu` FOREIGN KEY (`ma_phieu`) REFERENCES `phieu_xuat` (`ma_phieu`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_ctpx_sanpham` FOREIGN KEY (`san_pham`) REFERENCES `sanpham` (`MaSP`);
+  ADD CONSTRAINT `fk_ctpx_receipt` FOREIGN KEY (`receipt_code`) REFERENCES `phieu_xuat` (`code`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_ctpx_product` FOREIGN KEY (`product_id`) REFERENCES `sanpham` (`id`);
 
 --
 -- Các ràng buộc cho bảng `phieu_nhap`
 --
 ALTER TABLE `phieu_nhap`
-  ADD CONSTRAINT `fk_pn_nguoi_tao` FOREIGN KEY (`nguoi_tao`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `fk_pn_created_by` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`);
 
 --
 -- Các ràng buộc cho bảng `phieu_xuat`
 --
 ALTER TABLE `phieu_xuat`
-  ADD CONSTRAINT `fk_px_nguoi_tao` FOREIGN KEY (`nguoi_tao`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `fk_px_created_by` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`);
 
 --
 -- Các ràng buộc cho bảng `sanpham`
 --
 ALTER TABLE `sanpham`
-  ADD CONSTRAINT `FK_SP_DanhMuc` FOREIGN KEY (`DanhMuc`) REFERENCES `danhmuc` (`MaDM`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `FK_SP_Category` FOREIGN KEY (`category_code`) REFERENCES `danhmuc` (`code`) ON UPDATE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `sessions`

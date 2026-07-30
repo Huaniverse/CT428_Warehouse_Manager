@@ -18,28 +18,28 @@ switch ($action) {
         requirePost();
         verifyCsrfToken();
 
-        $san_pham = (int)($_POST['san_pham'] ?? 0);
-        $so_luong = (int)($_POST['so_luong'] ?? 0);
-        $ghi_chu  = trim($_POST['ghi_chu'] ?? '');
-        $nguoi_tao = $_SESSION['user_id'];
+        $product_id = (int)($_POST['product_id'] ?? 0);
+        $quantity = (int)($_POST['quantity'] ?? 0);
+        $note  = trim($_POST['note'] ?? '');
+        $created_by = $_SESSION['user_id'];
 
-        if ($san_pham <= 0) {
+        if ($product_id <= 0) {
             echo json_encode(['success' => false, 'message' => 'Vui lòng chọn sản phẩm.']);
             exit;
         }
-        if ($so_luong <= 0) {
+        if ($quantity <= 0) {
             echo json_encode(['success' => false, 'message' => 'Số lượng xuất phải lớn hơn 0.']);
             exit;
         }
-        if (mb_strlen($ghi_chu) > 1000) {
+        if (mb_strlen($note) > 1000) {
             echo json_encode(['success' => false, 'message' => 'Ghi chú không được quá 1000 ký tự.']);
             exit;
         }
 
         $conn->begin_transaction();
         try {
-            $lock = $conn->prepare("SELECT MaSP, TenSP, SoLuong FROM sanpham WHERE MaSP = ? AND is_active = 1 FOR UPDATE");
-            $lock->bind_param("i", $san_pham);
+            $lock = $conn->prepare("SELECT id, name, stock FROM sanpham WHERE id = ? AND is_active = 1 FOR UPDATE");
+            $lock->bind_param("i", $product_id);
             $lock->execute();
             $locked_product = $lock->get_result()->fetch_assoc();
             $lock->close();
@@ -50,29 +50,29 @@ switch ($action) {
                 exit;
             }
 
-            if ($locked_product['SoLuong'] < $so_luong) {
+            if ($locked_product['stock'] < $quantity) {
                 $conn->rollback();
                 echo json_encode([
                     'success' => false,
-                    'message' => "Không đủ hàng để xuất. Hiện còn {$locked_product['SoLuong']} sản phẩm."
+                    'message' => "Không đủ hàng để xuất. Hiện còn {$locked_product['stock']} sản phẩm."
                 ]);
                 exit;
             }
 
-            $ma_phieu = 'PX_' . date('YmdHis') . '_' . random_int(1000, 9999);
+            $code = 'PX_' . date('YmdHis') . '_' . random_int(1000, 9999);
 
-            $header = $conn->prepare("INSERT INTO phieu_xuat (ma_phieu, nguoi_tao, ngay_tao) VALUES (?, ?, NOW())");
-            $header->bind_param("si", $ma_phieu, $nguoi_tao);
+            $header = $conn->prepare("INSERT INTO phieu_xuat (code, created_by, created_at) VALUES (?, ?, NOW())");
+            $header->bind_param("si", $code, $created_by);
             $header->execute();
             $header->close();
 
-            $detail = $conn->prepare("INSERT INTO chi_tiet_phieu_xuat (ma_phieu, san_pham, so_luong, ghi_chu) VALUES (?, ?, ?, ?)");
-            $detail->bind_param("siis", $ma_phieu, $san_pham, $so_luong, $ghi_chu);
+            $detail = $conn->prepare("INSERT INTO chi_tiet_phieu_xuat (receipt_code, product_id, quantity, note) VALUES (?, ?, ?, ?)");
+            $detail->bind_param("siis", $code, $product_id, $quantity, $note);
             $detail->execute();
             $detail->close();
 
-            $update = $conn->prepare("UPDATE sanpham SET SoLuong = SoLuong - ? WHERE MaSP = ? AND SoLuong >= ?");
-            $update->bind_param("iii", $so_luong, $san_pham, $so_luong);
+            $update = $conn->prepare("UPDATE sanpham SET stock = stock - ? WHERE id = ? AND stock >= ?");
+            $update->bind_param("iii", $quantity, $product_id, $quantity);
             $update->execute();
 
             if ($update->affected_rows === 0) {
@@ -83,18 +83,18 @@ switch ($action) {
             }
             $update->close();
 
-            $fetch = $conn->prepare("SELECT SoLuong FROM sanpham WHERE MaSP = ?");
-            $fetch->bind_param("i", $san_pham);
+            $fetch = $conn->prepare("SELECT stock FROM sanpham WHERE id = ?");
+            $fetch->bind_param("i", $product_id);
             $fetch->execute();
-            $new_qty = (int)$fetch->get_result()->fetch_assoc()['SoLuong'];
+            $new_stock = (int)$fetch->get_result()->fetch_assoc()['stock'];
             $fetch->close();
 
             $conn->commit();
             echo json_encode([
                 'success'       => true,
-                'message'       => "Xuất kho thành công. Sản phẩm \"{$locked_product['TenSP']}\": -{$so_luong} → {$new_qty} sản phẩm.",
-                'ma_phieu'      => $ma_phieu,
-                'so_luong_moi'  => $new_qty
+                'message'       => "Xuất kho thành công. Sản phẩm \"{$locked_product['name']}\": -{$quantity} → {$new_stock} sản phẩm.",
+                'code'          => $code,
+                'new_stock'     => $new_stock
             ]);
         } catch (Exception $e) {
             $conn->rollback();
@@ -119,53 +119,53 @@ switch ($action) {
             exit;
         }
 
-        $nguoi_tao = $_SESSION['user_id'];
+        $created_by = $_SESSION['user_id'];
         $conn->begin_transaction();
         try {
-            $ma_phieu = 'PX_' . date('YmdHis') . '_' . random_int(1000, 9999);
+            $code = 'PX_' . date('YmdHis') . '_' . random_int(1000, 9999);
 
-            $header = $conn->prepare("INSERT INTO phieu_xuat (ma_phieu, nguoi_tao, ngay_tao) VALUES (?, ?, NOW())");
-            $header->bind_param("si", $ma_phieu, $nguoi_tao);
+            $header = $conn->prepare("INSERT INTO phieu_xuat (code, created_by, created_at) VALUES (?, ?, NOW())");
+            $header->bind_param("si", $code, $created_by);
             $header->execute();
             $header->close();
 
-            $detail_stmt = $conn->prepare("INSERT INTO chi_tiet_phieu_xuat (ma_phieu, san_pham, so_luong, ghi_chu) VALUES (?, ?, ?, ?)");
-            $lock = $conn->prepare("SELECT MaSP, TenSP, SoLuong FROM sanpham WHERE MaSP = ? AND is_active = 1 FOR UPDATE");
-            $update = $conn->prepare("UPDATE sanpham SET SoLuong = SoLuong - ? WHERE MaSP = ? AND SoLuong >= ?");
+            $detail_stmt = $conn->prepare("INSERT INTO chi_tiet_phieu_xuat (receipt_code, product_id, quantity, note) VALUES (?, ?, ?, ?)");
+            $lock = $conn->prepare("SELECT id, name, stock FROM sanpham WHERE id = ? AND is_active = 1 FOR UPDATE");
+            $update = $conn->prepare("UPDATE sanpham SET stock = stock - ? WHERE id = ? AND stock >= ?");
 
             $success_count = 0;
             $messages = [];
 
             foreach ($items as $item) {
-                $san_pham = (int)($item['san_pham'] ?? 0);
-                $so_luong = (int)($item['so_luong'] ?? 0);
-                $ghi_chu  = trim($item['ghi_chu'] ?? '');
+                $product_id = (int)($item['product_id'] ?? 0);
+                $quantity = (int)($item['quantity'] ?? 0);
+                $note  = trim($item['note'] ?? '');
 
-                if ($san_pham <= 0 || $so_luong <= 0) continue;
+                if ($product_id <= 0 || $quantity <= 0) continue;
 
-                $lock->bind_param("i", $san_pham);
+                $lock->bind_param("i", $product_id);
                 $lock->execute();
                 $locked_product = $lock->get_result()->fetch_assoc();
 
                 if (!$locked_product) {
-                    throw new Exception("Sản phẩm ID {$san_pham} không tồn tại.");
+                    throw new Exception("Sản phẩm ID {$product_id} không tồn tại.");
                 }
-                if ($locked_product['SoLuong'] < $so_luong) {
-                    throw new Exception("Sản phẩm \"{$locked_product['TenSP']}\" không đủ số lượng (tồn kho: {$locked_product['SoLuong']}, yêu cầu: {$so_luong}).");
+                if ($locked_product['stock'] < $quantity) {
+                    throw new Exception("Sản phẩm \"{$locked_product['name']}\" không đủ số lượng (tồn kho: {$locked_product['stock']}, yêu cầu: {$quantity}).");
                 }
 
-                $detail_stmt->bind_param("siis", $ma_phieu, $san_pham, $so_luong, $ghi_chu);
+                $detail_stmt->bind_param("siis", $code, $product_id, $quantity, $note);
                 $detail_stmt->execute();
 
-                $update->bind_param("iii", $so_luong, $san_pham, $so_luong);
+                $update->bind_param("iii", $quantity, $product_id, $quantity);
                 $update->execute();
 
                 if ($update->affected_rows === 0) {
-                    throw new Exception("Lỗi đồng bộ khi trừ tồn kho cho sản phẩm \"{$locked_product['TenSP']}\".");
+                    throw new Exception("Lỗi đồng bộ khi trừ tồn kho cho sản phẩm \"{$locked_product['name']}\".");
                 }
 
                 $success_count++;
-                $messages[] = "{$locked_product['TenSP']}: -{$so_luong}";
+                $messages[] = "{$locked_product['name']}: -{$quantity}";
             }
 
             $detail_stmt->close();
@@ -183,7 +183,7 @@ switch ($action) {
             echo json_encode([
                 'success'  => true,
                 'message'  => "Xuất kho thành công {$success_count} sản phẩm: {$summary}.",
-                'ma_phieu' => $ma_phieu
+                'code' => $code
             ]);
         } catch (Exception $e) {
             $conn->rollback();
@@ -198,12 +198,12 @@ switch ($action) {
 
     // ── Chi tiết phiếu xuất ───────────────────────────────────────────────
     case 'detail':
-        $ma_phieu = trim($_GET['ma_phieu'] ?? '');
-        if ($ma_phieu === '') {
+        $code = trim($_GET['code'] ?? '');
+        if ($code === '') {
             echo json_encode(['success' => false, 'message' => 'Thiếu mã phiếu.']);
             exit;
         }
-        echo json_encode(getStockDetail($conn, 'export', $ma_phieu));
+        echo json_encode(getStockDetail($conn, 'export', $code));
         break;
 
     default:

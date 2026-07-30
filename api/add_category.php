@@ -20,28 +20,28 @@ if (!$conn) {
 }
 
 // Nhận và làm sạch dữ liệu đầu vào
-$ma_dm  = strtoupper(trim($_POST['ma_dm'] ?? ''));
-$ten_dm = trim($_POST['ten_dm'] ?? '');
+$code  = strtoupper(trim($_POST['code'] ?? ''));
+$category_name = trim($_POST['name'] ?? '');
 
 // Kiểm tra dữ liệu đầu vào
-if ($ma_dm === '') {
+if ($code === '') {
     echo json_encode(['success' => false, 'message' => 'Mã danh mục không được để trống.']);
     exit;
 }
 
-if (!preg_match('/^[a-zA-Z0-9_]{2,10}$/', $ma_dm)) {
+if (!preg_match('/^[a-zA-Z0-9_]{2,10}$/', $code)) {
     echo json_encode(['success' => false, 'message' => 'Mã danh mục chỉ gồm chữ cái, số, gạch dưới (2–10 ký tự).']);
     exit;
 }
 
-if ($ten_dm === '') {
+if ($category_name === '') {
     echo json_encode(['success' => false, 'message' => 'Tên danh mục không được để trống.']);
     exit;
 }
 
 // Kiểm tra trùng lặp mã danh mục
-$check = $conn->prepare("SELECT MaDM FROM danhmuc WHERE MaDM = ?");
-$check->bind_param("s", $ma_dm);
+$check = $conn->prepare("SELECT code FROM danhmuc WHERE code = ?");
+$check->bind_param("s", $code);
 $check->execute();
 $res = $check->get_result();
 if ($res->num_rows > 0) {
@@ -52,13 +52,13 @@ if ($res->num_rows > 0) {
 $check->close();
 
 // Thực hiện thêm danh mục mới
-$stmt = $conn->prepare("INSERT INTO danhmuc (MaDM, TenDM) VALUES (?, ?)");
-$stmt->bind_param("ss", $ma_dm, $ten_dm);
+$stmt = $conn->prepare("INSERT INTO danhmuc (code, name) VALUES (?, ?)");
+$stmt->bind_param("ss", $code, $category_name);
 
 if ($stmt->execute()) {
     // Lấy lại toàn bộ danh sách danh mục để cập nhật giao diện
     $categories = [];
-    $result = $conn->query("SELECT MaDM, TenDM FROM danhmuc ORDER BY TenDM ASC");
+    $result = $conn->query("SELECT code, name FROM danhmuc ORDER BY name ASC");
     if ($result) {
         while ($row = $result->fetch_assoc()) {
             $categories[] = $row;

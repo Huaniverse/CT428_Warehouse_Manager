@@ -24,9 +24,9 @@ function loadProductDropdown(inputId) {
     apiFetch(BASE + '/api/filter_products.php?search=&category=&price_sort=&qty_sort=&limit=all&active_only=1')
         .then(data => {
             const products = data.records.map(r => ({
-                id: String(r.MaSP),
-                name: r.TenSP,
-                label: r.TenSP + ' (Mã: ' + r.MaSP + ')'
+                id: String(r.id),
+                name: r.name,
+                label: r.name + ' (Mã: ' + r.id + ')'
             }));
             _comboData[inputId] = products;
             input.placeholder = 'Gõ tên sản phẩm để tìm...';
