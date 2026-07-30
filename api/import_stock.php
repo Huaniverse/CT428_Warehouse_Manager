@@ -1,5 +1,5 @@
 <?php
-// Xử lý nhập kho (đơn lẻ và hàng loạt)
+// Xử lý nhập kho
 
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/auth.php';

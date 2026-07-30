@@ -67,7 +67,7 @@ switch ($action) {
             exit;
         }
 
-        // Nhận và làm sạch dữ liệu đầu vào, dùng helper để DRY
+        // Nhận và làm sạch dữ liệu đầu vào
         $validation = validateProductInput($conn, $_POST, true);
 
         if (!$validation['success']) {

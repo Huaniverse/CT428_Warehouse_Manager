@@ -1,5 +1,5 @@
 <?php
-// Quản lý tài khoản người dùng (CRUD, phân quyền, session)
+// Quản lý tài khoản người dùng 
 
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/auth.php';

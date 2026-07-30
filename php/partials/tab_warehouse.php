@@ -94,7 +94,7 @@
           <?php endif; ?>
         </div>
 
-        <!-- Bang san pham -->
+        <!-- Bảng sản phẩm -->
         <div id="filter_results_container" style="margin-top: 24px;">
           <div class="table_container">
             <table class="product_table">
@@ -113,7 +113,7 @@
                 </tr>
               </thead>
               <tbody id="product_table_body">
-                  <!-- AJAX se render du lieu vao day -->
+                  <!-- AJAX sẽ render dữ liệu vào đây -->
               </tbody>
             </table>
           </div>

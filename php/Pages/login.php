@@ -145,7 +145,6 @@ $expired = isset($_GET['expired']) && $_GET['expired'] == '1' && $_SERVER['REQUE
     </div>
 
     <div class="login_wrapper">
-        <!-- Phan hien thi thuong hieu ben trai -->
         <div class="login_brand">
             <div class="brand_logo">
                 <span class="material-symbols-outlined">inventory_2</span>
@@ -168,7 +167,7 @@ $expired = isset($_GET['expired']) && $_GET['expired'] == '1' && $_SERVER['REQUE
             </div>
         </div>
 
-        <!-- The dang nhap -->
+        <!-- Thẻ đăng nhập -->
         <div class="login_card">
             <div class="login_card_header">
                 <h2>Chào mừng trở lại</h2>

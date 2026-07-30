@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th7 28, 2026 lúc 06:51 AM
+-- Thời gian đã tạo: Th7 30, 2026 lúc 05:47 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -20,6 +20,179 @@ SET time_zone = "+00:00";
 --
 -- Cơ sở dữ liệu: `warehouse_manager`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `categories`
+--
+
+CREATE TABLE `categories` (
+  `id` varchar(10) NOT NULL,
+  `name` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `categories`
+--
+
+INSERT INTO `categories` (`id`, `name`) VALUES
+('ATH', 'Thiết bị âm thanh'),
+('DTH', 'Điện thoại'),
+('GDG', 'Gia dụng'),
+('LAP', 'Laptop'),
+('PKI', 'Phụ kiện'),
+('QUA', 'Quà tặng');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `export_receipts`
+--
+
+CREATE TABLE `export_receipts` (
+  `id` varchar(50) NOT NULL,
+  `created_by` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `export_receipts`
+--
+
+INSERT INTO `export_receipts` (`id`, `created_by`, `created_at`) VALUES
+('PX_20260505100000_2001', 2, '2026-05-05 10:00:00'),
+('PX_20260508140000_2002', 1, '2026-05-08 14:00:00'),
+('PX_20260513090000_2003', 4, '2026-05-13 09:00:00'),
+('PX_20260517153000_2004', 3, '2026-05-17 15:30:00'),
+('PX_20260603084500_2005', 2, '2026-06-03 08:45:00'),
+('PX_20260611110000_2006', 1, '2026-06-11 11:00:00'),
+('PX_20260618140000_2007', 4, '2026-06-18 14:00:00'),
+('PX_20260628090000_2008', 2, '2026-06-28 09:00:00'),
+('PX_20260706103000_2009', 1, '2026-07-06 10:30:00'),
+('PX_20260715140000_2010', 3, '2026-07-15 14:00:00'),
+('PX_20260721090000_2011', 2, '2026-07-21 09:00:00'),
+('PX_20260727143000_2012', 1, '2026-07-27 14:30:00'),
+('PX_20260730201741_7503', 2, '2026-07-30 13:17:41');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `export_receipt_details`
+--
+
+CREATE TABLE `export_receipt_details` (
+  `id` int(11) NOT NULL,
+  `receipt_id` varchar(50) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `notes` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `export_receipt_details`
+--
+
+INSERT INTO `export_receipt_details` (`id`, `receipt_id`, `product_id`, `quantity`, `notes`) VALUES
+(1, 'PX_20260505100000_2001', 1, 6, 'Bán iPhone 15 Pro Max — đơn online'),
+(2, 'PX_20260505100000_2001', 20, 12, 'Bán iPhone 13 — đơn lẻ'),
+(3, 'PX_20260505100000_2001', 26, 5, 'Bán iPhone 15 128GB — khách VIP'),
+(4, 'PX_20260508140000_2002', 2, 4, 'Bán Samsung S24 Ultra — đơn online'),
+(5, 'PX_20260508140000_2002', 17, 5, 'Bán Oppo Reno11 Pro — đơn lẻ'),
+(6, 'PX_20260508140000_2002', 18, 2, 'Bán Xiaomi 14 Ultra — khách VIP'),
+(7, 'PX_20260513090000_2003', 24, 6, 'Bán Vivo V30 — đại lý'),
+(8, 'PX_20260513090000_2003', 67, 8, 'Bán Samsung A55 — đơn online'),
+(9, 'PX_20260513090000_2003', 68, 5, 'Bán Oppo Reno12 F — đơn lẻ'),
+(10, 'PX_20260517153000_2004', 5, 3, 'Bán Asus ROG Strix — đơn gaming'),
+(11, 'PX_20260517153000_2004', 28, 4, 'Bán Lenovo Legion — đơn gaming'),
+(12, 'PX_20260517153000_2004', 30, 2, 'Bán MSI Cyborg — đơn online'),
+(13, 'PX_20260603084500_2005', 31, 2, 'Bán Dell XPS 13 Plus — doanh nhân'),
+(14, 'PX_20260603084500_2005', 32, 1, 'Bán MacBook Pro 14 — studio'),
+(15, 'PX_20260603084500_2005', 33, 2, 'Bán Asus Zenbook OLED — văn phòng'),
+(16, 'PX_20260611110000_2006', 69, 8, 'Xuất Xiaomi Redmi Note 13 Pro — online'),
+(17, 'PX_20260611110000_2006', 71, 10, 'Xuất Realme C65 — đơn sỉ'),
+(18, 'PX_20260611110000_2006', 72, 4, 'Xuất iPhone 14 Plus — đơn lẻ'),
+(19, 'PX_20260618140000_2007', 35, 3, 'Xuất Lenovo Yoga Slim 7 — VIP'),
+(20, 'PX_20260618140000_2007', 87, 4, 'Xuất Asus Vivobook OLED — văn phòng'),
+(21, 'PX_20260618140000_2007', 89, 5, 'Xuất Lenovo IdeaPad — đơn học sinh'),
+(22, 'PX_20260628090000_2008', 107, 8, 'Xuất sạc Anker Nano — kèm điện thoại'),
+(23, 'PX_20260628090000_2008', 108, 6, 'Xuất chuột Razer — đơn gaming'),
+(24, 'PX_20260628090000_2008', 109, 3, 'Xuất bàn phím ROG — gaming'),
+(25, 'PX_20260706103000_2009', 21, 3, 'Xuất iPad Pro 11 M4 — doanh nghiệp'),
+(26, 'PX_20260706103000_2009', 22, 4, 'Xuất Samsung Tab S9 — online'),
+(27, 'PX_20260706103000_2009', 73, 5, 'Xuất iPad Mini 6 — khách lẻ'),
+(28, 'PX_20260715140000_2010', 17, 6, 'Xuất Oppo Reno11 Pro — đơn online'),
+(29, 'PX_20260715140000_2010', 18, 2, 'Xuất Xiaomi 14 Ultra — đơn VIP'),
+(30, 'PX_20260715140000_2010', 24, 5, 'Xuất Vivo V30 — đại lý'),
+(31, 'PX_20260721090000_2011', 32, 3, 'Xuất MacBook Pro 14 — studio ảnh'),
+(32, 'PX_20260721090000_2011', 31, 2, 'Xuất Dell XPS 13 Plus — doanh nhân'),
+(33, 'PX_20260721090000_2011', 34, 1, 'Xuất LG Gram 16 — khách VIP'),
+(34, 'PX_20260727143000_2012', 47, 4, 'Xuất loa Marshall — đơn online'),
+(35, 'PX_20260727143000_2012', 53, 6, 'Xuất tai nghe JBL — đơn lẻ'),
+(36, 'PX_20260727143000_2012', 14, 2, 'Xuất robot hút bụi — đơn VIP'),
+(37, 'PX_20260727143000_2012', 61, 3, 'Xuất lò vi sóng Sharp — đại lý'),
+(38, 'PX_20260730201741_7503', 1, 5, '');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `import_receipts`
+--
+
+CREATE TABLE `import_receipts` (
+  `id` varchar(50) NOT NULL,
+  `created_by` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `import_receipts`
+--
+
+INSERT INTO `import_receipts` (`id`, `created_by`, `created_at`) VALUES
+('PN_20260502083000_1001', 2, '2026-05-02 08:30:00'),
+('PN_20260504141500_1002', 3, '2026-05-04 14:15:00'),
+('PN_20260507090000_1003', 2, '2026-05-07 09:00:00'),
+('PN_20260509103000_1004', 1, '2026-05-09 10:30:00'),
+('PN_20260512084500_1005', 3, '2026-05-12 08:45:00'),
+('PN_20260514150000_1006', 2, '2026-05-14 15:00:00'),
+('PN_20260516090000_1007', 3, '2026-05-16 09:00:00'),
+('PN_20260519100000_1008', 1, '2026-05-19 10:00:00'),
+('PN_20260521143000_1009', 2, '2026-05-21 14:30:00'),
+('PN_20260523081500_1010', 3, '2026-05-23 08:15:00'),
+('PN_20260526100000_1011', 1, '2026-05-26 10:00:00'),
+('PN_20260528140000_1012', 2, '2026-05-28 14:00:00'),
+('PN_20260530083000_1013', 3, '2026-05-30 08:30:00'),
+('PN_20260602090000_1014', 2, '2026-06-02 09:00:00'),
+('PN_20260604140000_1015', 3, '2026-06-04 14:00:00'),
+('PN_20260607083000_1016', 1, '2026-06-07 08:30:00'),
+('PN_20260609150000_1017', 2, '2026-06-09 15:00:00'),
+('PN_20260612090000_1018', 3, '2026-06-12 09:00:00'),
+('PN_20260614103000_1019', 1, '2026-06-14 10:30:00'),
+('PN_20260617140000_1020', 2, '2026-06-17 14:00:00'),
+('PN_20260619083000_1021', 3, '2026-06-19 08:30:00'),
+('PN_20260622100000_1022', 1, '2026-06-22 10:00:00'),
+('PN_20260624143000_1023', 2, '2026-06-24 14:30:00'),
+('PN_20260626090000_1024', 3, '2026-06-26 09:00:00'),
+('PN_20260628150000_1025', 1, '2026-06-28 15:00:00'),
+('PN_20260701083000_1026', 2, '2026-07-01 08:30:00'),
+('PN_20260703140000_1027', 3, '2026-07-03 14:00:00'),
+('PN_20260705090000_1028', 1, '2026-07-05 09:00:00'),
+('PN_20260707103000_1029', 2, '2026-07-07 10:30:00'),
+('PN_20260709140000_1030', 3, '2026-07-09 14:00:00'),
+('PN_20260711083000_1031', 1, '2026-07-11 08:30:00'),
+('PN_20260714100000_1032', 2, '2026-07-14 10:00:00'),
+('PN_20260716150000_1033', 3, '2026-07-16 15:00:00'),
+('PN_20260718090000_1034', 1, '2026-07-18 09:00:00'),
+('PN_20260720140000_1035', 2, '2026-07-20 14:00:00'),
+('PN_20260722083000_1036', 3, '2026-07-22 08:30:00'),
+('PN_20260724100000_1037', 1, '2026-07-24 10:00:00'),
+('PN_20260725143000_1038', 2, '2026-07-25 14:30:00'),
+('PN_20260726090000_1039', 3, '2026-07-26 09:00:00'),
+('PN_20260727083000_1040', 1, '2026-07-27 08:30:00'),
+('PN_20260727110000_1041', 2, '2026-07-27 11:00:00'),
+('PN_20260727150000_1042', 3, '2026-07-27 15:00:00'),
+('PN_20260730200544_7063', 2, '2026-07-30 13:05:44');
 
 -- --------------------------------------------------------
 
@@ -205,177 +378,9 @@ INSERT INTO `import_receipt_details` (`id`, `receipt_id`, `product_id`, `quantit
 (163, 'PN_20260727110000_1041', 164, 18, 'Máy xay thịt Philips — thủy tinh'),
 (164, 'PN_20260727110000_1041', 165, 12, 'Máy đánh trứng Philips — 5 tốc độ'),
 (165, 'PN_20260727150000_1042', 166, 22, 'Ổ cắm thông minh Tuya — WiFi'),
-(166, 'PN_20260727150000_1042', 16, 50, 'Thẻ quà tặng Got It — 500k');
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `export_receipt_details`
---
-
-CREATE TABLE `export_receipt_details` (
-  `id` int(11) NOT NULL,
-  `receipt_id` varchar(50) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `quantity` int(11) NOT NULL,
-  `notes` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Đang đổ dữ liệu cho bảng `export_receipt_details`
---
-
-INSERT INTO `export_receipt_details` (`id`, `receipt_id`, `product_id`, `quantity`, `notes`) VALUES
-(1, 'PX_20260505100000_2001', 1, 6, 'Bán iPhone 15 Pro Max — đơn online'),
-(2, 'PX_20260505100000_2001', 20, 12, 'Bán iPhone 13 — đơn lẻ'),
-(3, 'PX_20260505100000_2001', 26, 5, 'Bán iPhone 15 128GB — khách VIP'),
-(4, 'PX_20260508140000_2002', 2, 4, 'Bán Samsung S24 Ultra — đơn online'),
-(5, 'PX_20260508140000_2002', 17, 5, 'Bán Oppo Reno11 Pro — đơn lẻ'),
-(6, 'PX_20260508140000_2002', 18, 2, 'Bán Xiaomi 14 Ultra — khách VIP'),
-(7, 'PX_20260513090000_2003', 24, 6, 'Bán Vivo V30 — đại lý'),
-(8, 'PX_20260513090000_2003', 67, 8, 'Bán Samsung A55 — đơn online'),
-(9, 'PX_20260513090000_2003', 68, 5, 'Bán Oppo Reno12 F — đơn lẻ'),
-(10, 'PX_20260517153000_2004', 5, 3, 'Bán Asus ROG Strix — đơn gaming'),
-(11, 'PX_20260517153000_2004', 28, 4, 'Bán Lenovo Legion — đơn gaming'),
-(12, 'PX_20260517153000_2004', 30, 2, 'Bán MSI Cyborg — đơn online'),
-(13, 'PX_20260603084500_2005', 31, 2, 'Bán Dell XPS 13 Plus — doanh nhân'),
-(14, 'PX_20260603084500_2005', 32, 1, 'Bán MacBook Pro 14 — studio'),
-(15, 'PX_20260603084500_2005', 33, 2, 'Bán Asus Zenbook OLED — văn phòng'),
-(16, 'PX_20260611110000_2006', 69, 8, 'Xuất Xiaomi Redmi Note 13 Pro — online'),
-(17, 'PX_20260611110000_2006', 71, 10, 'Xuất Realme C65 — đơn sỉ'),
-(18, 'PX_20260611110000_2006', 72, 4, 'Xuất iPhone 14 Plus — đơn lẻ'),
-(19, 'PX_20260618140000_2007', 35, 3, 'Xuất Lenovo Yoga Slim 7 — VIP'),
-(20, 'PX_20260618140000_2007', 87, 4, 'Xuất Asus Vivobook OLED — văn phòng'),
-(21, 'PX_20260618140000_2007', 89, 5, 'Xuất Lenovo IdeaPad — đơn học sinh'),
-(22, 'PX_20260628090000_2008', 107, 8, 'Xuất sạc Anker Nano — kèm điện thoại'),
-(23, 'PX_20260628090000_2008', 108, 6, 'Xuất chuột Razer — đơn gaming'),
-(24, 'PX_20260628090000_2008', 109, 3, 'Xuất bàn phím ROG — gaming'),
-(25, 'PX_20260706103000_2009', 21, 3, 'Xuất iPad Pro 11 M4 — doanh nghiệp'),
-(26, 'PX_20260706103000_2009', 22, 4, 'Xuất Samsung Tab S9 — online'),
-(27, 'PX_20260706103000_2009', 73, 5, 'Xuất iPad Mini 6 — khách lẻ'),
-(28, 'PX_20260715140000_2010', 17, 6, 'Xuất Oppo Reno11 Pro — đơn online'),
-(29, 'PX_20260715140000_2010', 18, 2, 'Xuất Xiaomi 14 Ultra — đơn VIP'),
-(30, 'PX_20260715140000_2010', 24, 5, 'Xuất Vivo V30 — đại lý'),
-(31, 'PX_20260721090000_2011', 32, 3, 'Xuất MacBook Pro 14 — studio ảnh'),
-(32, 'PX_20260721090000_2011', 31, 2, 'Xuất Dell XPS 13 Plus — doanh nhân'),
-(33, 'PX_20260721090000_2011', 34, 1, 'Xuất LG Gram 16 — khách VIP'),
-(34, 'PX_20260727143000_2012', 47, 4, 'Xuất loa Marshall — đơn online'),
-(35, 'PX_20260727143000_2012', 53, 6, 'Xuất tai nghe JBL — đơn lẻ'),
-(36, 'PX_20260727143000_2012', 14, 2, 'Xuất robot hút bụi — đơn VIP'),
-(37, 'PX_20260727143000_2012', 61, 3, 'Xuất lò vi sóng Sharp — đại lý');
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `categories`
---
-
-CREATE TABLE `categories` (
-  `id` varchar(10) NOT NULL,
-  `name` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Đang đổ dữ liệu cho bảng `categories`
---
-
-INSERT INTO `categories` (`id`, `name`) VALUES
-('ATH', 'Thiết bị âm thanh'),
-('DTH', 'Điện thoại'),
-('GDG', 'Gia dụng'),
-('LAP', 'Laptop'),
-('PKI', 'Phụ kiện'),
-('QUA', 'Quà tặng');
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `import_receipts`
---
-
-CREATE TABLE `import_receipts` (
-  `id` varchar(50) NOT NULL,
-  `created_by` int(11) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Đang đổ dữ liệu cho bảng `import_receipts`
---
-
-INSERT INTO `import_receipts` (`id`, `created_by`, `created_at`) VALUES
-('PN_20260502083000_1001', 2, '2026-05-02 08:30:00'),
-('PN_20260504141500_1002', 3, '2026-05-04 14:15:00'),
-('PN_20260507090000_1003', 2, '2026-05-07 09:00:00'),
-('PN_20260509103000_1004', 1, '2026-05-09 10:30:00'),
-('PN_20260512084500_1005', 3, '2026-05-12 08:45:00'),
-('PN_20260514150000_1006', 2, '2026-05-14 15:00:00'),
-('PN_20260516090000_1007', 3, '2026-05-16 09:00:00'),
-('PN_20260519100000_1008', 1, '2026-05-19 10:00:00'),
-('PN_20260521143000_1009', 2, '2026-05-21 14:30:00'),
-('PN_20260523081500_1010', 3, '2026-05-23 08:15:00'),
-('PN_20260526100000_1011', 1, '2026-05-26 10:00:00'),
-('PN_20260528140000_1012', 2, '2026-05-28 14:00:00'),
-('PN_20260530083000_1013', 3, '2026-05-30 08:30:00'),
-('PN_20260602090000_1014', 2, '2026-06-02 09:00:00'),
-('PN_20260604140000_1015', 3, '2026-06-04 14:00:00'),
-('PN_20260607083000_1016', 1, '2026-06-07 08:30:00'),
-('PN_20260609150000_1017', 2, '2026-06-09 15:00:00'),
-('PN_20260612090000_1018', 3, '2026-06-12 09:00:00'),
-('PN_20260614103000_1019', 1, '2026-06-14 10:30:00'),
-('PN_20260617140000_1020', 2, '2026-06-17 14:00:00'),
-('PN_20260619083000_1021', 3, '2026-06-19 08:30:00'),
-('PN_20260622100000_1022', 1, '2026-06-22 10:00:00'),
-('PN_20260624143000_1023', 2, '2026-06-24 14:30:00'),
-('PN_20260626090000_1024', 3, '2026-06-26 09:00:00'),
-('PN_20260628150000_1025', 1, '2026-06-28 15:00:00'),
-('PN_20260701083000_1026', 2, '2026-07-01 08:30:00'),
-('PN_20260703140000_1027', 3, '2026-07-03 14:00:00'),
-('PN_20260705090000_1028', 1, '2026-07-05 09:00:00'),
-('PN_20260707103000_1029', 2, '2026-07-07 10:30:00'),
-('PN_20260709140000_1030', 3, '2026-07-09 14:00:00'),
-('PN_20260711083000_1031', 1, '2026-07-11 08:30:00'),
-('PN_20260714100000_1032', 2, '2026-07-14 10:00:00'),
-('PN_20260716150000_1033', 3, '2026-07-16 15:00:00'),
-('PN_20260718090000_1034', 1, '2026-07-18 09:00:00'),
-('PN_20260720140000_1035', 2, '2026-07-20 14:00:00'),
-('PN_20260722083000_1036', 3, '2026-07-22 08:30:00'),
-('PN_20260724100000_1037', 1, '2026-07-24 10:00:00'),
-('PN_20260725143000_1038', 2, '2026-07-25 14:30:00'),
-('PN_20260726090000_1039', 3, '2026-07-26 09:00:00'),
-('PN_20260727083000_1040', 1, '2026-07-27 08:30:00'),
-('PN_20260727110000_1041', 2, '2026-07-27 11:00:00'),
-('PN_20260727150000_1042', 3, '2026-07-27 15:00:00');
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `export_receipts`
---
-
-CREATE TABLE `export_receipts` (
-  `id` varchar(50) NOT NULL,
-  `created_by` int(11) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Đang đổ dữ liệu cho bảng `export_receipts`
---
-
-INSERT INTO `export_receipts` (`id`, `created_by`, `created_at`) VALUES
-('PX_20260505100000_2001', 2, '2026-05-05 10:00:00'),
-('PX_20260508140000_2002', 1, '2026-05-08 14:00:00'),
-('PX_20260513090000_2003', 4, '2026-05-13 09:00:00'),
-('PX_20260517153000_2004', 3, '2026-05-17 15:30:00'),
-('PX_20260603084500_2005', 2, '2026-06-03 08:45:00'),
-('PX_20260611110000_2006', 1, '2026-06-11 11:00:00'),
-('PX_20260618140000_2007', 4, '2026-06-18 14:00:00'),
-('PX_20260628090000_2008', 2, '2026-06-28 09:00:00'),
-('PX_20260706103000_2009', 1, '2026-07-06 10:30:00'),
-('PX_20260715140000_2010', 3, '2026-07-15 14:00:00'),
-('PX_20260721090000_2011', 2, '2026-07-21 09:00:00'),
-('PX_20260727143000_2012', 1, '2026-07-27 14:30:00');
+(166, 'PN_20260727150000_1042', 16, 50, 'Thẻ quà tặng Got It — 500k'),
+(167, 'PN_20260730200544_7063', 1, 10, ''),
+(168, 'PN_20260730200544_7063', 8, 20, '');
 
 -- --------------------------------------------------------
 
@@ -398,14 +403,14 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `name`, `description`, `price`, `stock_quantity`, `category_id`, `is_active`) VALUES
-(1, 'iPhone 15 Pro Max 256GB', 'Điện thoại Apple chính hãng, màu Titan tự nhiên', 30990000, 50, 'DTH', 1),
+(1, 'iPhone 15 Pro Max 256GB', 'Điện thoại Apple chính hãng, màu Titan tự nhiên', 30990000, 55, 'DTH', 1),
 (2, 'Samsung Galaxy S24 Ultra', 'Điện thoại kèm bút S-Pen, hỗ trợ Galaxy AI', 27490000, 40, 'DTH', 1),
 (3, 'iPad Air 6 M2', 'Máy tính bảng Apple hiệu năng cao, màn hình 11 inch', 16290000, 15, 'DTH', 0),
 (4, 'MacBook Air M3 8GB/256GB', 'Laptop mỏng nhẹ, pin trâu, màu Midnight', 27990000, 25, 'LAP', 0),
 (5, 'Asus ROG Strix G16', 'Laptop gaming cấu hình cao, RTX 4060, Intel i7', 34500000, 80, 'LAP', 1),
 (6, 'Dell Inspiron 14 5430', 'Laptop văn phòng vỏ nhôm, core i5 đời mới', 16800000, 40, 'LAP', 1),
 (7, 'Sạc dự phòng Anker 20000mAh', 'Sạc nhanh PowerIQ 22.5W, 2 cổng USB-C', 650000, 155, 'PKI', 1),
-(8, 'Chuột không dây Logitech MX Master 3S', 'Chuột công thái học cao cấp cho lập trình viên', 2490000, 60, 'PKI', 1),
+(8, 'Chuột không dây Logitech MX Master 3S', 'Chuột công thái học cao cấp cho lập trình viên', 2490000, 80, 'PKI', 1),
 (9, 'Bàn phím cơ Keychron K2 V2', 'Bàn phím Bluetooth, Gateron Brown Switch', 1850000, 35, 'PKI', 1),
 (10, 'Cáp sạc Baseus USB-C to Lightning', 'Cáp bọc dù siêu bền, hỗ trợ sạc nhanh PD 20W', 120000, 300, 'PKI', 1),
 (11, 'Tai nghe Sony WH-1000XM5', 'Tai nghe chụp tai chống ồn chủ động cao cấp', 6990000, 12, 'ATH', 1),
@@ -585,7 +590,8 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`session_token`, `user_id`, `ip_address`, `user_agent`, `created_at`, `expires_at`) VALUES
-('01b77b029e61b39cf1835ae0546ebccffff74c502733f40771d926c1a0c4401cdb5d56b95a3f2b1233d0159e782ab8837caba4aa25ba2528f8ffb5f98ac2f208', 1, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36 Edg/150.0.0.0', '2026-07-28 04:26:32', '2026-07-28 19:26:32');
+('8c007a851efc97adc68e83633360b40be2ffa67bcb2c2c1133509fe9c1195b997b643fbde527d02d07caffb5fedaa594c11455d17d77a39a45e5b963304834e1', 4, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36', '2026-07-30 15:13:59', '2026-07-31 06:13:59'),
+('c046ebf2f78a60ad329c56c65d977081097c649d86bcb0c0db89e2816bd2d90d26d4c50a4d289070e0f909d0fe3e88d55ca466ba03fec719481c5f645b2fbe6f', 1, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36 Edg/150.0.0.0', '2026-07-30 15:10:50', '2026-07-31 06:10:50');
 
 -- --------------------------------------------------------
 
@@ -615,22 +621,28 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `role`, `is_active`, `allow_import_export`, `has_schedule`, `access_start`, `access_end`, `temp_access_until`, `created_by`, `created_at`, `last_login`) VALUES
-(1, 'admin', '$2y$12$tLxN.y5yFOlS4i676dUWJulxHF3T3imvv0VteXiNx7MphW6qhGjqW', 'Quản trị viên', 'admin', 1, 1, 0, NULL, NULL, NULL, 1, '2026-07-15 16:06:35', '2026-07-28 04:26:32'),
-(2, 'nv1', '$2y$12$Ty.RlU5SMnWGXZ.nL1tWe.rWUhEuvtD6OHm9w9rA8qM8E/6uxeWCK', 'Nguyễn Văn A', 'staff', 1, 1, 1, '06:00:00', '20:00:00', '2026-07-26 14:56:39', 1, '2026-05-01 07:24:39', '2026-07-27 08:27:23'),
-(3, 'ql1', '$2y$12$/o3yao3oowPI6Te1Y0wYT.aWMRO73CEpD0aaPKyhS8.TARzXAPhR2', 'Trần Thị B', 'manager', 1, 0, 0, '06:00:00', '22:00:00', NULL, 1, '2026-05-01 08:00:00', '2026-07-27 08:15:00'),
-(4, 'nv2', '$2y$12$slpbf3kETWTWOJIcW8NtB.HBrD9l2CQI4wT7OLvgbORqXQjP.UZlK', 'Lê Văn C', 'staff', 1, 0, 1, '06:00:00', '22:00:00', NULL, 1, '2026-05-03 09:30:00', '2026-07-26 07:35:26');
+(1, 'admin', '$2y$12$tLxN.y5yFOlS4i676dUWJulxHF3T3imvv0VteXiNx7MphW6qhGjqW', 'Quản trị viên', 'admin', 1, 1, 0, NULL, NULL, NULL, 1, '2026-07-15 16:06:35', '2026-07-30 15:10:50'),
+(2, 'nv1', '$2y$12$Ty.RlU5SMnWGXZ.nL1tWe.rWUhEuvtD6OHm9w9rA8qM8E/6uxeWCK', 'Nguyễn Văn A', 'staff', 1, 1, 1, '06:00:00', '20:00:00', '2026-07-30 20:33:15', 1, '2026-05-01 07:24:39', '2026-07-30 13:03:19'),
+(3, 'ql1', '$2y$12$/o3yao3oowPI6Te1Y0wYT.aWMRO73CEpD0aaPKyhS8.TARzXAPhR2', 'Trần Thị B', 'manager', 1, 0, 0, '06:00:00', '22:00:00', NULL, 1, '2026-05-01 08:00:00', '2026-07-30 13:18:33'),
+(4, 'nv2', '$2y$12$slpbf3kETWTWOJIcW8NtB.HBrD9l2CQI4wT7OLvgbORqXQjP.UZlK', 'Lê Văn C', 'staff', 1, 0, 1, '06:00:00', '22:00:00', '2026-07-30 22:23:53', 1, '2026-05-03 09:30:00', '2026-07-30 15:13:59');
 
 --
 -- Chỉ mục cho các bảng đã đổ
 --
 
 --
--- Chỉ mục cho bảng `import_receipt_details`
+-- Chỉ mục cho bảng `categories`
 --
-ALTER TABLE `import_receipt_details`
+ALTER TABLE `categories`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Chỉ mục cho bảng `export_receipts`
+--
+ALTER TABLE `export_receipts`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_ird_receipt` (`receipt_id`),
-  ADD KEY `idx_ird_product` (`product_id`);
+  ADD KEY `idx_er_creator` (`created_by`),
+  ADD KEY `idx_er_created_at` (`created_at`);
 
 --
 -- Chỉ mục cho bảng `export_receipt_details`
@@ -641,12 +653,6 @@ ALTER TABLE `export_receipt_details`
   ADD KEY `idx_erd_product` (`product_id`);
 
 --
--- Chỉ mục cho bảng `categories`
---
-ALTER TABLE `categories`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Chỉ mục cho bảng `import_receipts`
 --
 ALTER TABLE `import_receipts`
@@ -655,12 +661,12 @@ ALTER TABLE `import_receipts`
   ADD KEY `idx_ir_created_at` (`created_at`);
 
 --
--- Chỉ mục cho bảng `export_receipts`
+-- Chỉ mục cho bảng `import_receipt_details`
 --
-ALTER TABLE `export_receipts`
+ALTER TABLE `import_receipt_details`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_er_creator` (`created_by`),
-  ADD KEY `idx_er_created_at` (`created_at`);
+  ADD KEY `idx_ird_receipt` (`receipt_id`),
+  ADD KEY `idx_ird_product` (`product_id`);
 
 --
 -- Chỉ mục cho bảng `products`
@@ -691,22 +697,22 @@ ALTER TABLE `users`
 --
 
 --
--- AUTO_INCREMENT cho bảng `import_receipt_details`
---
-ALTER TABLE `import_receipt_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=167;
-
---
 -- AUTO_INCREMENT cho bảng `export_receipt_details`
 --
 ALTER TABLE `export_receipt_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+
+--
+-- AUTO_INCREMENT cho bảng `import_receipt_details`
+--
+ALTER TABLE `import_receipt_details`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=169;
 
 --
 -- AUTO_INCREMENT cho bảng `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=167;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=168;
 
 --
 -- AUTO_INCREMENT cho bảng `users`
@@ -719,18 +725,17 @@ ALTER TABLE `users`
 --
 
 --
--- Các ràng buộc cho bảng `import_receipt_details`
+-- Các ràng buộc cho bảng `export_receipts`
 --
-ALTER TABLE `import_receipt_details`
-  ADD CONSTRAINT `fk_ird_receipt` FOREIGN KEY (`receipt_id`) REFERENCES `import_receipts` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_ird_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
+ALTER TABLE `export_receipts`
+  ADD CONSTRAINT `fk_er_creator` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`);
 
 --
 -- Các ràng buộc cho bảng `export_receipt_details`
 --
 ALTER TABLE `export_receipt_details`
-  ADD CONSTRAINT `fk_erd_receipt` FOREIGN KEY (`receipt_id`) REFERENCES `export_receipts` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_erd_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
+  ADD CONSTRAINT `fk_erd_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
+  ADD CONSTRAINT `fk_erd_receipt` FOREIGN KEY (`receipt_id`) REFERENCES `export_receipts` (`id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `import_receipts`
@@ -739,10 +744,11 @@ ALTER TABLE `import_receipts`
   ADD CONSTRAINT `fk_ir_creator` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`);
 
 --
--- Các ràng buộc cho bảng `export_receipts`
+-- Các ràng buộc cho bảng `import_receipt_details`
 --
-ALTER TABLE `export_receipts`
-  ADD CONSTRAINT `fk_er_creator` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`);
+ALTER TABLE `import_receipt_details`
+  ADD CONSTRAINT `fk_ird_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
+  ADD CONSTRAINT `fk_ird_receipt` FOREIGN KEY (`receipt_id`) REFERENCES `import_receipts` (`id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `products`

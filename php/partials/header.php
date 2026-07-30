@@ -5,7 +5,7 @@
       <h1>Quản Lí Kho</h1>
     </div>
     <div class="header_right">
-      <!-- Dropdown tai khoan nguoi dung -->
+      <!-- Dropdown tài khoản người dùng -->
       <div class="user_dropdown_wrapper" id="userDropdownWrapper">
         <button class="user_dropdown_trigger" id="userDropdownTrigger" title="Tài khoản của bạn">
           <span class="material-symbols-outlined">account_circle</span>

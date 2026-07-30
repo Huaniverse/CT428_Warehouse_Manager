@@ -1,17 +1,23 @@
-# [SEC-08] Bảo mật thư mục admin
-# Ngăn chặn clickjacking và mime-sniffing
 <IfModule mod_headers.c>
     Header set X-Frame-Options "SAMEORIGIN"
     Header set X-Content-Type-Options "nosniff"
 </IfModule>
 
-# Ngăn truy cập trực tiếp bằng trình duyệt (chỉ cho phép AJAX/Server-side request)
-# Mặc dù đã có session check, nhưng thêm một lớp bảo vệ ở tầng web server cũng tốt
-# Chú ý: Cấu hình này có thể cản trở một số client không truyền đúng headers, 
-# nhưng phù hợp vì các API này chỉ được gọi qua fetch() nội bộ.
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    
+    # 403 — Chặn truy cập trực tiếp file php
     RewriteCond %{HTTP:X-Requested-With} !=XMLHttpRequest
     RewriteCond %{HTTP_ACCEPT} !application/json
-    RewriteRule ^(.*\.php)$ - [F,L]
+    RewriteRule ^(.*\.php)$ ../php/Pages/error.php?code=403 [L]
+
+    # 403 — directory listing 
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteCond %{REQUEST_FILENAME}/index.php !-f
+    RewriteRule ^(.*)$ ../php/Pages/error.php?code=403 [L]
+
+    # 404 — file/thư mục không tồn tại
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ ../php/Pages/error.php?code=404 [L]
 </IfModule>
