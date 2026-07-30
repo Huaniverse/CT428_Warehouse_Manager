@@ -5,7 +5,7 @@
       if ($is_admin || $is_manager):
       ?>
       <!-- Tab quan ly nhan vien -->
-      <div id="content_caidat" class="tab_content">
+      <div id="content_users" class="tab_content">
         <h1 class="page_title">Quản lý nhân viên</h1>
         <p class="page_subtitle">Tạo và quản lý tài khoản nhân viên, theo dõi phiên đăng nhập đang hoạt động.</p>
 

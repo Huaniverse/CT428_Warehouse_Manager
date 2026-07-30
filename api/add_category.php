@@ -20,27 +20,27 @@ if (!$conn) {
 }
 
 // Nhận và làm sạch dữ liệu
-$ma_dm  = strtoupper(trim($_POST['ma_dm'] ?? ''));
-$ten_dm = trim($_POST['ten_dm'] ?? '');
+$id   = strtoupper(trim($_POST['id'] ?? ''));
+$name = trim($_POST['name'] ?? '');
 
-if ($ma_dm === '') {
+if ($id === '') {
     echo json_encode(['success' => false, 'message' => 'Mã danh mục không được để trống.']);
     exit;
 }
 
-if (!preg_match('/^[a-zA-Z0-9_]{2,10}$/', $ma_dm)) {
+if (!preg_match('/^[a-zA-Z0-9_]{2,10}$/', $id)) {
     echo json_encode(['success' => false, 'message' => 'Mã danh mục chỉ gồm chữ cái, số, gạch dưới (2-10 ký tự).']);
     exit;
 }
 
-if ($ten_dm === '') {
+if ($name === '') {
     echo json_encode(['success' => false, 'message' => 'Tên danh mục không được để trống.']);
     exit;
 }
 
 // Kiểm tra mã danh mục đã tồn tại chưa
-$check = $conn->prepare("SELECT MaDM FROM danhmuc WHERE MaDM = ?");
-$check->bind_param("s", $ma_dm);
+$check = $conn->prepare("SELECT id FROM categories WHERE id = ?");
+$check->bind_param("s", $id);
 $check->execute();
 $res = $check->get_result();
 if ($res->num_rows > 0) {
@@ -51,13 +51,13 @@ if ($res->num_rows > 0) {
 $check->close();
 
 // Thêm danh mục mới
-$stmt = $conn->prepare("INSERT INTO danhmuc (MaDM, TenDM) VALUES (?, ?)");
-$stmt->bind_param("ss", $ma_dm, $ten_dm);
+$stmt = $conn->prepare("INSERT INTO categories (id, name) VALUES (?, ?)");
+$stmt->bind_param("ss", $id, $name);
 
 if ($stmt->execute()) {
     // Lấy danh sách danh mục để cập nhật giao diện
     $categories = [];
-    $result = $conn->query("SELECT MaDM, TenDM FROM danhmuc ORDER BY TenDM ASC");
+    $result = $conn->query("SELECT id, name FROM categories ORDER BY name ASC");
     if ($result) {
         while ($row = $result->fetch_assoc()) {
             $categories[] = $row;

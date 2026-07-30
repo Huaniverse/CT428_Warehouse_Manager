@@ -15,6 +15,7 @@
 
 .product_table {
     width: 100%;
+    table-layout: auto;
     border-collapse: collapse;
     text-align: left;
     font-size: 14px;
@@ -29,6 +30,7 @@
     text-transform: none;
     font-size: 12px;
     letter-spacing: 0.02em;
+    white-space: nowrap;
 }
 
 .product_table td {
@@ -36,6 +38,13 @@
     border-bottom: 1px solid #eef1f5;
     color: #3d4555;
     vertical-align: middle;
+}
+
+.product_table .product_name {
+    font-weight: 600;
+    color: #1a1d23;
+    white-space: normal;
+    max-width: 200px;
 }
 
 .product_table tbody tr {
@@ -48,11 +57,6 @@
 
 .product_table tbody tr:last-child td {
     border-bottom: none;
-}
-
-.product_name {
-    font-weight: 600;
-    color: #1a1d23;
 }
 
 .product_price {
@@ -211,6 +215,11 @@
 .action_cell .btn_icon:hover {
     background: #eef1f5;
     color: #1a1d23;
+}
+
+.action_cell .btn_icon_danger:hover {
+    background: #fef2f2;
+    color: #dc2626;
 }
 
 .action_cell .btn_icon.danger:hover {

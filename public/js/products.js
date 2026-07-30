@@ -3,8 +3,8 @@ let productCurrentPage = 1;
 
 function getProductStatus(r) {
     if (r.is_active == 0) return { cls: 'hidden_product', text: 'Ngừng kinh doanh' };
-    if (r.SoLuong <= 0)   return { cls: 'out_of_stock', text: 'Hết hàng' };
-    if (r.SoLuong < 30)   return { cls: 'low_stock', text: 'Sắp hết' };
+    if (r.stock_quantity <= 0)   return { cls: 'out_of_stock', text: 'Hết hàng' };
+    if (r.stock_quantity < 30)   return { cls: 'low_stock', text: 'Sắp hết' };
     return { cls: 'in_stock', text: 'Còn hàng' };
 }
 
@@ -60,25 +60,19 @@ function fetchFilteredProducts(page) {
             tbody.innerHTML = data.records.map(r => {
                 const s = getProductStatus(r);
                 const rowCls = r.is_active == 0 ? ' class="row_hidden"' : '';
-                const desc = escapeHtml(r.MoTa || '');
+                const desc = escapeHtml(r.description || '');
                 let actionCell = '';
                 if (viewPerm) {
-                    const viewBtn = '<button class="btn_icon" title="Xem chi tiết" onclick="openProductDetail(' + r.MaSP + ')"><span class="material-symbols-outlined">visibility</span></button>';
-                    let toggleBtn = '';
-                    if (managePerm) {
-                        toggleBtn = r.is_active == 1
-                            ? '<button class="btn_icon" title="Ẩn sản phẩm" onclick="toggleProductActive(' + r.MaSP + ', 0)"><span class="material-symbols-outlined">visibility_off</span></button>'
-                            : '<button class="btn_icon" title="Khôi phục sản phẩm" onclick="toggleProductActive(' + r.MaSP + ', 1)"><span class="material-symbols-outlined">restore</span></button>';
-                    }
-                    actionCell = '<td class="action_cell"><div class="action_group">' + viewBtn + toggleBtn + '</div></td>';
+                    const editBtn = '<button class="btn_icon" title="Xem chi tiết" onclick="openProductDetail(' + r.id + ')"><span class="material-symbols-outlined">edit</span></button>';
+                    actionCell = '<td class="action_cell"><div class="action_group">' + editBtn + '</div></td>';
                 }
                 return '<tr' + rowCls + '>'
-                    + '<td>' + r.MaSP + '</td>'
-                    + '<td><span class="product_name">' + escapeHtml(r.TenSP) + '</span></td>'
-                    + '<td>' + escapeHtml(r.TenDM) + '</td>'
+                    + '<td>' + r.id + '</td>'
+                    + '<td><span class="product_name">' + escapeHtml(r.name) + '</span></td>'
+                    + '<td>' + escapeHtml(r.category_name) + '</td>'
                     + '<td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + desc + '">' + desc + '</td>'
-                    + '<td><span class="product_price">' + number_format(r.Gia) + ' đ</span></td>'
-                    + '<td>' + number_format(r.SoLuong) + '</td>'
+                    + '<td><span class="product_price">' + number_format(r.price) + ' đ</span></td>'
+                    + '<td>' + number_format(r.stock_quantity) + '</td>'
                     + '<td><span class="badge ' + s.cls + '">' + s.text + '</span></td>'
                     + actionCell
                     + '</tr>';
@@ -173,7 +167,7 @@ if (searchBtn) {
 let currentDetailProduct = null;
 let currentProductHistoryType = 'import';
 
-function openProductDetail(maSp) {
+function openProductDetail(productId) {
     const modal = document.getElementById('productDetailModal');
     if (!modal) return;
 
@@ -186,7 +180,7 @@ function openProductDetail(maSp) {
 
     modal.classList.add('open');
 
-    ajaxCall(BASE + '/api/edit_product.php?action=detail&id=' + maSp)
+    ajaxCall(BASE + '/api/edit_product.php?action=detail&id=' + productId)
         .then(data => {
             if (!data.success) { showToast(data.message, 'error'); modal.classList.remove('open'); return; }
             currentDetailProduct = data;
@@ -197,20 +191,35 @@ function openProductDetail(maSp) {
 }
 
 function renderProductInfo(p) {
-    document.getElementById('detail_prod_id').value = p.MaSP;
-    document.getElementById('productDetailTitle').textContent = p.TenSP;
-    document.getElementById('detail_prod_id_display').textContent = '#' + p.MaSP;
-    document.getElementById('detail_prod_name_display').textContent = p.TenSP;
-    document.getElementById('detail_prod_category_display').textContent = p.TenDM;
-    document.getElementById('detail_prod_price_display').textContent = number_format(p.Gia) + ' đ';
-    document.getElementById('detail_prod_desc_display').textContent = p.MoTa || 'Không có mô tả.';
+    document.getElementById('detail_prod_id').value = p.id;
+    document.getElementById('productDetailTitle').textContent = p.name;
+    document.getElementById('detail_prod_id_display').textContent = '#' + p.id;
+    document.getElementById('detail_prod_name_display').textContent = p.name;
+    document.getElementById('detail_prod_category_display').textContent = p.category_name;
+    document.getElementById('detail_prod_price_display').textContent = number_format(p.price) + ' đ';
+    document.getElementById('detail_prod_desc_display').textContent = p.description || 'Không có mô tả.';
 
     const statusEl = document.getElementById('detail_prod_status_badge');
     const stockInfo = document.getElementById('detail_prod_stock_info');
     const s = getProductStatus(p);
     statusEl.className = 'badge ' + s.cls;
     statusEl.textContent = s.text;
-    stockInfo.textContent = 'Tồn kho: ' + number_format(p.SoLuong) + ' sản phẩm';
+    stockInfo.textContent = 'Tồn kho: ' + number_format(p.stock_quantity) + ' sản phẩm';
+
+    const toggleBtn = document.getElementById('btnToggleProdActiveInDetail');
+    if (toggleBtn) {
+        const icon = toggleBtn.querySelector('.material-symbols-outlined');
+        const label = document.getElementById('detail_toggle_label');
+        if (p.is_active == 1) {
+            icon.textContent = 'visibility_off';
+            label.textContent = 'Ẩn';
+            toggleBtn.style.background = '#6b7280';
+        } else {
+            icon.textContent = 'restore';
+            label.textContent = 'Khôi phục';
+            toggleBtn.style.background = '#16a34a';
+        }
+    }
 }
 
 function renderProductHistory(data) {
@@ -226,13 +235,13 @@ function renderProductHistory(data) {
     }
 
     tbody.innerHTML = records.map((r, idx) => {
-        const date = new Date(r.ngay_tao).toLocaleString('vi-VN');
+        const date = new Date(r.created_at).toLocaleString('vi-VN');
         return '<tr>'
-            + '<td><span style="font-family:monospace;font-weight:600;">' + escapeHtml(r.ma_phieu) + '</span></td>'
-            + '<td style="text-align:center;"><strong>' + number_format(r.so_luong) + '</strong></td>'
-            + '<td style="text-align:right;">' + number_format(r.don_gia) + 'đ</td>'
-            + '<td style="text-align:right;font-weight:600;color:' + color + ';">' + number_format(r.thanh_tien) + 'đ</td>'
-            + '<td>' + escapeHtml(r.nguoi_tao_name) + '</td>'
+            + '<td><span style="font-family:monospace;font-weight:600;">' + escapeHtml(r.receipt_id) + '</span></td>'
+            + '<td style="text-align:center;"><strong>' + number_format(r.quantity) + '</strong></td>'
+            + '<td style="text-align:right;">' + number_format(r.unit_price) + 'đ</td>'
+            + '<td style="text-align:right;font-weight:600;color:' + color + ';">' + number_format(r.total_price) + 'đ</td>'
+            + '<td>' + escapeHtml(r.created_by_name) + '</td>'
             + '<td style="font-size:13px;">' + date + '</td>'
             + '</tr>';
     }).join('');
@@ -252,14 +261,28 @@ function switchProductHistoryTab(type) {
     if (currentDetailProduct) renderProductHistory(currentDetailProduct);
 }
 
-function toggleProductActive(maSp, newActive) {
+function toggleProductActive(productId, newActive) {
     const label = newActive == 1 ? 'khôi phục' : 'ẩn';
     showConfirm('Bạn có chắc muốn ' + label + ' sản phẩm này?').then(confirmed => {
         if (!confirmed) return;
         const fd = new FormData();
-        fd.append('ma_sp', maSp);
+        fd.append('id', productId);
         fd.append('is_active', newActive);
         ajaxCall(BASE + '/api/edit_product.php?action=toggle_active', { method: 'POST', body: fd })
+            .then(data => {
+                showToast(data.message, data.success ? 'success' : 'error');
+                if (data.success) fetchFilteredProducts(productCurrentPage);
+            })
+            .catch(() => showToast('Lỗi kết nối máy chủ.', 'error'));
+    });
+}
+
+function deleteProduct(productId) {
+    showConfirm('Bạn có chắc muốn xóa vĩnh viễn sản phẩm này? Hành động này không thể hoàn tác.').then(confirmed => {
+        if (!confirmed) return;
+        const fd = new FormData();
+        fd.append('id', productId);
+        ajaxCall(BASE + '/api/edit_product.php?action=delete', { method: 'POST', body: fd })
             .then(data => {
                 showToast(data.message, data.success ? 'success' : 'error');
                 if (data.success) fetchFilteredProducts(productCurrentPage);
@@ -277,7 +300,7 @@ if (prodDetailModal) {
     document.getElementById('btnAddToImportList')?.addEventListener('click', function() {
         if (!currentDetailProduct) return;
         const p = currentDetailProduct.product;
-        const added = addToImportList(p.MaSP, p.TenSP);
+        const added = addToImportList(p.id, p.name);
         if (added) {
             this.classList.add('btn_import_list_added');
             this.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">check_circle</span> Đã lưu';
@@ -291,7 +314,7 @@ if (prodDetailModal) {
     document.getElementById('btnAddToExportList')?.addEventListener('click', function() {
         if (!currentDetailProduct) return;
         const p = currentDetailProduct.product;
-        const added = addToExportList(p.MaSP, p.TenSP);
+        const added = addToExportList(p.id, p.name);
         if (added) {
             this.classList.add('btn_import_list_added');
             this.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">check_circle</span> Đã lưu';
@@ -305,10 +328,10 @@ if (prodDetailModal) {
     document.getElementById('btnToggleProdEditMode')?.addEventListener('click', function() {
         if (!currentDetailProduct) return;
         const p = currentDetailProduct.product;
-        document.getElementById('edit_prod_name').value = p.TenSP;
-        document.getElementById('edit_prod_category').value = p.DanhMuc;
-        document.getElementById('edit_prod_price').value = p.Gia;
-        document.getElementById('edit_prod_desc').value = p.MoTa || '';
+        document.getElementById('edit_prod_name').value = p.name;
+        document.getElementById('edit_prod_category').value = p.category_id;
+        document.getElementById('edit_prod_price').value = p.price;
+        document.getElementById('edit_prod_desc').value = p.description || '';
         document.getElementById('productInfoDisplay').style.display = 'none';
         document.getElementById('productInfoEdit').style.display = 'block';
     });
@@ -319,17 +342,16 @@ if (prodDetailModal) {
     }
 
     document.getElementById('btnCancelProdEdit')?.addEventListener('click', cancelProdEdit);
-    document.getElementById('btnCancelProdEditBottom')?.addEventListener('click', cancelProdEdit);
 
     document.getElementById('btnSubmitEditProduct')?.addEventListener('click', function() {
         const fd = new FormData();
-        fd.append('ma_sp', document.getElementById('detail_prod_id').value);
-        fd.append('ten_sp', document.getElementById('edit_prod_name').value.trim());
-        fd.append('danhmuc', document.getElementById('edit_prod_category').value);
-        fd.append('gia', document.getElementById('edit_prod_price').value);
-        fd.append('mota', document.getElementById('edit_prod_desc').value.trim());
+        fd.append('id', document.getElementById('detail_prod_id').value);
+        fd.append('name', document.getElementById('edit_prod_name').value.trim());
+        fd.append('category_id', document.getElementById('edit_prod_category').value);
+        fd.append('price', document.getElementById('edit_prod_price').value);
+        fd.append('description', document.getElementById('edit_prod_desc').value.trim());
 
-        if (fd.get('ten_sp') === '' || fd.get('danhmuc') === '') {
+        if (fd.get('name') === '' || fd.get('category_id') === '') {
             showToast('Vui lòng nhập đầy đủ thông tin.', 'error'); return;
         }
 
@@ -338,8 +360,8 @@ if (prodDetailModal) {
             successLabel: '<span class="material-symbols-outlined" style="font-size:18px;">save</span> Lưu thay đổi',
             onSuccess: () => {
                 fetchFilteredProducts(productCurrentPage);
-                const maSp = document.getElementById('detail_prod_id').value;
-                ajaxCall(BASE + '/api/edit_product.php?action=detail&id=' + maSp)
+                const productId = document.getElementById('detail_prod_id').value;
+    ajaxCall(BASE + '/api/edit_product.php?action=detail&id=' + productId)
                     .then(d => {
                         if (d.success) {
                             currentDetailProduct = d;
@@ -349,6 +371,55 @@ if (prodDetailModal) {
                     });
                 cancelProdEdit();
             }
+        });
+    });
+
+    document.getElementById('btnDeleteProductDetail')?.addEventListener('click', function() {
+        if (!currentDetailProduct) return;
+        const productId = currentDetailProduct.product.id;
+        showConfirm('Bạn có chắc muốn xóa vĩnh viễn sản phẩm này? Hành động này không thể hoàn tác.').then(confirmed => {
+            if (!confirmed) return;
+            const fd = new FormData();
+            fd.append('id', productId);
+            ajaxCall(BASE + '/api/edit_product.php?action=delete', { method: 'POST', body: fd })
+                .then(data => {
+                    showToast(data.message, data.success ? 'success' : 'error');
+                    if (data.success) {
+                        prodDetailModal.classList.remove('open');
+                        fetchFilteredProducts(productCurrentPage);
+                    }
+                })
+                .catch(() => showToast('Lỗi kết nối máy chủ.', 'error'));
+        });
+    });
+
+    document.getElementById('btnToggleProdActiveInDetail')?.addEventListener('click', function() {
+        if (!currentDetailProduct) return;
+        const p = currentDetailProduct.product;
+        const newActive = p.is_active == 1 ? 0 : 1;
+        const label = newActive == 1 ? 'khôi phục' : 'ẩn';
+        showConfirm('Bạn có chắc muốn ' + label + ' sản phẩm này?').then(confirmed => {
+            if (!confirmed) return;
+            const fd = new FormData();
+            fd.append('id', p.id);
+            fd.append('is_active', newActive);
+            ajaxCall(BASE + '/api/edit_product.php?action=toggle_active', { method: 'POST', body: fd })
+                .then(data => {
+                    showToast(data.message, data.success ? 'success' : 'error');
+                    if (data.success) {
+                        fetchFilteredProducts(productCurrentPage);
+                        const productId = document.getElementById('detail_prod_id').value;
+                        ajaxCall(BASE + '/api/edit_product.php?action=detail&id=' + productId)
+                            .then(d => {
+                                if (d.success) {
+                                    currentDetailProduct = d;
+                                    renderProductInfo(d.product);
+                                    renderProductHistory(d);
+                                }
+                            });
+                    }
+                })
+                .catch(() => showToast('Lỗi kết nối máy chủ.', 'error'));
         });
     });
 }
@@ -411,11 +482,11 @@ if (btnSubmitProd) {
         }
 
         const fd = new FormData();
-        fd.append('ten_sp', name);
-        fd.append('danhmuc', category);
-        fd.append('gia', price);
-        fd.append('so_luong', quantity);
-        fd.append('mota', desc);
+        fd.append('name', name);
+        fd.append('category_id', category);
+        fd.append('price', price);
+        fd.append('stock_quantity', quantity);
+        fd.append('description', desc);
 
         submitForm(this, BASE + '/api/add_product.php', fd, {
             loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...',
@@ -467,7 +538,7 @@ function updateCategoryDropdowns(categories) {
         const currentFilterVal = filterSelect.value;
         let optionsHtml = '<option value="">Tất cả danh mục</option>';
         categories.forEach(c => {
-            optionsHtml += `<option value="${escapeHtml(c.MaDM)}">${escapeHtml(c.TenDM)}</option>`;
+            optionsHtml += `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`;
         });
         filterSelect.innerHTML = optionsHtml;
         filterSelect.value = currentFilterVal;
@@ -477,7 +548,7 @@ function updateCategoryDropdowns(categories) {
     if (prodSelect) {
         let optionsHtml = '<option value="">-- Chọn danh mục --</option>';
         categories.forEach(c => {
-            optionsHtml += `<option value="${escapeHtml(c.MaDM)}">${escapeHtml(c.TenDM)}</option>`;
+            optionsHtml += `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`;
         });
         prodSelect.innerHTML = optionsHtml;
     }
@@ -499,8 +570,8 @@ if (btnSubmitCat) {
         }
 
         const fd = new FormData();
-        fd.append('ma_dm', code);
-        fd.append('ten_dm', name);
+        fd.append('id', code);
+        fd.append('name', name);
 
         submitForm(this, BASE + '/api/add_category.php', fd, {
             loadingText: '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang lưu...',

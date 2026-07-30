@@ -55,9 +55,9 @@ function deleteUserSessions(mysqli $conn, int $user_id): void {
 function renderCategoryOptions(array $categories, string $selected = ''): string {
     $html = '';
     foreach ($categories as $row) {
-        $sel = ($selected === $row['MaDM']) ? ' selected' : '';
-        $html .= '<option value="' . htmlspecialchars($row['MaDM']) . '"' . $sel . '>'
-               . htmlspecialchars($row['TenDM']) . '</option>';
+        $sel = ($selected === (string)$row['id']) ? ' selected' : '';
+        $html .= '<option value="' . htmlspecialchars((string)$row['id']) . '"' . $sel . '>'
+               . htmlspecialchars($row['name']) . '</option>';
     }
     return $html;
 }

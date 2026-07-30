@@ -1,6 +1,6 @@
       <?php if (canViewProducts()): ?>
       <!-- Tab lịch sử nhập xuất kho -->
-      <div id="content_lichsu" class="tab_content">
+      <div id="content_history" class="tab_content">
         <h1 class="page_title">Lịch sử nhập / xuất kho</h1>
         <p class="page_subtitle">Xem danh sách các phiếu nhập kho và xuất kho đã thực hiện.</p>
 
@@ -28,7 +28,7 @@
                     $users_list[] = $row;
                 }
             }
-            $res2 = $conn->query("SELECT MAX(Gia) as max_price FROM sanpham");
+            $res2 = $conn->query("SELECT MAX(price) as max_price FROM products");
             if ($res2) {
                 $max_price = (int)($res2->fetch_assoc()['max_price'] ?? 0);
             }

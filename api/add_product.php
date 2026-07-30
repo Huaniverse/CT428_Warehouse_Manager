@@ -29,22 +29,43 @@ if (!$validation['success']) {
 }
 
 $data = $validation['data'];
-$ten_sp   = $data['ten_sp'];
-$danhmuc  = $data['danhmuc'];
-$mota     = $data['mota'];
-$gia      = $data['gia'];
-$so_luong = $data['so_luong'];
+$name        = $data['name'];
+$category_id = $data['category_id'];
+$description = $data['description'];
+$price       = $data['price'];
+$stock_quantity = $data['stock_quantity'];
 
 $stmt = $conn->prepare(
-    "INSERT INTO sanpham (TenSP, DanhMuc, MoTa, Gia, SoLuong) VALUES (?, ?, ?, ?, ?)"
+    "INSERT INTO products (name, category_id, description, price, stock_quantity) VALUES (?, ?, ?, ?, ?)"
 );
-$stmt->bind_param("sssdi", $ten_sp, $danhmuc, $mota, $gia, $so_luong);
+$stmt->bind_param("sssdi", $name, $category_id, $description, $price, $stock_quantity);
 
 if ($stmt->execute()) {
+    $product_id = $conn->insert_id;
+
+    // Tự động tạo phiếu nhập kho cho sản phẩm mới
+    if ($stock_quantity > 0) {
+        $receipt_id = 'PN_AUTO_' . date('YmdHis') . '_' . $product_id;
+        $created_by = $_SESSION['user_id'] ?? null;
+        if ($created_by) {
+            $import_stmt = $conn->prepare("INSERT INTO import_receipts (id, created_by, notes) VALUES (?, ?, ?)");
+            $notes = 'Tự động tạo khi thêm sản phẩm mới';
+            $import_stmt->bind_param("sis", $receipt_id, $created_by, $notes);
+            $import_stmt->execute();
+            $import_stmt->close();
+
+            $detail_stmt = $conn->prepare("INSERT INTO import_receipt_details (receipt_id, product_id, quantity, notes) VALUES (?, ?, ?, ?)");
+            $detail_notes = 'Nhập kho ban đầu';
+            $detail_stmt->bind_param("siis", $receipt_id, $product_id, $stock_quantity, $detail_notes);
+            $detail_stmt->execute();
+            $detail_stmt->close();
+        }
+    }
+
     echo json_encode([
         'success' => true,
         'message' => 'Thêm sản phẩm mới thành công.',
-        'ma_sp'   => $conn->insert_id
+        'id'      => $product_id
     ]);
 } else {
     echo json_encode([

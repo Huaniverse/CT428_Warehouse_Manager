@@ -411,7 +411,7 @@
 }
 
 .modal_card_lg {
-    width: 800px;
+    width: 960px;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
@@ -513,14 +513,6 @@
     font-size: 13px;
 }
 
-/* Thẻ form thêm nét đứt */
-.add_form_card {
-    background: #f8fafc;
-    border-radius: 10px;
-    padding: 16px;
-    border: 1px dashed #cbd5e1;
-}
-
 /* Tiện ích label */
 .label_section {
     font-weight: 600;
@@ -553,6 +545,7 @@
 /* Lịch sử sản phẩm */
 .history_table_wrap {
     border-radius: 8px;
+    overflow-x: auto;
 }
 
 .history_table_wrap table {

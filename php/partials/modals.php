@@ -89,7 +89,7 @@ $categories_list  = $categories_list  ?? [];
   <?php endif; ?>
 
   <!-- Modal them san pham -->
-  <?php if ($is_admin): ?>
+  <?php if ($is_admin || $is_manager): ?>
   <div class="modal_overlay" id="addProductModal">
     <div class="modal_card">
       <div class="modal_header">
@@ -105,14 +105,12 @@ $categories_list  = $categories_list  ?? [];
         <div class="form_group">
           <label for="new_prod_name">Tên sản phẩm</label>
           <div class="form_input_wrapper">
-            <span class="material-symbols-outlined form_icon">shopping_bag</span>
-            <input type="text" id="new_prod_name" class="form_input" placeholder="vd: Laptop ASUS Zenbook">
+            <input type="text" id="new_prod_name" class="form_input" placeholder="Nhập tên sản phẩm">
           </div>
         </div>
         <div class="form_group">
           <label for="new_prod_category">Danh mục</label>
           <div class="form_input_wrapper">
-            <span class="material-symbols-outlined form_icon">category</span>
             <select id="new_prod_category" class="form_input" style="cursor:pointer;">
               <option value="">-- Chọn danh mục --</option>
               <?php echo renderCategoryOptions($categories_list); ?>
@@ -122,21 +120,18 @@ $categories_list  = $categories_list  ?? [];
         <div class="form_group">
           <label for="new_prod_price">Giá bán (VNĐ)</label>
           <div class="form_input_wrapper">
-            <span class="material-symbols-outlined form_icon">payments</span>
-            <input type="number" id="new_prod_price" class="form_input" min="0" placeholder="vd: 15000000">
+            <input type="number" id="new_prod_price" class="form_input" min="0" placeholder="Nhập giá bán">
           </div>
         </div>
         <div class="form_group">
           <label for="new_prod_quantity">Số lượng tồn kho</label>
           <div class="form_input_wrapper">
-            <span class="material-symbols-outlined form_icon">inventory_2</span>
-            <input type="number" id="new_prod_quantity" class="form_input" min="0" placeholder="vd: 20">
+            <input type="number" id="new_prod_quantity" class="form_input" min="0" placeholder="Nhập số lượng">
           </div>
         </div>
         <div class="form_group">
           <label for="new_prod_desc">Mô tả sản phẩm</label>
           <div class="form_input_wrapper" style="align-items: flex-start; padding: 6px 12px;">
-            <span class="material-symbols-outlined form_icon" style="margin-top:6px;">description</span>
             <textarea id="new_prod_desc" class="form_input form_textarea" rows="3" placeholder="Nhập mô tả..."></textarea>
           </div>
         </div>
@@ -152,7 +147,7 @@ $categories_list  = $categories_list  ?? [];
   <?php endif; ?>
 
   <!-- Modal them danh muc -->
-  <?php if ($is_admin): ?>
+  <?php if ($is_admin || $is_manager): ?>
   <div class="modal_overlay" id="addCategoryModal">
     <div class="modal_card modal_card_sm">
       <div class="modal_header">
@@ -168,15 +163,13 @@ $categories_list  = $categories_list  ?? [];
         <div class="form_group">
           <label for="new_cat_code">Mã danh mục (2–10 ký tự)</label>
           <div class="form_input_wrapper">
-            <span class="material-symbols-outlined form_icon">qr_code</span>
-            <input type="text" id="new_cat_code" class="form_input" placeholder="vd: DIEN" maxlength="10" style="text-transform: uppercase;">
+            <input type="text" id="new_cat_code" class="form_input" placeholder="Nhập mã danh mục" maxlength="10">
           </div>
         </div>
         <div class="form_group">
           <label for="new_cat_name">Tên danh mục</label>
           <div class="form_input_wrapper">
-            <span class="material-symbols-outlined form_icon">label</span>
-            <input type="text" id="new_cat_name" class="form_input" placeholder="vd: Thiết bị điện tử">
+            <input type="text" id="new_cat_name" class="form_input" placeholder="Nhập tên danh mục">
           </div>
         </div>
       </div>
@@ -225,9 +218,17 @@ $categories_list  = $categories_list  ?? [];
               </button>
               <?php endif; ?>
               <?php if ($is_admin || $is_manager): ?>
+              <button class="btn_primary btn_sm" id="btnToggleProdActiveInDetail" style="background:#6b7280;">
+                <span class="material-symbols-outlined" style="font-size:18px;">visibility_off</span>
+                <span id="detail_toggle_label">Ẩn</span>
+              </button>
               <button class="btn_primary btn_sm" id="btnToggleProdEditMode" style="background:#3b82f6;">
                 <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
                 Chỉnh sửa
+              </button>
+              <button class="btn_primary btn_sm" id="btnDeleteProductDetail" style="background:#dc2626;">
+                <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+                Xóa
               </button>
               <?php endif; ?>
             </div>
@@ -261,10 +262,6 @@ $categories_list  = $categories_list  ?? [];
         <div id="productInfoEdit" class="display_none">
           <div class="flex_between">
             <span class="text_section_title">Chỉnh sửa thông tin</span>
-            <button class="btn_secondary btn_sm" id="btnCancelProdEdit">
-              <span class="material-symbols-outlined" style="font-size:18px;">close</span>
-              Hủy
-            </button>
           </div>
           <div class="form_group">
             <label for="edit_prod_name">Tên sản phẩm</label>
@@ -298,7 +295,10 @@ $categories_list  = $categories_list  ?? [];
             </div>
           </div>
           <div class="flex_end">
-            <button class="btn_secondary btn_sm" id="btnCancelProdEditBottom">Hủy</button>
+            <button class="btn_secondary btn_sm" id="btnCancelProdEdit">
+              <span class="material-symbols-outlined" style="font-size:18px;">close</span>
+              Hủy
+            </button>
             <button class="btn_primary btn_sm" id="btnSubmitEditProduct" style="background:#16a34a;">
               <span class="material-symbols-outlined" style="font-size:18px;">save</span>
               Lưu thay đổi
@@ -386,7 +386,6 @@ $categories_list  = $categories_list  ?? [];
         </div>
 
         <!-- Form them tung san pham -->
-        <div class="add_form_card">
           <label class="label_section section_block_mb">
             <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle; margin-right:4px;">add_box</span>
             Thêm sản phẩm vào phiếu
@@ -395,7 +394,6 @@ $categories_list  = $categories_list  ?? [];
             <label for="import_product">Sản phẩm</label>
             <div class="product_combobox" id="import_combobox_wrapper">
               <div class="form_input_wrapper">
-                <span class="material-symbols-outlined form_icon">inventory_2</span>
                 <input type="text" id="import_product" class="form_input" placeholder="Gõ tên sản phẩm để tìm..." autocomplete="off">
                 <input type="hidden" id="import_product_id">
                 <span class="material-symbols-outlined combobox_clear" id="import_combobox_clear" style="display:none;cursor:pointer;font-size:18px;color:#94a3b8;">close</span>
@@ -407,14 +405,12 @@ $categories_list  = $categories_list  ?? [];
             <div class="form_group" style="margin-bottom: 10px; flex: 1;">
               <label for="import_quantity">Số lượng nhập</label>
               <div class="form_input_wrapper">
-                <span class="material-symbols-outlined form_icon">add_circle</span>
                 <input type="number" id="import_quantity" class="form_input" min="1" placeholder="Nhập số lượng...">
               </div>
             </div>
             <div class="form_group" style="margin-bottom: 10px; flex: 1.5;">
               <label for="import_note">Ghi chú</label>
               <div class="form_input_wrapper">
-                <span class="material-symbols-outlined form_icon">description</span>
                 <input type="text" id="import_note" class="form_input" placeholder="Lý do nhập kho...">
               </div>
             </div>
@@ -423,7 +419,6 @@ $categories_list  = $categories_list  ?? [];
             <span class="material-symbols-outlined" style="font-size: 18px;">playlist_add</span>
             Thêm vào phiếu
           </button>
-        </div>
 
         <!-- Danh sach hang can nhap (goi y) -->
         <div id="importListSuggestions" class="suggestion_wrap">
@@ -487,7 +482,6 @@ $categories_list  = $categories_list  ?? [];
         </div>
 
         <!-- Form them tung san pham -->
-        <div style="background: #f8fafc; border-radius: 10px; padding: 16px; border: 1px dashed #cbd5e1;">
           <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 10px; display: block;">
             <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle; margin-right:4px;">add_box</span>
             Thêm sản phẩm vào phiếu
@@ -496,7 +490,6 @@ $categories_list  = $categories_list  ?? [];
             <label for="export_product">Sản phẩm</label>
             <div class="product_combobox" id="export_combobox_wrapper">
               <div class="form_input_wrapper">
-                <span class="material-symbols-outlined form_icon">inventory_2</span>
                 <input type="text" id="export_product" class="form_input" placeholder="Gõ tên sản phẩm để tìm..." autocomplete="off">
                 <input type="hidden" id="export_product_id">
                 <span class="material-symbols-outlined combobox_clear" id="export_combobox_clear" style="display:none;cursor:pointer;font-size:18px;color:#94a3b8;">close</span>
@@ -511,14 +504,12 @@ $categories_list  = $categories_list  ?? [];
             <div class="form_group" style="margin-bottom: 10px; flex: 1;">
               <label for="export_quantity">Số lượng xuất</label>
               <div class="form_input_wrapper">
-                <span class="material-symbols-outlined form_icon">remove_circle</span>
                 <input type="number" id="export_quantity" class="form_input" min="1" placeholder="Nhập số lượng...">
               </div>
             </div>
             <div class="form_group" style="margin-bottom: 10px; flex: 1.5;">
               <label for="export_note">Ghi chú</label>
               <div class="form_input_wrapper">
-                <span class="material-symbols-outlined form_icon">description</span>
                 <input type="text" id="export_note" class="form_input" placeholder="Lý do xuất kho...">
               </div>
             </div>
@@ -527,7 +518,6 @@ $categories_list  = $categories_list  ?? [];
             <span class="material-symbols-outlined" style="font-size: 18px;">playlist_add</span>
             Thêm vào phiếu
           </button>
-        </div>
 
         <!-- Danh sach hang can xuat (goi y) -->
         <div id="exportListSuggestions" class="suggestion_wrap">
@@ -824,8 +814,13 @@ $categories_list  = $categories_list  ?? [];
         <div class="form_group" style="margin-bottom: 0;">
           <label for="quantityPromptInput" id="quantityPromptLabel">Sản phẩm</label>
           <div class="form_input_wrapper">
-            <span class="material-symbols-outlined form_icon">pinch</span>
-            <input type="number" id="quantityPromptInput" class="form_input" min="1" value="10" placeholder="Nhập số lượng...">
+            <input type="number" id="quantityPromptInput" class="form_input" min="1" placeholder="Nhập số lượng...">
+          </div>
+        </div>
+        <div class="form_group" style="margin-bottom: 0; margin-top: 12px;">
+          <label for="quantityPromptNote">Ghi chú</label>
+          <div class="form_input_wrapper">
+            <input type="text" id="quantityPromptNote" class="form_input" placeholder="Ghi chú...">
           </div>
         </div>
       </div>

@@ -12,9 +12,9 @@ function switchTab(tabId) {
 
     localStorage.setItem('activeTab', tabId);
 
-    if (tabId === 'khohang') fetchFilteredProducts(1);
-    if (tabId === 'lichsu')  switchHistoryTab('import');
-    if (tabId === 'caidat')  { loadUsers(); loadSessions(); }
+    if (tabId === 'warehouse') fetchFilteredProducts(1);
+    if (tabId === 'history')  switchHistoryTab('import');
+    if (tabId === 'users')  { loadUsers(); loadSessions(); }
 }
 
 // ─── Tab switching ────────────────────────────────────────────────────────
@@ -34,9 +34,9 @@ document.querySelectorAll('.sidebar_menu .menu_item').forEach(item => {
         document.querySelectorAll('.sidebar_menu .menu_item').forEach(el => el.classList.remove('active'));
         const m = document.querySelector('.sidebar_menu .menu_item[data-tab="' + saved + '"]');
         if (m) m.classList.add('active');
-        if (saved === 'khohang') setTimeout(function() { fetchFilteredProducts(productCurrentPage || 1); }, 50);
-        if (saved === 'lichsu')  setTimeout(function() { switchHistoryTab('import'); }, 50);
-        if (saved === 'caidat')  setTimeout(function() { loadUsers(); loadSessions(); }, 50);
+        if (saved === 'warehouse') setTimeout(function() { fetchFilteredProducts(productCurrentPage || 1); }, 50);
+        if (saved === 'history')  setTimeout(function() { switchHistoryTab('import'); }, 50);
+        if (saved === 'users')  setTimeout(function() { loadUsers(); loadSessions(); }, 50);
     }
 })();
 

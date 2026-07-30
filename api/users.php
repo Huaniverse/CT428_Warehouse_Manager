@@ -26,7 +26,7 @@ switch ($action) {
         if ($caller_role === 'manager') {
             $sql .= " WHERE u.role = 'staff'";
         }
-        $sql .= " ORDER BY u.created_at DESC";
+        $sql .= " ORDER BY FIELD(u.role, 'admin', 'manager', 'staff'), u.created_at DESC";
         $result = $conn->query($sql);
         $users  = [];
         if ($result) {
@@ -209,7 +209,7 @@ switch ($action) {
                     FROM sessions s
                     JOIN users u ON s.user_id = u.id
                     WHERE s.expires_at > NOW() AND (u.role = 'staff' OR u.id = ?)
-                    ORDER BY s.created_at DESC";
+                    ORDER BY FIELD(u.role, 'admin', 'manager', 'staff'), s.created_at DESC";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("i", $my_user_id);
             $stmt->execute();
@@ -220,7 +220,7 @@ switch ($action) {
                     FROM sessions s
                     JOIN users u ON s.user_id = u.id
                     WHERE s.expires_at > NOW()
-                    ORDER BY s.created_at DESC";
+                    ORDER BY FIELD(u.role, 'admin', 'manager', 'staff'), s.created_at DESC";
             $result = $conn->query($sql);
         }
         $sessions = [];

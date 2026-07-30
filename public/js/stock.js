@@ -97,7 +97,7 @@ if (importModal) {
 
         const fd = new FormData();
         fd.append('items', JSON.stringify(importBatchItems.map(item => ({
-            san_pham: item.productId, so_luong: item.quantity, ghi_chu: item.note
+            product_id: item.productId, quantity: item.quantity, notes: item.note
         }))));
         const originalLabel = this.innerHTML;
         this.disabled = true;
@@ -146,9 +146,9 @@ if (exportModal) {
         ajaxCall(BASE + '/api/edit_product.php?action=get&id=' + spId)
             .then(data => {
                 if (data.success) {
-                    document.getElementById('export_current_stock').textContent = data.product.SoLuong;
+                    document.getElementById('export_current_stock').textContent = data.product.stock_quantity;
                     infoDiv.style.display = 'block';
-                    document.getElementById('export_quantity').max = data.product.SoLuong;
+                    document.getElementById('export_quantity').max = data.product.stock_quantity;
                 }
             });
     });
@@ -193,7 +193,7 @@ if (exportModal) {
 
         const fd = new FormData();
         fd.append('items', JSON.stringify(exportBatchItems.map(item => ({
-            san_pham: item.productId, so_luong: item.quantity, ghi_chu: item.note
+            product_id: item.productId, quantity: item.quantity, notes: item.note
         }))));
         const originalLabel = this.innerHTML;
         this.disabled = true;
@@ -261,15 +261,15 @@ function loadHistory(type, page = 1) {
                 return;
             }
             tbody.innerHTML = data.records.map(r => {
-                const date = new Date(r.ngay_tao).toLocaleString('vi-VN');
-                const safeMaPhieu = escapeHtml(r.ma_phieu).replace(/'/g, "\\'");
-                const tongGia = number_format(parseInt(r.tong_gia_tien) || 0);
-                return `<tr style="cursor:pointer;" onclick="openReceiptDetail('${type}', '${safeMaPhieu}')">
-                    <td><span style="font-family:monospace;font-weight:600;">${escapeHtml(r.ma_phieu)}</span></td>
-                    <td style="text-align:center;">${r.so_loai_hang} loại</td>
-                    <td style="text-align:center;"><strong>${number_format(r.tong_so_luong)}</strong></td>
-                    <td style="text-align:right;font-weight:600;color:${cfg.color};">${tongGia}đ</td>
-                    <td>${escapeHtml(r.nguoi_tao_name)}</td>
+                const date = new Date(r.created_at).toLocaleString('vi-VN');
+                const safeReceiptId = escapeHtml(r.id).replace(/'/g, "\\'");
+                const totalPrice = number_format(parseInt(r.total_price) || 0);
+                return `<tr style="cursor:pointer;" onclick="openReceiptDetail('${type}', '${safeReceiptId}')">
+                    <td><span style="font-family:monospace;font-weight:600;">${escapeHtml(r.id)}</span></td>
+                    <td style="text-align:center;">${r.item_count} loại</td>
+                    <td style="text-align:center;"><strong>${number_format(r.total_quantity)}</strong></td>
+                    <td style="text-align:right;font-weight:600;color:${cfg.color};">${totalPrice}đ</td>
+                    <td>${escapeHtml(r.created_by_name)}</td>
                     <td style="font-size:13px;">${date}</td>
                 </tr>`;
             }).join('');
@@ -319,7 +319,7 @@ if (receiptDetailModal) {
     receiptDetailModal.addEventListener('click', e => { if (e.target === receiptDetailModal) receiptDetailModal.classList.remove('open'); });
 }
 
-function openReceiptDetail(type, maPhieu) {
+function openReceiptDetail(type, receiptId) {
     if (!receiptDetailModal) return;
     const infoDiv = document.getElementById('receiptDetailInfo');
     const itemsDiv = document.getElementById('receiptDetailItems');
@@ -330,13 +330,13 @@ function openReceiptDetail(type, maPhieu) {
     itemsDiv.innerHTML = '';
 
     const endpoint = type === 'import' ? BASE + '/api/import_stock.php' : BASE + '/api/export_stock.php';
-    ajaxCall(endpoint + '?action=detail&ma_phieu=' + encodeURIComponent(maPhieu))
+    ajaxCall(endpoint + '?action=detail&receipt_id=' + encodeURIComponent(receiptId))
         .then(data => {
             if (!data.success || !data.items || data.items.length === 0) {
                 infoDiv.innerHTML = '<p style="color:#dc2626;">Không tìm thấy phiếu.</p>';
                 return;
             }
-            const ngayTao = new Date(data.ngay_tao).toLocaleString('vi-VN');
+            const createdDate = new Date(data.created_at).toLocaleString('vi-VN');
             const icon  = type === 'import' ? 'download' : 'upload';
             const color = type === 'import' ? '#16a34a' : '#ea580c';
             const label = type === 'import' ? 'Nhập kho' : 'Xuất kho';
@@ -345,30 +345,30 @@ function openReceiptDetail(type, maPhieu) {
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
                     <span class="material-symbols-outlined" style="color:${color};font-size:28px;">${icon}</span>
                     <div>
-                        <div style="font-size:16px;font-weight:600;color:#0f172a;">${label} — ${escapeHtml(data.ma_phieu)}</div>
-                        <div style="font-size:13px;color:#64748b;">${ngayTao}</div>
+                        <div style="font-size:16px;font-weight:600;color:#0f172a;">${label} — ${escapeHtml(data.receipt_id)}</div>
+                        <div style="font-size:13px;color:#64748b;">${createdDate}</div>
                     </div>
                 </div>
                 <div style="display:flex;gap:24px;font-size:14px;color:#475569;">
-                    <div><strong>Người tạo:</strong> ${escapeHtml(data.nguoi_tao)}</div>
+                    <div><strong>Người tạo:</strong> ${escapeHtml(data.created_by)}</div>
                     <div><strong>Số mặt hàng:</strong> ${data.items.length}</div>
                 </div>
             `;
 
-            let tongTien = 0;
+            let grandTotal = 0;
             let rows = data.items.map((item, idx) => {
-                const gia = parseInt(item.Gia) || 0;
-                const thanhTien = gia * parseInt(item.so_luong);
-                tongTien += thanhTien;
-                const ghiChu = item.ghi_chu || '—';
+                const price = parseInt(item.price) || 0;
+                const lineTotal = price * parseInt(item.quantity);
+                grandTotal += lineTotal;
+                const notes = item.notes || '—';
                 return `
                     <tr>
                         <td style="text-align:center;">${idx + 1}</td>
-                        <td><span class="product_name">${escapeHtml(item.TenSP)}</span></td>
-                        <td style="text-align:right;">${number_format(gia)}đ</td>
-                        <td style="text-align:center;"><strong>${number_format(item.so_luong)}</strong></td>
-                        <td style="text-align:right;font-weight:600;">${number_format(thanhTien)}đ</td>
-                        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(ghiChu)}">${escapeHtml(ghiChu)}</td>
+                        <td><span class="product_name">${escapeHtml(item.name)}</span></td>
+                        <td style="text-align:right;">${number_format(price)}đ</td>
+                        <td style="text-align:center;"><strong>${number_format(item.quantity)}</strong></td>
+                        <td style="text-align:right;font-weight:600;">${number_format(lineTotal)}đ</td>
+                        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(notes)}">${escapeHtml(notes)}</td>
                     </tr>
                 `;
             }).join('');
@@ -389,7 +389,7 @@ function openReceiptDetail(type, maPhieu) {
                     <tfoot>
                         <tr>
                             <td colspan="4" style="text-align:right;font-weight:600;color:#0f172a;">Tổng cộng:</td>
-                            <td style="text-align:right;font-weight:700;color:${color};font-size:15px;">${number_format(tongTien)}đ</td>
+                            <td style="text-align:right;font-weight:700;color:${color};font-size:15px;">${number_format(grandTotal)}đ</td>
                             <td></td>
                         </tr>
                     </tfoot>
@@ -586,7 +586,6 @@ function renderListSuggestions(type) {
 
     itemsDiv.innerHTML = list.map(item => `
         <div class="${cfg.chipClass}" onclick="quickAddFromList('${type}', '${item.productId}', '${escapeHtml(item.productName).replace(/'/g, "\\'")}')" title="${cfg.suggestTitle}">
-            <span class="material-symbols-outlined" style="font-size:16px; color:${cfg.color};">${cfg.icon}</span>
             <span class="chip_name">${escapeHtml(item.productName)}</span>
             <button class="chip_remove" onclick="event.stopPropagation(); removeFromList('${type}', '${item.productId}')" title="Xóa khỏi danh sách">
                 <span class="material-symbols-outlined">close</span>
@@ -601,6 +600,7 @@ function quickAddFromList(type, productId, productName) {
     const titleEl = document.getElementById('quantityPromptTitle');
     const labelEl = document.getElementById('quantityPromptLabel');
     const inputEl = document.getElementById('quantityPromptInput');
+    const noteEl = document.getElementById('quantityPromptNote');
     const btnConfirm = document.getElementById('btnConfirmQuantityPrompt');
     const btnCancel = document.getElementById('btnCancelQuantityPrompt');
     const btnClose = document.getElementById('btnCloseQuantityPrompt');
@@ -608,7 +608,9 @@ function quickAddFromList(type, productId, productName) {
 
     titleEl.textContent = cfg.promptLabel;
     labelEl.textContent = `"${productName}"`;
-    inputEl.value = '10';
+    inputEl.value = '';
+    inputEl.placeholder = 'Nhập số lượng...';
+    if (noteEl) noteEl.value = '';
     modal.classList.add('open');
     setTimeout(() => inputEl.focus(), 50);
 
@@ -619,6 +621,7 @@ function quickAddFromList(type, productId, productName) {
         btnClose.removeEventListener('click', onCancel);
         modal.removeEventListener('click', onOverlay);
         inputEl.removeEventListener('keydown', onKey);
+        if (noteEl) noteEl.removeEventListener('keydown', onKey);
     }
     function onOverlay(e) { if (e.target === modal) cleanup(); }
     function onCancel() { cleanup(); }
@@ -626,15 +629,17 @@ function quickAddFromList(type, productId, productName) {
     function onConfirm() {
         const quantity = parseInt(inputEl.value, 10);
         if (!quantity || quantity <= 0) { inputEl.focus(); return; }
+        const note = noteEl ? noteEl.value.trim() : '';
         cleanup();
 
         const batchItems = type === 'import' ? importBatchItems : exportBatchItems;
         const existing = batchItems.find(item => item.productId === productId);
         if (existing) {
             existing.quantity += quantity;
+            if (note) existing.note = note;
             showToast(`Đã cộng thêm ${number_format(quantity)} vào "${productName}".`, 'success');
         } else {
-            batchItems.push({ productId, productName, quantity, note: cfg.quickNote });
+            batchItems.push({ productId, productName, quantity, note });
             showToast(`Đã thêm "${productName}" (${number_format(quantity)}) vào phiếu.`, 'success');
         }
 
@@ -647,6 +652,7 @@ function quickAddFromList(type, productId, productName) {
     btnClose.addEventListener('click', onCancel);
     modal.addEventListener('click', onOverlay);
     inputEl.addEventListener('keydown', onKey);
+    if (noteEl) noteEl.addEventListener('keydown', onKey);
 }
 
 window.removeFromList = removeFromList;
