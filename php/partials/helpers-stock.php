@@ -1,5 +1,7 @@
 <?php
+// Các hàm xử lý phiếu nhập xuất kho
 
+// Lấy cấu hình bảng cho loại phiếu (nhập hoặc xuất)
 function getStockTableConfig(string $type): array {
     return $type === 'import'
         ? [
@@ -20,6 +22,7 @@ function getStockTableConfig(string $type): array {
         ];
 }
 
+// Lấy danh sách phiếu nhập/xuất có phân trang và lọc
 function getStockList(mysqli $conn, string $type): array {
     $cfg = getStockTableConfig($type);
     $a = $cfg['alias'];

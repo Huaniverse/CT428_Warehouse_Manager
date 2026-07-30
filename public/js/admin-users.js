@@ -1,3 +1,4 @@
+// Quản lý tài khoản người dùng, phân quyền, lịch truy cập
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btnRefreshSessions')?.addEventListener('click', loadSessions);
 
@@ -21,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateCreateScheduleUI(role) {
         if (!createSchedNote || !createSchedToggle || !createTimeFields || !createSchedToggleGroup) return;
         var isStaff = (role === 'staff');
-        var isManager = (role === 'store_manager');
+        var isManager = (role === 'manager');
         createSchedNote.classList.toggle('hidden', !isStaff);
         createSchedToggleGroup.classList.toggle('hidden', !isManager);
         if (isStaff) {
@@ -82,11 +83,11 @@ document.addEventListener('DOMContentLoaded', function() {
         fd.append('password',  document.getElementById('new_password').value);
         fd.append('role',      document.getElementById('new_role').value);
         const role = document.getElementById('new_role').value;
-        if (role === 'staff' || (role === 'store_manager' && createSchedToggle.checked)) {
+        if (role === 'staff' || (role === 'manager' && createSchedToggle.checked)) {
             fd.append('has_schedule', 1);
             fd.append('access_start', document.getElementById('create_start').value);
             fd.append('access_end',   document.getElementById('create_end').value);
-        } else if (role === 'store_manager') {
+        } else if (role === 'manager') {
             fd.append('has_schedule', 0);
         }
 
@@ -265,7 +266,7 @@ function loadUsers() {
     const tbody = document.getElementById('usersTableBody');
     tbody.innerHTML = '<tr><td colspan="7" class="table_loading">Đang tải...</td></tr>';
 
-    apiFetch(BASE + '/api/users.php?action=list')
+    ajaxCall(BASE + '/api/users.php?action=list')
         .then(data => {
             if (!data.success) { tbody.innerHTML = '<tr><td colspan="7" class="table_loading">Lỗi tải dữ liệu.</td></tr>'; return; }
             if (data.users.length === 0) {
@@ -282,8 +283,8 @@ function loadUsers() {
                     : '<span class="status_badge inactive">Vô hiệu hóa</span>';
                 const roleBadge   = u.role === 'admin'
                     ? '<span class="user_role_badge admin">Admin</span>'
-                    : u.role === 'store_manager'
-                    ? '<span class="user_role_badge store_manager">Cửa hàng trưởng</span>'
+                    : u.role === 'manager'
+                    ? '<span class="user_role_badge manager">Quản lý kho</span>'
                     : '<span class="user_role_badge staff">Nhân viên</span>';
                 const lastLogin   = u.last_login ? new Date(u.last_login).toLocaleString('vi-VN') : '— Chưa đăng nhập';
                 const createdBy   = safeCreatedBy || '— Hệ thống';
@@ -344,19 +345,21 @@ function toggleUser(id, newStatus) {
     const fd = new FormData();
     fd.append('id', id);
     fd.append('is_active', newStatus);
-    apiFetch(BASE + '/api/users.php?action=toggle', { method: 'POST', body: fd })
+    ajaxCall(BASE + '/api/users.php?action=toggle', { method: 'POST', body: fd })
         .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadUsers(); })
         .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
 }
 
 // ── Xóa tài khoản ────────────────────────────────────────────────────────
 function deleteUser(id, name) {
-    if (!confirm(`Bạn có chắc muốn xóa tài khoản "${name}"? Hành động này không thể hoàn tác.`)) return;
-    const fd = new FormData();
-    fd.append('id', id);
-    apiFetch(BASE + '/api/users.php?action=delete', { method: 'POST', body: fd })
-        .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadUsers(); })
-        .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
+    showConfirm('Bạn có chắc muốn xóa tài khoản "' + name + '"? Hành động này không thể hoàn tác.').then(confirmed => {
+        if (!confirmed) return;
+        const fd = new FormData();
+        fd.append('id', id);
+        ajaxCall(BASE + '/api/users.php?action=delete', { method: 'POST', body: fd })
+            .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadUsers(); })
+            .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
+    });
 }
 
 // ── Modal quyền ──────────────────────────────────────────────────────────
@@ -398,7 +401,7 @@ function openScheduleModal(userId, userName, role, hasSchedule, startTime, endTi
 
 // ── Modal chi tiết / sửa tài khoản ───────────────────────────────────────
 function openUserDetail(userId) {
-    apiFetch(BASE + '/api/users.php?action=get_detail&id=' + userId)
+    ajaxCall(BASE + '/api/users.php?action=get_detail&id=' + userId)
         .then(data => {
             if (!data.success) { showToast(data.message, 'error'); return; }
             const u = data.user;
@@ -408,7 +411,7 @@ function openUserDetail(userId) {
             // Họ và tên — editable input
             document.getElementById('detail_fullname').value = u.full_name;
 
-            // Vai trò — admin thấy select, store_manager thấy badge readonly
+            // Vai trò — admin thấy select, manager thấy badge readonly
             const roleEdit    = document.getElementById('detail_role_edit');
             const roleDisplay = document.getElementById('detail_role_display');
             if (window.APP_CONFIG?.isAdmin) {
@@ -420,8 +423,8 @@ function openUserDetail(userId) {
                 roleDisplay.style.display = 'block';
                 const badge = u.role === 'admin'
                     ? '<span class="user_role_badge admin">Admin</span>'
-                    : u.role === 'store_manager'
-                    ? '<span class="user_role_badge store_manager">Cửa hàng trưởng</span>'
+                    : u.role === 'manager'
+                    ? '<span class="user_role_badge manager">Quản lý kho</span>'
                     : '<span class="user_role_badge staff">Nhân viên</span>';
                 roleDisplay.innerHTML = badge;
             }
@@ -518,7 +521,7 @@ function loadSessions() {
     const list = document.getElementById('sessionList');
     list.innerHTML = '<div class="table_loading">Đang tải...</div>';
 
-    apiFetch(BASE + '/api/users.php?action=sessions')
+    ajaxCall(BASE + '/api/users.php?action=sessions')
         .then(data => {
             if (!data.success || data.sessions.length === 0) {
                 list.innerHTML = '<div class="empty_state"><span class="material-symbols-outlined">sensors_off</span><p>Không có phiên hoạt động nào.</p></div>';
@@ -531,7 +534,7 @@ function loadSessions() {
                 const currentTag   = s.is_current ? '<span class="current_tag">Phiên này</span>' : '';
                 const loginTime    = new Date(s.created_at).toLocaleString('vi-VN');
                 const expireTime   = new Date(s.expires_at).toLocaleString('vi-VN');
-                const roleLabel    = s.role === 'admin' ? 'Admin' : s.role === 'store_manager' ? 'Cửa hàng trưởng' : 'Nhân viên';
+                const roleLabel    = s.role === 'admin' ? 'Admin' : s.role === 'manager' ? 'Quản lý kho' : 'Nhân viên';
                 const kickBtn      = !s.is_current
                     ? `<button class="btn_icon danger" title="Kick user" onclick="kickUser(${s.user_id})"><span class="material-symbols-outlined">logout</span></button>`
                     : '';
@@ -546,12 +549,14 @@ function loadSessions() {
 }
 
 function kickUser(userId) {
-    if (!confirm('Đăng xuất người dùng này khỏi tất cả phiên?')) return;
-    const fd = new FormData();
-    fd.append('user_id', userId);
-    apiFetch(BASE + '/api/users.php?action=kick', { method: 'POST', body: fd })
-        .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadSessions(); })
-        .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
+    showConfirm('Đăng xuất người dùng này khỏi tất cả phiên?').then(confirmed => {
+        if (!confirmed) return;
+        const fd = new FormData();
+        fd.append('user_id', userId);
+        ajaxCall(BASE + '/api/users.php?action=kick', { method: 'POST', body: fd })
+            .then(data => { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadSessions(); })
+            .catch(err => showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'));
+    });
 }
 
 // ── Cấp quyền truy cập tạm thời ────────────────────────────────────────
@@ -584,12 +589,14 @@ function grantTempAccess() {
 }
 
 function revokeTempAccess(userId) {
-    if (!confirm('Thu hồi quyền truy cập tạm thời? Tài khoản sẽ bị khóa theo lịch trình ngay lập tức.')) return;
-    var fd = new FormData();
-    fd.append('user_id', userId);
-    apiFetch(BASE + '/api/users.php?action=revoke_temp_access', { method: 'POST', body: fd })
-        .then(function(data) { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadUsers(); })
-        .catch(function(err) { showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'); });
+    showConfirm('Thu hồi quyền truy cập tạm thời? Tài khoản sẽ bị khóa theo lịch trình ngay lập tức.').then(confirmed => {
+        if (!confirmed) return;
+        var fd = new FormData();
+        fd.append('user_id', userId);
+        ajaxCall(BASE + '/api/users.php?action=revoke_temp_access', { method: 'POST', body: fd })
+            .then(function(data) { showToast(data.message, data.success ? 'success' : 'error'); if (data.success) loadUsers(); })
+            .catch(function(err) { showToast(err.message || 'Lỗi kết nối máy chủ.', 'error'); });
+    });
 }
 
 var _tempCountdownInterval = null;

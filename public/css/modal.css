@@ -1,4 +1,4 @@
-/* ===== MODAL ===== */
+/* Modal overlay và card */
 .modal_overlay {
     display: none;
     position: fixed;
@@ -131,7 +131,7 @@
     background-color: #e8ecf0;
 }
 
-/* ===== MODAL FORM HELPERS ===== */
+/* Form trong modal */
 .modal_card .form_group label {
     font-weight: 500;
     font-size: 13px;
@@ -210,7 +210,7 @@
     min-height: 60px;
 }
 
-/* ===== TOGGLE PASSWORD IN MODALS ===== */
+/* Nút hiện/ẩn mật khẩu trong modal */
 .modal_body .form_input_wrapper .toggle_password {
     position: absolute;
     right: 8px;
@@ -243,7 +243,7 @@
     position: relative;
 }
 
-/* ===== TIME INPUT FIXES ===== */
+/* Fix input thời gian */
 .modal_card .form_input_wrapper input[type="time"]::-webkit-calendar-picker-indicator {
     display: none !important;
     appearance: none;
@@ -274,7 +274,7 @@
     display: none;
 }
 
-/* ===== SELECT/INPUT FIX IN DETAIL MODAL ===== */
+/* Fix select/input trong modal chi tiết */
 .modal_card .form_input_wrapper select.form_input,
 .modal_card .form_input_wrapper input.form_input,
 .user_detail_info .form_input_wrapper select.form_input,
@@ -287,7 +287,7 @@
     padding-bottom: 7px;
 }
 
-/* ===== STOCK INFO (EXPORT MODAL) ===== */
+/* Thông tin tồn kho trong modal xuất */
 .stock_info {
     background: #eef1f5;
     border: 1px solid #e8ecf0;
@@ -298,14 +298,14 @@
     color: #5a6577;
 }
 
-/* ===== MODAL WIDTH VARIANTS ===== */
+/* Biến thể độ rộng modal */
 .modal_card.w_380 { width: 380px; }
 .modal_card.w_420 { width: 420px; }
 .modal_card.w_560 { width: 560px; }
 .modal_card.w_780 { width: 780px; max-height: 90vh; display: flex; flex-direction: column; }
 .modal_card.w_800 { width: 800px; max-height: 90vh; display: flex; flex-direction: column; }
 
-/* ===== MODAL BODY VARIANTS ===== */
+/* Biến thể thân modal */
 .modal_body_scroll {
     overflow-y: auto;
     flex: 1;
@@ -315,7 +315,7 @@
     padding: 20px 24px 16px;
 }
 
-/* ===== MODAL SECTION DIVIDER ===== */
+/* Phân cách trong modal */
 .modal_section {
     margin-top: 24px;
     border-top: 1px solid #e8ecf0;
@@ -329,7 +329,7 @@
     margin-bottom: 14px;
 }
 
-/* ===== FORM ROW (time fields, etc.) ===== */
+/* Hàng form */
 .form_row {
     display: flex;
     gap: 12px;
@@ -347,7 +347,7 @@
     min-width: 0;
 }
 
-/* ===== TEXTAREA WRAPPER ===== */
+/* Wrapper textarea */
 .textarea_wrapper {
     align-items: flex-start;
     padding: 6px 12px;
@@ -366,7 +366,7 @@
     font-family: inherit;
 }
 
-/* ===== COMBOBOX CLEAR BUTTON ===== */
+/* Nút xóa combobox */
 .combobox_clear_hidden {
     display: none;
     cursor: pointer;
@@ -374,7 +374,7 @@
     color: #94a3b8;
 }
 
-/* ===== DASHED FORM AREA ===== */
+/* Vùng form nét đứt */
 .dashed_form_area {
     background: #f8fafc;
     border-radius: 10px;
@@ -382,9 +382,265 @@
     border: 1px dashed #cbd5e1;
 }
 
-/* ===== BATCH TABLE WRAPPER ===== */
+/* Modal xác nhận */
+.confirm_text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #334155;
+    margin: 0;
+}
+
+.confirm_icon {
+    color: #f59e0b;
+}
+
+/* Wrapper bảng nhập/xuất hàng loạt */
 .batch_table_wrapper {
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     overflow: hidden;
+}
+
+/* Kích thước modal */
+.modal_card_sm {
+    width: 380px;
+}
+
+.modal_card_md {
+    width: 560px;
+}
+
+.modal_card_lg {
+    width: 800px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Thân modal có scroll */
+.modal_body_scroll {
+    overflow-y: auto;
+    flex: 1;
+    padding: 20px 24px 16px;
+}
+
+/* Tiện ích flex */
+.flex_row {
+    display: flex;
+    gap: 8px;
+}
+
+.flex_row_gap12 {
+    display: flex;
+    gap: 12px;
+}
+
+.flex_center {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.flex_center_gap8 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.flex_between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.flex_between_no_mb {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flex_between_wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.flex_end {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
+.form_group_flex {
+    flex: 1;
+}
+
+.form_group_flex15 {
+    flex: 1.5;
+}
+
+/* Tiện ích text */
+.text_muted {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.text_section_title {
+    font-weight: 600;
+    font-size: 15px;
+    color: #0f172a;
+}
+
+.text_info {
+    font-size: 14px;
+    color: #475569;
+    margin-bottom: 16px;
+}
+
+/* Nút nhỏ */
+.btn_sm {
+    padding: 6px 14px;
+    font-size: 13px;
+    height: 36px;
+}
+
+.btn_full {
+    width: 100%;
+    padding: 8px;
+    font-size: 13px;
+}
+
+/* Thẻ form thêm nét đứt */
+.add_form_card {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px dashed #cbd5e1;
+}
+
+/* Tiện ích label */
+.label_section {
+    font-weight: 600;
+    font-size: 13px;
+    color: #334155;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.label_section_inline {
+    font-weight: 600;
+    font-size: 13px;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Block section */
+.section_block {
+    margin-top: 24px;
+    border-top: 1px solid #e8ecf0;
+    padding-top: 20px;
+}
+
+.section_block_mb {
+    margin-bottom: 16px;
+}
+
+/* Lịch sử sản phẩm */
+.history_table_wrap {
+    border-radius: 8px;
+}
+
+.history_table_wrap table {
+    margin: 0;
+    font-size: 13px;
+}
+
+/* Thông tin tồn kho */
+.stock_info_box {
+    display: none;
+    background: #fef3c7;
+    border: 1px solid #fbbf24;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #92400e;
+}
+
+/* Hộp ghi chú */
+.note_box {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #0369a1;
+}
+
+/* Wrapper gợi ý */
+.suggestion_wrap {
+    margin-top: 16px;
+    display: none;
+}
+
+.suggestion_items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Trường thời gian ẩn */
+.time_fields_hidden {
+    display: none;
+}
+
+.time_fields_row {
+    display: flex;
+    gap: 12px;
+}
+
+/* Reset padding */
+.padding_reset {
+    padding: 0;
+}
+
+/* Ẩn hiển thị */
+.display_none {
+    display: none;
+}
+
+/* Textarea */
+.form_textarea {
+    resize: vertical;
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 100%;
+    font-family: inherit;
+}
+
+/* Label checkbox */
+.checkbox_label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.checkbox_input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Tiện ích checkbox inline */
+.flex_center_gap6 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }

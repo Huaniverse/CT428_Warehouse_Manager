@@ -1,14 +1,15 @@
       <?php
+      // Tab quản lý nhân viên
       $is_admin         = $is_admin         ?? isAdmin();
-      $is_store_manager = $is_store_manager ?? isStoreManager();
-      if ($is_admin || $is_store_manager):
+      $is_manager = $is_manager ?? isManager();
+      if ($is_admin || $is_manager):
       ?>
-      <!-- TAB QUẢN LÝ NHÂN VIÊN -->
+      <!-- Tab quan ly nhan vien -->
       <div id="content_caidat" class="tab_content">
-        <h1 style="font-size: 24px; font-weight: 600; color: #0f172a; margin: 0 0 4px 0;">Quản lý nhân viên</h1>
-        <p style="font-size: 14px; color: #64748b; margin: 0 0 24px 0;">Tạo và quản lý tài khoản nhân viên, theo dõi phiên đăng nhập đang hoạt động.</p>
+        <h1 class="page_title">Quản lý nhân viên</h1>
+        <p class="page_subtitle">Tạo và quản lý tài khoản nhân viên, theo dõi phiên đăng nhập đang hoạt động.</p>
 
-        <!-- Section: Danh sách tài khoản -->
+        <!-- Danh sach tai khoan -->
         <div class="settings_section">
           <div class="settings_section_header">
             <h3>
@@ -40,7 +41,7 @@
           </div>
         </div>
 
-        <!-- Section: Phiên đăng nhập đang hoạt động -->
+        <!-- Phien dang nhap dang hoat dong -->
         <div class="settings_section">
           <div class="settings_section_header">
             <h3>

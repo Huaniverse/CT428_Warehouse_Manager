@@ -1,9 +1,10 @@
 <?php
+// Thêm sản phẩm mới
 
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/auth.php';
 require_once __DIR__ . '/../php/partials/helpers-products.php';
-requireAdmin(); // Yêu cầu quyền Admin
+requireAdminOrManager();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -12,7 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// [SEC-01] Xác minh CSRF token — chống CSRF attack
 verifyCsrfToken();
 
 if (!$conn) {
@@ -20,7 +20,7 @@ if (!$conn) {
     exit;
 }
 
-// Nhận và làm sạch dữ liệu đầu vào, dùng helper để DRY
+// Dùng helper để kiểm tra dữ liệu
 $validation = validateProductInput($conn, $_POST, false);
 
 if (!$validation['success']) {
@@ -35,7 +35,6 @@ $description   = $data['description'];
 $price         = $data['price'];
 $quantity      = $data['quantity'];
 
-// Thực hiện thêm sản phẩm mới
 $stmt = $conn->prepare(
     "INSERT INTO sanpham (name, category_code, description, price, stock) VALUES (?, ?, ?, ?, ?)"
 );

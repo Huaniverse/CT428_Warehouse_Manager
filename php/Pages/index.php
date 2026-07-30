@@ -1,4 +1,5 @@
 <?php
+// Trang chính của ứng dụng sau khi đăng nhập
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../auth.php';
@@ -6,8 +7,9 @@ require_once __DIR__ . '/../partials/helpers-users.php';
 
 $current_user    = getCurrentUser();
 $is_admin        = isAdmin();
-$is_store_manager = isStoreManager();
+$is_manager = isManager();
 
+// Lấy dữ liệu dashboard từ database
 extract(getDashboardData($conn));
 ?>
   <?php require_once ROOT_PATH . '/php/partials/head.php'; ?>
@@ -28,27 +30,31 @@ extract(getDashboardData($conn));
 
   <script>
       window.BASE_URL = '<?php echo BASE_URL; ?>';
+    // Cấu hình quyền trên client cho JS
     window.APP_CONFIG = {
       isAdmin: <?php echo $is_admin ? 'true' : 'false'; ?>,
-      isStoreManager: <?php echo $is_store_manager ? 'true' : 'false'; ?>,
-      canManageProducts: <?php echo ($is_admin || $is_store_manager) ? 'true' : 'false'; ?>,
-      canViewProducts: <?php echo ($is_admin || $is_store_manager || canImportExport()) ? 'true' : 'false'; ?>,
+      isManager: <?php echo $is_manager ? 'true' : 'false'; ?>,
+      canManageProducts: <?php echo ($is_admin || $is_manager) ? 'true' : 'false'; ?>,
+      canViewProducts: <?php echo canViewProducts() ? 'true' : 'false'; ?>,
       role: '<?php echo $current_user['role']; ?>',
       currentUserId: <?php echo $current_user['id']; ?>
     };
   </script>
 <?php $p = defined('ROOT_CONTEXT') ? '' : '../../'; ?>
-  <script src="<?= $p ?>public/js/app.js"></script>
-  <script src="<?= $p ?>public/js/products.js"></script>
-  <?php if (canImportExport()): ?>
-    <script src="<?= $p ?>public/js/stock.js"></script>
-    <script src="<?= $p ?>public/js/combobox.js"></script>
+  <script src="<?= $p ?>public/js/app.js?v=<?= filemtime(ROOT_PATH . '/public/js/app.js') ?>"></script>
+  <script src="<?= $p ?>public/js/products.js?v=<?= filemtime(ROOT_PATH . '/public/js/products.js') ?>"></script>
+  <?php if (canViewProducts()): ?>
+    <script src="<?= $p ?>public/js/stock.js?v=<?= filemtime(ROOT_PATH . '/public/js/stock.js') ?>"></script>
   <?php endif; ?>
-  <?php if ($is_admin || $is_store_manager): ?>
-    <script src="<?= $p ?>public/js/admin-users.js"></script>
+  <?php if (canImportExport()): ?>
+    <script src="<?= $p ?>public/js/combobox.js?v=<?= filemtime(ROOT_PATH . '/public/js/combobox.js') ?>"></script>
+  <?php endif; ?>
+  <?php if ($is_admin || $is_manager): ?>
+    <script src="<?= $p ?>public/js/admin-users.js?v=<?= filemtime(ROOT_PATH . '/public/js/admin-users.js') ?>"></script>
   <?php endif; ?>
 
   <script>
+    // Dữ liệu cho các biểu đồ
     const chart1Labels = <?php echo json_encode($chart1_labels); ?>;
     const chart1Data = <?php echo json_encode($chart1_data); ?>;
     const chart2Labels = <?php echo json_encode($chart2_labels); ?>;
@@ -61,7 +67,7 @@ extract(getDashboardData($conn));
     const chartTopLabels = <?php echo json_encode($chart_top_labels); ?>;
     const chartTopData = <?php echo json_encode($chart_top_data); ?>;
   </script>
-  <script src="<?= $p ?>public/js/dashboard.js"></script>
+  <script src="<?= $p ?>public/js/dashboard.js?v=<?= filemtime(ROOT_PATH . '/public/js/dashboard.js') ?>"></script>
 </body>
 <?php if ($conn) $conn->close(); ?>
 

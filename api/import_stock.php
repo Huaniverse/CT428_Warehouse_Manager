@@ -1,4 +1,5 @@
 <?php
+// Xử lý nhập kho (đơn lẻ và hàng loạt)
 
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/auth.php';
@@ -6,14 +7,20 @@ require_once __DIR__ . '/../php/partials/helpers-stock.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-requireCanImportExport();
 requireDb($conn);
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
+$viewActions = ['list', 'detail'];
+if (in_array($action, $viewActions, true)) {
+    if (!canViewProducts()) deny403();
+} else {
+    requireCanImportExport();
+}
+
 switch ($action) {
 
-    // ── Tạo phiếu nhập ────────────────────────────────────────────────────
+    // Tạo phiếu nhập đơn lẻ
     case 'create':
         requirePost();
         verifyCsrfToken();
@@ -86,7 +93,7 @@ switch ($action) {
         }
         break;
 
-    // ── Tạo phiếu nhập hàng loạt ─────────────────────────────────────────
+    // Tạo phiếu nhập hàng loạt
     case 'create_batch':
         requirePost();
         verifyCsrfToken();
@@ -166,12 +173,12 @@ switch ($action) {
         }
         break;
 
-    // ── Danh sách phiếu nhập ──────────────────────────────────────────────
+    // Danh sách phiếu nhập
     case 'list':
         echo json_encode(getStockList($conn, 'import'));
         break;
 
-    // ── Chi tiết phiếu nhập ───────────────────────────────────────────────
+    // Chi tiết phiếu nhập
     case 'detail':
         $code = trim($_GET['code'] ?? '');
         if ($code === '') {

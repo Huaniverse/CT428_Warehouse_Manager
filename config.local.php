@@ -1,5 +1,5 @@
 <?php
-// config.local.php — Credentials thực tế cho môi trường local/production
+// Credentials thực tế cho môi trường local/production
 // [SEC-06] File này KHÔNG được commit vào git (xem .gitignore)
 // Sao chép từ config.local.example.php và điền thông tin thật
 

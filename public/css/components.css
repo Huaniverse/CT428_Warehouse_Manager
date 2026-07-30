@@ -1,3 +1,57 @@
+/* Các lớp CSS tiện ích dùng chung */
+/* ===== PAGE TITLES ===== */
+.page_title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+}
+
+.page_subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0 0 24px 0;
+}
+
+/* ===== PAGINATION ===== */
+.pagination_wrap {
+    padding: 12px 0;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+/* ===== TAB BUTTONS ROW ===== */
+.tab_buttons_row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+/* ===== SEARCH ICON ===== */
+.search_icon_md {
+    font-size: 18px;
+    color: #97a5b8;
+}
+
+/* ===== HIDDEN PANEL ===== */
+.panel_hidden {
+    display: none;
+}
+
+/* ===== ICON HELPERS ===== */
+.icon_expand {
+    font-size: 16px;
+    color: #94a3b8;
+}
+
+.icon_inline {
+    font-size: 16px;
+    vertical-align: middle;
+}
+
 /* ===== TOAST NOTIFICATION ===== */
 .toast_container {
     position: fixed;

@@ -1,3 +1,4 @@
+// Combobox tìm kiếm sản phẩm tự động
 const _comboData = {};
 
 function loadProductDropdown(inputId) {
@@ -21,7 +22,7 @@ function loadProductDropdown(inputId) {
         return;
     }
 
-    apiFetch(BASE + '/api/filter_products.php?search=&category=&price_sort=&qty_sort=&limit=all&active_only=1')
+    ajaxCall(BASE + '/api/filter_products.php?search=&category=&price_sort=&qty_sort=&limit=all&active_only=1')
         .then(data => {
             const products = data.records.map(r => ({
                 id: String(r.id),

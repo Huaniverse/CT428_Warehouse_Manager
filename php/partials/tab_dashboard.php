@@ -1,4 +1,5 @@
       <?php
+      // Tab tổng quan kho hàng
       $total_categories    = $total_categories    ?? 0;
       $total_quantity      = $total_quantity      ?? 0;
       $total_val           = $total_val           ?? 0;
@@ -18,10 +19,10 @@
       }
       ?>
       <div id="content_tongquan" class="tab_content active_tab">
-        <h1 style="font-size: 24px; font-weight: 600; color: #0f172a; margin: 0 0 4px 0;">Tổng quan kho hàng</h1>
-        <p style="font-size: 14px; color: #64748b; margin: 0 0 24px 0;">Thống kê và báo cáo số lượng, giá trị tồn kho theo thời gian thực</p>
+        <h1 class="page_title">Tổng quan kho hàng</h1>
+        <p class="page_subtitle">Thống kê và báo cáo số lượng, giá trị tồn kho theo thời gian thực</p>
 
-        <!-- KPI Cards -->
+        <!-- Cac the KPI -->
         <div class="dashboard_grid">
           <div class="kpi_card">
             <div class="kpi_icon blue">
@@ -104,17 +105,17 @@
           </div>
         </div>
 
-        <!-- Biểu đồ -->
+        <!-- Bieu do -->
         <div class="chart_grid">
           <div class="chart_card">
             <h3>Số lượng sản phẩm theo danh mục</h3>
-            <div style="position: relative; height: 240px;">
+            <div class="chart_canvas_wrap">
               <canvas id="quantityChart"></canvas>
             </div>
           </div>
           <div class="chart_card">
             <h3>Giá trị tồn kho theo danh mục (nghìn VNĐ)</h3>
-            <div style="position: relative; height: 240px;">
+            <div class="chart_canvas_wrap">
               <canvas id="valueChart"></canvas>
             </div>
           </div>
@@ -123,13 +124,13 @@
         <div class="chart_grid">
           <div class="chart_card">
             <h3>Xu hướng nhập / xuất kho (6 tháng)</h3>
-            <div style="position: relative; height: 240px;">
+            <div class="chart_canvas_wrap">
               <canvas id="trendChart"></canvas>
             </div>
           </div>
           <div class="chart_card">
             <h3>Phân loại trạng thái kho</h3>
-            <div style="position: relative; height: 240px;">
+            <div class="chart_canvas_wrap">
               <canvas id="statusChart"></canvas>
             </div>
           </div>
@@ -138,15 +139,15 @@
         <div class="chart_grid" style="grid-template-columns: 1fr;">
           <div class="chart_card">
             <h3>Top 5 sản phẩm bán chạy nhất</h3>
-            <div style="position: relative; height: 200px;">
+            <div class="chart_canvas_wrap short">
               <canvas id="topSellingChart"></canvas>
             </div>
           </div>
         </div>
 
-        <!-- Bảng danh sách -->
+        <!-- Bang danh sach -->
         <div class="dashboard_tables_grid">
-          <!-- Sắp hết hàng -->
+          <!-- Sap het hang -->
           <div class="dashboard_table_card">
             <div class="dashboard_table_header">
               <span class="material-symbols-outlined" style="color:#f59e0b;">warning</span>
@@ -163,7 +164,7 @@
                 </thead>
                 <tbody>
                   <?php if (empty($low_stock_list)): ?>
-                    <tr><td colspan="3" style="text-align:center; color:#94a3b8; padding:20px;">Không có sản phẩm sắp hết</td></tr>
+                    <tr><td colspan="3" class="empty_state">Không có sản phẩm sắp hết</td></tr>
                   <?php else: ?>
                     <?php foreach ($low_stock_list as $item): ?>
                       <tr>
@@ -178,7 +179,7 @@
             </div>
           </div>
 
-          <!-- Bán chạy nhất -->
+          <!-- Ban chay nhat -->
           <div class="dashboard_table_card">
             <div class="dashboard_table_header">
               <span class="material-symbols-outlined" style="color:#10b981;">local_fire_department</span>
@@ -195,7 +196,7 @@
                 </thead>
                 <tbody>
                   <?php if (empty($top_selling_list)): ?>
-                    <tr><td colspan="3" style="text-align:center; color:#94a3b8; padding:20px;">Chưa có dữ liệu bán hàng</td></tr>
+                    <tr><td colspan="3" class="empty_state">Chưa có dữ liệu bán hàng</td></tr>
                   <?php else: ?>
                     <?php foreach ($top_selling_list as $item): ?>
                       <tr>
@@ -210,7 +211,7 @@
             </div>
           </div>
 
-          <!-- Phiếu gần đây -->
+          <!-- Hoat dong gan day -->
           <div class="dashboard_table_card dashboard_table_full">
             <div class="dashboard_table_header">
               <span class="material-symbols-outlined" style="color:#3b82f6;">history</span>
@@ -230,7 +231,7 @@
                 </thead>
                 <tbody>
                   <?php if (empty($recent_receipts)): ?>
-                    <tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:20px;">Chưa có hoạt động nào</td></tr>
+                    <tr><td colspan="6" class="empty_state">Chưa có hoạt động nào</td></tr>
                   <?php else: ?>
                     <?php foreach ($recent_receipts as $r): ?>
                       <?php

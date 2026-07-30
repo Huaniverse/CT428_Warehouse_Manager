@@ -1,4 +1,7 @@
 <?php
+// Các hàm lấy dữ liệu dashboard và kiểm tra quyền
+
+// Lấy toàn bộ dữ liệu thống kê cho trang dashboard
 function getDashboardData(mysqli $conn): array
 {
     $data = [
@@ -29,7 +32,7 @@ function getDashboardData(mysqli $conn): array
 
     if (!$conn) return $data;
 
-    // ── KPI cơ bản ──────────────────────────────────────────────────────
+    // KPI cơ bản
     if ($res = $conn->query("SELECT COUNT(*) as total FROM danhmuc")) {
         $data['total_categories'] = $res->fetch_assoc()['total'];
     }
@@ -46,7 +49,7 @@ function getDashboardData(mysqli $conn): array
         $data['total_out'] = $res->fetch_assoc()['total'];
     }
 
-    // ── KPI tháng này ───────────────────────────────────────────────────
+    // KPI tháng này
     $month_start = date('Y-m-01');
     $month_end   = date('Y-m-t 23:59:59');
 
@@ -88,7 +91,7 @@ function getDashboardData(mysqli $conn): array
         }
     }
 
-    // ── Biểu đồ xu hướng 6 tháng ──────────────────────────────────────
+    // Biểu đồ xu hướng 6 tháng
     for ($i = 5; $i >= 0; $i--) {
         $m_start = date('Y-m-01', strtotime("-{$i} months"));
         $m_end   = date('Y-m-t 23:59:59', strtotime("-{$i} months"));
@@ -103,7 +106,7 @@ function getDashboardData(mysqli $conn): array
         $data['chart_trend_export'][] = (int)($res_exp->fetch_assoc()['total'] ?? 0);
     }
 
-    // ── Biểu đồ trạng thái kho ─────────────────────────────────────────
+    // Biểu đồ trạng thái kho
     if ($res = $conn->query("SELECT
         SUM(CASE WHEN stock >= 30 THEN 1 ELSE 0 END) as in_stock,
         SUM(CASE WHEN stock > 0 AND stock < 30 THEN 1 ELSE 0 END) as low_stock,
@@ -190,9 +193,9 @@ function getDashboardData(mysqli $conn): array
     return $data;
 }
 
-function checkStoreManagerTarget(mysqli $conn, int $target_id): array
+function checkManagerTarget(mysqli $conn, int $target_id): array
 {
-    if (($_SESSION['role'] ?? '') !== 'store_manager') {
+    if (($_SESSION['role'] ?? '') !== 'manager') {
         return ['allowed' => true];
     }
     $stmt = $conn->prepare("SELECT role FROM users WHERE id = ?");

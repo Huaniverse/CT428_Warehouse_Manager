@@ -1,4 +1,5 @@
 <?php
+// Lấy, cập nhật, ẩn/hiện sản phẩm
 
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/auth.php';
@@ -8,12 +9,11 @@ header('Content-Type: application/json; charset=utf-8');
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
-// action=detail và action=get: staff có import perm được phép xem
-// action=update và action=toggle_active: chỉ admin/store_manager
+// Chỉ admin/manager mới được update hoặc toggle
 $isEditAction = in_array($action, ['update', 'toggle_active'], true);
 if ($isEditAction) {
-    requireAdminOrStoreManager();
-} elseif (!isAdmin() && !isStoreManager() && !canImportExport()) {
+    requireAdminOrManager();
+} elseif (!canViewProducts()) {
     deny403();
 }
 
@@ -24,7 +24,7 @@ if (!$conn) {
 
 switch ($action) {
 
-    // ── Lấy thông tin sản phẩm ─────────────────────────────────────────────
+    // Lấy thông tin sản phẩm
     case 'get':
         $product_id = (int)($_GET['id'] ?? 0);
         if ($product_id <= 0) {
@@ -48,11 +48,11 @@ switch ($action) {
         echo json_encode([
             'success' => true,
             'product' => $product,
-            'can_edit' => isAdmin() || isStoreManager(),
+            'can_edit' => isAdmin() || isManager(),
         ]);
         break;
 
-    // ── Cập nhật thông tin sản phẩm ───────────────────────────────────────
+    // Cập nhật thông tin sản phẩm
     case 'update':
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']);
@@ -105,7 +105,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Soft delete / Restore sản phẩm ────────────────────────────────────
+    // Ẩn hoặc hiện sản phẩm (soft delete / restore)
     case 'toggle_active':
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']);
@@ -134,7 +134,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Chi tiết sản phẩm + lịch sử nhập/xuất ──────────────────────────────
+    // Chi tiết sản phẩm và lịch sử nhập xuất
     case 'detail':
         $product_id = (int)($_GET['id'] ?? 0);
         if ($product_id <= 0) {
@@ -208,7 +208,7 @@ switch ($action) {
             'product'        => $product,
             'import_history' => $import_history,
             'export_history' => $export_history,
-            'can_edit'       => isAdmin() || isStoreManager(),
+            'can_edit'       => isAdmin() || isManager(),
         ]);
         break;
 

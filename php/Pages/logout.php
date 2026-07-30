@@ -1,4 +1,5 @@
 <?php
+// Đăng xuất và hủy session
 session_start();
 
 require_once __DIR__ . '/../db.php';
@@ -31,5 +32,5 @@ if (ini_get("session.use_cookies")) {
 }
 session_destroy();
 
-header('Location: index.php');
+header('Location: ../../index.php');
 exit;

@@ -1,4 +1,7 @@
 <?php
+// Hàm kiểm tra dữ liệu sản phẩm
+
+// Kiểm tra tính hợp lệ của dữ liệu nhập từ form
 function validateProductInput(mysqli $conn, array $post, bool $isEdit = false): array
 {
     $name          = trim($post['name'] ?? '');

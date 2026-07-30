@@ -1,6 +1,6 @@
 <?php
 $is_admin        = $is_admin        ?? isAdmin();
-$is_store_manager= $is_store_manager?? isStoreManager();
+$is_manager= $is_manager?? isManager();
 ?>
   <aside>
     <nav class="sidebar_menu">
@@ -12,13 +12,13 @@ $is_store_manager= $is_store_manager?? isStoreManager();
         <span class="material-symbols-outlined">inventory</span>
         <span>Kho hàng</span>
       </a>
-      <?php if (canImportExport()): ?>
+      <?php if (canViewProducts()): ?>
       <a class="menu_item" data-tab="lichsu">
         <span class="material-symbols-outlined">history</span>
         <span>Lịch sử</span>
       </a>
       <?php endif; ?>
-      <?php if ($is_admin || $is_store_manager): ?>
+      <?php if ($is_admin || $is_manager): ?>
       <a class="menu_item" data-tab="caidat">
         <span class="material-symbols-outlined">manage_accounts</span>
         <span>Quản lý nhân viên</span>

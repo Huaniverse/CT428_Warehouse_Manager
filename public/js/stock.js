@@ -1,3 +1,4 @@
+// Quản lý nhập xuất kho, lịch sử, danh sách lưu
 // ─── Import/Export Stock Modal (Batch) ─────────────────────────────────────
 let importModal, exportModal;
 let importBatchItems = [], exportBatchItems = [];
@@ -25,7 +26,7 @@ function renderBatchTable(type) {
         tbody.innerHTML = '';
         return;
     }
-    wrapper.style.display = '';
+        wrapper.style.display = 'block';
     tbody.innerHTML = cfg.items.map((item, idx) => `<tr>
         <td style="text-align:center; color:#64748b;">${idx + 1}</td>
         <td><span class="product_name">${escapeHtml(item.productName)}</span></td>
@@ -102,7 +103,7 @@ if (importModal) {
         this.disabled = true;
         this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang xử lý...';
 
-        apiFetch(BASE + '/api/import_stock.php?action=create_batch', { method: 'POST', body: fd })
+        ajaxCall(BASE + '/api/import_stock.php?action=create_batch', { method: 'POST', body: fd })
             .then(data => {
                 this.disabled = false;
                 this.innerHTML = originalLabel;
@@ -142,7 +143,7 @@ if (exportModal) {
         const productId = document.getElementById('export_product_id').value;
         const infoDiv = document.getElementById('export_stock_info');
         if (!productId) { infoDiv.style.display = 'none'; return; }
-        apiFetch(BASE + '/api/edit_product.php?action=get&id=' + productId)
+        ajaxCall(BASE + '/api/edit_product.php?action=get&id=' + productId)
             .then(data => {
                 if (data.success) {
                     document.getElementById('export_current_stock').textContent = data.product.quantity;
@@ -198,7 +199,7 @@ if (exportModal) {
         this.disabled = true;
         this.innerHTML = '<span class="material-symbols-outlined spin_icon">autorenew</span> Đang xử lý...';
 
-        apiFetch(BASE + '/api/export_stock.php?action=create_batch', { method: 'POST', body: fd })
+        ajaxCall(BASE + '/api/export_stock.php?action=create_batch', { method: 'POST', body: fd })
             .then(data => {
                 this.disabled = false;
                 this.innerHTML = originalLabel;
@@ -252,7 +253,7 @@ function loadHistory(type, page = 1) {
 
     const filterQS = getHistoryFilterParams();
     const sep = filterQS ? '&' : '';
-    apiFetch(BASE + '/api/' + cfg.endpoint + '?action=list&page=' + page + sep + filterQS)
+    ajaxCall(BASE + '/api/' + cfg.endpoint + '?action=list&page=' + page + sep + filterQS)
         .then(data => {
             if (!data.success || data.records.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6"><div class="empty_state"><span class="material-symbols-outlined">inventory_2</span><p>${cfg.emptyMsg}</p></div></td></tr>`;
@@ -299,14 +300,14 @@ function switchHistoryTab(type) {
     if (type === 'import') {
         importBtn.classList.add('active');
         exportBtn.classList.remove('active');
-        importPanel.style.display = '';
-        exportPanel.style.display = 'none';
+        importPanel.classList.remove('panel_hidden');
+        exportPanel.classList.add('panel_hidden');
         loadImportHistory(1);
     } else {
         importBtn.classList.remove('active');
         exportBtn.classList.add('active');
-        importPanel.style.display = 'none';
-        exportPanel.style.display = '';
+        importPanel.classList.add('panel_hidden');
+        exportPanel.classList.remove('panel_hidden');
         loadExportHistory(1);
     }
 }
@@ -329,7 +330,7 @@ function openReceiptDetail(type, code) {
     itemsDiv.innerHTML = '';
 
     const endpoint = type === 'import' ? BASE + '/api/import_stock.php' : BASE + '/api/export_stock.php';
-    apiFetch(endpoint + '?action=detail&code=' + encodeURIComponent(code))
+    ajaxCall(endpoint + '?action=detail&code=' + encodeURIComponent(code))
         .then(data => {
             if (!data.success || !data.items || data.items.length === 0) {
                 infoDiv.innerHTML = '<p style="color:#dc2626;">Không tìm thấy phiếu.</p>';
@@ -562,10 +563,12 @@ function removeFromList(type, productId) {
 
 function clearList(type) {
     const cfg = getListConfig(type);
-    if (!confirm(cfg.clearMsg)) return;
-    saveList(type, []);
-    renderListSuggestions(type);
-    showToast(cfg.clearDoneMsg, 'success');
+    showConfirm(cfg.clearMsg).then(confirmed => {
+        if (!confirmed) return;
+        saveList(type, []);
+        renderListSuggestions(type);
+        showToast(cfg.clearDoneMsg, 'success');
+    });
 }
 
 function renderListSuggestions(type) {
@@ -579,7 +582,7 @@ function renderListSuggestions(type) {
     countSpan.textContent = list.length;
 
     if (list.length === 0) { container.style.display = 'none'; return; }
-    container.style.display = '';
+    container.style.display = 'block';
 
     itemsDiv.innerHTML = list.map(item => `
         <div class="${cfg.chipClass}" onclick="quickAddFromList('${type}', '${item.productId}', '${escapeHtml(item.productName).replace(/'/g, "\\'")}')" title="${cfg.suggestTitle}">

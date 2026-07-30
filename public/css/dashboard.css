@@ -1,4 +1,4 @@
-/* ===== DASHBOARD OVERVIEW ===== */
+/* Trang tổng quan */
 .dashboard_grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -71,7 +71,7 @@
     text-align: left;
 }
 
-/* ===== CHART GRID ===== */
+/* Lưới biểu đồ */
 .chart_grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
@@ -95,7 +95,7 @@
     color: #2a2d33;
 }
 
-/* ===== DASHBOARD TABLES ===== */
+/* Bảng trên dashboard */
 .dashboard_tables_grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -149,7 +149,7 @@
     grid-column: 1 / -1;
 }
 
-/* ── Badges ───────────────────────────────────────────────────────────── */
+/* Badges trạng thái */
 .low_stock_badge {
     display: inline-flex;
     align-items: center;
@@ -204,7 +204,7 @@
     font-weight: 600;
 }
 
-/* ===== RESPONSIVE ===== */
+/* Responsive */
 @media (max-width: 1024px) {
     .dashboard_grid {
         grid-template-columns: repeat(2, 1fr);
@@ -263,7 +263,38 @@
     }
 }
 
-/* ===== CHART CANVAS WRAPPER ===== */
+/* Tiêu đề trang */
+.page_title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+}
+
+.page_subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0 0 24px 0;
+}
+
+/* Ô bảng */
+.empty_state {
+    text-align: center;
+    color: #94a3b8;
+    padding: 20px;
+}
+
+.price_cell {
+    text-align: right;
+    font-size: 13px;
+}
+
+.code_mono {
+    font-family: monospace;
+    font-weight: 600;
+}
+
+/* Biểu đồ */
 .chart_canvas_wrap {
     position: relative;
     height: 240px;
@@ -277,7 +308,7 @@
     grid-template-columns: 1fr;
 }
 
-/* ===== DASHBOARD TABLE CELL ALIGN ===== */
+/* Căn chỉnh ô bảng */
 .cell_center {
     text-align: center;
 }
@@ -286,7 +317,7 @@
     text-align: right;
 }
 
-/* ===== ADD PRODUCT BUTTON ===== */
+/* Nút thêm sản phẩm */
 .add_product_button {
     display: flex;
     align-items: center;

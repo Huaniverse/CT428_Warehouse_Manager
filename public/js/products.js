@@ -1,3 +1,4 @@
+// Quản lý sản phẩm: lọc, tìm kiếm, chi tiết, thêm, sửa
 let productCurrentPage = 1;
 
 function getProductStatus(r) {
@@ -34,14 +35,14 @@ function fetchFilteredProducts(page) {
     });
 
     const cfg = window.APP_CONFIG || {};
-    const canManage = !!cfg.canManageProducts || !!cfg.isAdmin || cfg.role === 'store_manager';
+    const canManage = !!cfg.canManageProducts || !!cfg.isAdmin || cfg.role === 'manager';
     const canView = canManage || !!cfg.canViewProducts;
     const colspan = canView ? 8 : 7;
     const tbody = document.getElementById('product_table_body');
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="' + colspan + '" style="text-align: center; padding: 32px; color: #64748b;">Đang tải dữ liệu...</td></tr>';
 
-    apiFetch(BASE + '/api/filter_products.php?' + params.toString())
+    ajaxCall(BASE + '/api/filter_products.php?' + params.toString())
         .then(data => {
             const totalPages = Math.ceil(data.total / data.per_page);
             renderProductPagination(totalPages, data.page);
@@ -185,7 +186,7 @@ function openProductDetail(productId) {
 
     modal.classList.add('open');
 
-    apiFetch(BASE + '/api/edit_product.php?action=detail&id=' + productId)
+    ajaxCall(BASE + '/api/edit_product.php?action=detail&id=' + productId)
         .then(data => {
             if (!data.success) { showToast(data.message, 'error'); modal.classList.remove('open'); return; }
             currentDetailProduct = data;
@@ -253,16 +254,18 @@ function switchProductHistoryTab(type) {
 
 function toggleProductActive(productId, newActive) {
     const label = newActive == 1 ? 'khôi phục' : 'ẩn';
-    if (!confirm(`Bạn có chắc muốn ${label} sản phẩm này?`)) return;
-    const fd = new FormData();
-    fd.append('product_id', productId);
-    fd.append('is_active', newActive);
-    apiFetch(BASE + '/api/edit_product.php?action=toggle_active', { method: 'POST', body: fd })
-        .then(data => {
-            showToast(data.message, data.success ? 'success' : 'error');
-            if (data.success) fetchFilteredProducts(productCurrentPage);
-        })
-        .catch(() => showToast('Lỗi kết nối máy chủ.', 'error'));
+    showConfirm(`Bạn có chắc muốn ${label} sản phẩm này?`).then(confirmed => {
+        if (!confirmed) return;
+        const fd = new FormData();
+        fd.append('product_id', productId);
+        fd.append('is_active', newActive);
+        ajaxCall(BASE + '/api/edit_product.php?action=toggle_active', { method: 'POST', body: fd })
+            .then(data => {
+                showToast(data.message, data.success ? 'success' : 'error');
+                if (data.success) fetchFilteredProducts(productCurrentPage);
+            })
+            .catch(() => showToast('Lỗi kết nối máy chủ.', 'error'));
+    });
 }
 
 // ─── Product Detail Modal ────────────────────────────────────────────────
@@ -307,7 +310,7 @@ if (prodDetailModal) {
         document.getElementById('edit_prod_price').value = p.price;
         document.getElementById('edit_prod_desc').value = p.description || '';
         document.getElementById('productInfoDisplay').style.display = 'none';
-        document.getElementById('productInfoEdit').style.display = '';
+        document.getElementById('productInfoEdit').style.display = 'block';
     });
 
     function cancelProdEdit() {
@@ -336,7 +339,7 @@ if (prodDetailModal) {
             onSuccess: () => {
                 fetchFilteredProducts(productCurrentPage);
                 const productId = document.getElementById('detail_prod_id').value;
-                apiFetch(BASE + '/api/edit_product.php?action=detail&id=' + productId)
+                ajaxCall(BASE + '/api/edit_product.php?action=detail&id=' + productId)
                     .then(d => {
                         if (d.success) {
                             currentDetailProduct = d;

@@ -1,9 +1,10 @@
 <?php
+// Trang đăng nhập hệ thống
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Nếu đã đăng nhập → chuyển thẳng vào trang chính
+// Nếu đã đăng nhập thì chuyển vào trang chính
 if (isset($_SESSION['user_id'])) {
     header('Location: index.php');
     exit;
@@ -17,23 +18,23 @@ $asset = defined('ROOT_CONTEXT') ? '' : '../../';
 $error   = '';
 $success = '';
 
-// Xử lý POST
+// Xử lý form đăng nhập
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    // [IMP-05] Rate limiting — chặn brute force sau 5 lần sai liên tiếp
+    // Rate limiting để tránh brute force
     if (!isset($_SESSION['login_attempts'])) {
         $_SESSION['login_attempts']    = 0;
         $_SESSION['login_last_attempt'] = 0;
     }
 
     $max_attempts = 5;
-    $lockout_secs = 300; // 5 phút
+    $lockout_secs = 300;
     $now          = time();
     $time_since   = $now - (int)$_SESSION['login_last_attempt'];
 
-    // Reset đếm nếu đã qua thời gian lockout
+    // Reset bộ đệm nếu đã qua thời gian lockout
     if ($_SESSION['login_attempts'] >= $max_attempts && $time_since >= $lockout_secs) {
         $_SESSION['login_attempts'] = 0;
     }
@@ -46,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!$conn) {
         $error = 'Không thể kết nối cơ sở dữ liệu. Vui lòng thử lại sau.';
     } else {
+        // Truy vấn thông tin user
         $stmt = $conn->prepare("SELECT id, username, password, full_name, role, is_active, has_schedule, access_start, access_end, temp_access_until FROM users WHERE username = ?");
         $stmt->bind_param("s", $username);
         $stmt->execute();
@@ -68,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$schedCheck['allowed']) {
                 $error = $schedCheck['message'];
             } else {
-            // Xác thực thành công — reset bộ đếm
+            // Xác thực thành công, reset bộ đệm và tạo session mới
             $_SESSION['login_attempts']     = 0;
             $_SESSION['login_last_attempt'] = 0;
             session_regenerate_id(true);
@@ -79,13 +81,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ip         = $_SERVER['REMOTE_ADDR'] ?? '';
             $ua         = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
 
-            // Giới hạn 1 phiên / 1 tài khoản — xoá mọi session cũ trước khi tạo mới
+            // Xóa các session cũ của user này
             $del = $conn->prepare("DELETE FROM sessions WHERE user_id = ?");
             $del->bind_param("i", $user['id']);
             $del->execute();
             $del->close();
 
-            // Ghi vào bảng sessions
+            // Ghi session mới vào bảng sessions
             $stmt2 = $conn->prepare(
                 "INSERT INTO sessions (session_token, user_id, ip_address, user_agent, expires_at)
                  VALUES (?, ?, ?, ?, ?)"
@@ -94,16 +96,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt2->execute();
             $stmt2->close();
 
-            // [IMP-03] Dọn các session hết hạn — chạy mỗi lần đăng nhập thành công
+            // Dọn các session đã hết hạn
             $conn->query("DELETE FROM sessions WHERE expires_at < NOW()");
 
-            // Cập nhật last_login
+            // Cập nhật thời gian đăng nhập cuối
             $stmt3 = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
             $stmt3->bind_param("i", $user['id']);
             $stmt3->execute();
             $stmt3->close();
 
-            // Lưu session PHP
+            // Lưu thông tin user vào session PHP
             $_SESSION['user_id']       = $user['id'];
             $_SESSION['username']      = $user['username'];
             $_SESSION['name']          = $user['full_name'];
@@ -126,7 +128,7 @@ $expired = isset($_GET['expired']) && $_GET['expired'] == '1' && $_SERVER['REQUE
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập — Quản Lí Kho</title>
+    <title>Đăng nhập - Quản Lí Kho</title>
     <meta name="description" content="Đăng nhập vào hệ thống Quản Lí Kho hàng.">
     <link rel="stylesheet" href="<?= $asset ?>public/css/style.css?v=<?php echo filemtime(__DIR__ . '/../../public/css/style.css'); ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -143,7 +145,7 @@ $expired = isset($_GET['expired']) && $_GET['expired'] == '1' && $_SERVER['REQUE
     </div>
 
     <div class="login_wrapper">
-        <!-- Brand Panel -->
+        <!-- Phan hien thi thuong hieu ben trai -->
         <div class="login_brand">
             <div class="brand_logo">
                 <span class="material-symbols-outlined">inventory_2</span>
@@ -166,7 +168,7 @@ $expired = isset($_GET['expired']) && $_GET['expired'] == '1' && $_SERVER['REQUE
             </div>
         </div>
 
-        <!-- Login Card -->
+        <!-- The dang nhap -->
         <div class="login_card">
             <div class="login_card_header">
                 <h2>Chào mừng trở lại</h2>
@@ -219,13 +221,14 @@ $expired = isset($_GET['expired']) && $_GET['expired'] == '1' && $_SERVER['REQUE
             </form>
 
             <p class="login_footer_note">
-                <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">info</span>
+                <span class="material-symbols-outlined icon_inline">info</span>
                 Liên hệ quản trị viên nếu quên mật khẩu.
             </p>
         </div>
     </div>
 
     <script>
+        // Chức năng hiện/ẩn mật khẩu
         const toggleBtn = document.getElementById('togglePassword');
         const toggleIcon = document.getElementById('toggleIcon');
         const passwordInput = document.getElementById('password');
@@ -240,6 +243,7 @@ $expired = isset($_GET['expired']) && $_GET['expired'] == '1' && $_SERVER['REQUE
             }
         });
 
+        // Vô hiệu hóa nút submit để tránh double click
         const loginForm = document.getElementById('loginForm');
         const loginBtn = document.getElementById('loginBtn');
         loginForm.addEventListener('submit', function () {

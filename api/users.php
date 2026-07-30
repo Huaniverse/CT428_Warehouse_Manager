@@ -1,9 +1,10 @@
 <?php
+// Quản lý tài khoản người dùng (CRUD, phân quyền, session)
 
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/auth.php';
 require_once __DIR__ . '/../php/partials/helpers-users.php';
-requireAdminOrStoreManager();
+requireAdminOrManager();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -11,7 +12,7 @@ $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 switch ($action) {
 
-    // ── Danh sách users ──────────────────────────────────────────────────────
+    // Danh sách users
     case 'list':
         requireDb($conn);
 
@@ -22,7 +23,7 @@ switch ($action) {
                        creator.full_name AS created_by_name
                 FROM users u
                 LEFT JOIN users creator ON u.created_by = creator.id";
-        if ($caller_role === 'store_manager') {
+        if ($caller_role === 'manager') {
             $sql .= " WHERE u.role = 'staff'";
         }
         $sql .= " ORDER BY u.created_at DESC";
@@ -36,7 +37,7 @@ switch ($action) {
         echo json_encode(['success' => true, 'users' => $users]);
         break;
 
-    // ── Tạo tài khoản staff mới ──────────────────────────────────────────────
+    // Tạo tài khoản mới
     case 'create':
         requirePost();
         verifyCsrfToken();
@@ -68,11 +69,11 @@ switch ($action) {
             echo json_encode(['success' => false, 'message' => 'Mật khẩu phải có ít nhất 6 ký tự.']);
             exit;
         }
-        if (!in_array($new_role, ['store_manager', 'staff'])) {
+        if (!in_array($new_role, ['manager', 'staff'])) {
             $new_role = 'staff';
         }
         $caller_role = $_SESSION['role'] ?? '';
-        if ($caller_role === 'store_manager' && $new_role !== 'staff') {
+        if ($caller_role === 'manager' && $new_role !== 'staff') {
             echo json_encode(['success' => false, 'message' => 'Bạn chỉ có thể tạo tài khoản Staff.']);
             exit;
         }
@@ -95,7 +96,7 @@ switch ($action) {
                 echo json_encode(['success' => false, 'message' => 'Định dạng giờ không hợp lệ.']);
                 exit;
             }
-        } elseif ($new_role === 'store_manager') {
+        } elseif ($new_role === 'manager') {
             $has_schedule = (int)($_POST['has_schedule'] ?? 0);
             if ($has_schedule) {
                 $access_start = $_POST['access_start'] ?? null;
@@ -128,7 +129,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Vô hiệu hóa / Kích hoạt lại tài khoản ──────────────────────────────
+    // Vô hiệu hóa / Kích hoạt lại tài khoản
     case 'toggle':
         requirePost();
         verifyCsrfToken();
@@ -139,7 +140,7 @@ switch ($action) {
 
         denyIfSelf($target_id);
 
-        $check = checkStoreManagerTarget($conn, $target_id);
+        $check = checkManagerTarget($conn, $target_id);
         if (!$check['allowed']) {
             echo json_encode(['success' => false, 'message' => $check['message']]);
             exit;
@@ -160,7 +161,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Xóa tài khoản ────────────────────────────────────────────────────────
+    // Xóa tài khoản
     case 'delete':
         requirePost();
         verifyCsrfToken();
@@ -179,7 +180,7 @@ switch ($action) {
             echo json_encode(['success' => false, 'message' => 'Không thể xóa tài khoản admin.']);
             exit;
         }
-        $check = checkStoreManagerTarget($conn, $target_id);
+        $check = checkManagerTarget($conn, $target_id);
         if (!$check['allowed']) {
             echo json_encode(['success' => false, 'message' => $check['message']]);
             exit;
@@ -195,14 +196,14 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Danh sách phiên đăng nhập đang hoạt động ────────────────────────────
+    // Danh sách phiên đăng nhập đang hoạt động
     case 'sessions':
         requireDb($conn);
 
         $caller_role = $_SESSION['role'] ?? '';
         $my_user_id  = (int)$_SESSION['user_id'];
 
-        if ($caller_role === 'store_manager') {
+        if ($caller_role === 'manager') {
             $sql = "SELECT s.session_token, s.user_id, u.username, u.full_name, u.role,
                            s.ip_address, s.user_agent, s.created_at, s.expires_at
                     FROM sessions s
@@ -234,7 +235,7 @@ switch ($action) {
         echo json_encode(['success' => true, 'sessions' => $sessions]);
         break;
 
-    // ── Kick user (xóa phiên từ xa) ─────────────────────────────────────────
+    // Kick user (xóa phiên từ xa)
     case 'kick':
         requirePost();
         verifyCsrfToken();
@@ -244,7 +245,7 @@ switch ($action) {
 
         denyIfSelf($kick_user_id);
 
-        $check = checkStoreManagerTarget($conn, $kick_user_id);
+        $check = checkManagerTarget($conn, $kick_user_id);
         if (!$check['allowed']) {
             echo json_encode(['success' => false, 'message' => $check['message']]);
             exit;
@@ -261,7 +262,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Cấp quyền nhập/xuất kho cho staff ────────────────────────────────
+    // Cấp quyền nhập/xuất kho cho staff
     case 'update_permissions':
         requirePost();
         verifyCsrfToken();
@@ -294,7 +295,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Lấy chi tiết tài khoản ─────────────────────────────────────────────
+    // Lấy chi tiết tài khoản
     case 'get_detail':
         requireDb($conn);
 
@@ -323,7 +324,7 @@ switch ($action) {
             exit;
         }
 
-        $check = checkStoreManagerTarget($conn, $target_id);
+        $check = checkManagerTarget($conn, $target_id);
         if (!$check['allowed']) {
             echo json_encode(['success' => false, 'message' => 'Bạn không có quyền xem tài khoản này.']);
             exit;
@@ -332,7 +333,7 @@ switch ($action) {
         echo json_encode(['success' => true, 'user' => $user]);
         break;
 
-    // ── Cập nhật lịch truy cập ─────────────────────────────────────────────
+    // Cập nhật lịch truy cập
     case 'update_schedule':
         requirePost();
         verifyCsrfToken();
@@ -358,7 +359,7 @@ switch ($action) {
             exit;
         }
 
-        $check = checkStoreManagerTarget($conn, $target_id);
+        $check = checkManagerTarget($conn, $target_id);
         if (!$check['allowed']) {
             echo json_encode(['success' => false, 'message' => $check['message']]);
             exit;
@@ -389,7 +390,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Đặt lại mật khẩu ──────────────────────────────────────────────────
+    // Đặt lại mật khẩu
     case 'reset_password':
         requirePost();
         verifyCsrfToken();
@@ -422,7 +423,7 @@ switch ($action) {
             exit;
         }
 
-        $check = checkStoreManagerTarget($conn, $target_id);
+        $check = checkManagerTarget($conn, $target_id);
         if (!$check['allowed']) {
             echo json_encode(['success' => false, 'message' => $check['message']]);
             exit;
@@ -441,7 +442,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Cập nhật thông tin tài khoản ───────────────────────────────────────
+    // Cập nhật thông tin tài khoản
     case 'update':
         requirePost();
         verifyCsrfToken();
@@ -476,18 +477,18 @@ switch ($action) {
             exit;
         }
 
-        $check = checkStoreManagerTarget($conn, $target_id);
+        $check = checkManagerTarget($conn, $target_id);
         if (!$check['allowed']) {
             echo json_encode(['success' => false, 'message' => $check['message']]);
             exit;
         }
 
         $caller_role = $_SESSION['role'] ?? '';
-        if ($caller_role === 'store_manager') {
+        if ($caller_role === 'manager') {
             $new_role = $target_role;
         }
 
-        if (!in_array($new_role, ['admin', 'store_manager', 'staff'])) {
+        if (!in_array($new_role, ['admin', 'manager', 'staff'])) {
             echo json_encode(['success' => false, 'message' => 'Vai trò không hợp lệ.']);
             exit;
         }
@@ -530,7 +531,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Cấp quyền truy cập tạm thời ──────────────────────────────────────
+    // Cấp quyền truy cập tạm thời
     case 'grant_temp_access':
         requirePost();
         verifyCsrfToken();
@@ -551,7 +552,7 @@ switch ($action) {
             exit;
         }
 
-        $permCheck = checkStoreManagerTarget($conn, $target_id);
+        $permCheck = checkManagerTarget($conn, $target_id);
         if (!$permCheck['allowed']) {
             echo json_encode(['success' => false, 'message' => $permCheck['message']]);
             exit;
@@ -573,7 +574,7 @@ switch ($action) {
         $stmt->close();
         break;
 
-    // ── Thu hồi quyền truy cập tạm thời ───────────────────────────────────
+    // Thu hồi quyền truy cập tạm thời
     case 'revoke_temp_access':
         requirePost();
         verifyCsrfToken();
@@ -585,7 +586,7 @@ switch ($action) {
             exit;
         }
 
-        $permCheck = checkStoreManagerTarget($conn, $target_id);
+        $permCheck = checkManagerTarget($conn, $target_id);
         if (!$permCheck['allowed']) {
             echo json_encode(['success' => false, 'message' => $permCheck['message']]);
             exit;

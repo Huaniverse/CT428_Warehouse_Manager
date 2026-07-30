@@ -1,8 +1,9 @@
 <?php
+// Thêm danh mục sản phẩm
 
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/auth.php';
-requireAdmin(); // Yêu cầu quyền Admin
+requireAdminOrManager();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -11,7 +12,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// [SEC-01] Xác minh CSRF token — chống CSRF attack
 verifyCsrfToken();
 
 if (!$conn) {
@@ -56,7 +56,7 @@ $stmt = $conn->prepare("INSERT INTO danhmuc (code, name) VALUES (?, ?)");
 $stmt->bind_param("ss", $code, $category_name);
 
 if ($stmt->execute()) {
-    // Lấy lại toàn bộ danh sách danh mục để cập nhật giao diện
+    // Lấy danh sách danh mục để cập nhật giao diện
     $categories = [];
     $result = $conn->query("SELECT code, name FROM danhmuc ORDER BY name ASC");
     if ($result) {

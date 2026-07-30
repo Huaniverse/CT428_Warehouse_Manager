@@ -1,41 +1,15 @@
-/* ===== STYLE INDEX =====
- * All CSS modules are imported below.
- * Edit individual module files for changes.
- */
-
-/* Base */
+/* File chính để import các module CSS */
+/* Import cac module CSS */
 @import url('base.css');
-
-/* Layout: header, sidebar, main content, tabs */
 @import url('layout.css');
-
-/* Dashboard: KPI cards, charts */
 @import url('dashboard.css');
-
-/* Product table, badges, filters, stock buttons */
 @import url('table.css');
-
-/* History tab buttons */
 @import url('history.css');
-
-/* Login page */
 @import url('login.css');
-
-/* User dropdown */
 @import url('dropdown.css');
-
-/* User management tab */
 @import url('users.css');
-
-/* Modal, form helpers, toast, buttons, pagination */
 @import url('modal.css');
 @import url('components.css');
-
-/* Combobox, toggle switch */
 @import url('combobox.css');
-
-/* User detail modal, schedule, temp access */
 @import url('user-detail.css');
-
-/* Responsive (always last) */
 @import url('responsive.css');

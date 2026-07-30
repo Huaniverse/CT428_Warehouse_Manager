@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// ── CSRF Protection ───────────────────────────────────────────────────────────
+// CSRF Protection
 
 function generateCsrfToken(): string {
     if (empty($_SESSION['csrf_token'])) {
@@ -110,24 +110,28 @@ if ($conn) {
 // Sinh CSRF token cho session (dùng ở mọi trang cần bảo vệ)
 generateCsrfToken();
 
-// ── Tiện ích kiểm tra quyền ──────────────────────────────────────────────────
+// Tiện ích kiểm tra quyền
 
 function isAdmin(): bool {
     return ($_SESSION['role'] ?? '') === 'admin';
 }
 
-function isStoreManager(): bool {
-    return ($_SESSION['role'] ?? '') === 'store_manager';
+function isManager(): bool {
+    return ($_SESSION['role'] ?? '') === 'manager';
 }
 
 function canImportExport(): bool {
     $role = $_SESSION['role'] ?? '';
-    if ($role === 'admin' || $role === 'store_manager') return true;
+    if ($role === 'admin' || $role === 'manager') return true;
     if ($role === 'staff') return ($_SESSION['allow_import_export'] ?? 0) == 1;
     return false;
 }
 
-// ── Gate Functions (die with 403 if unauthorized) ────────────────────────────
+function canViewProducts(): bool {
+    return isAdmin() || isManager() || ($_SESSION['role'] ?? '') === 'staff';
+}
+
+// Gate Functions (die with 403 if unauthorized)
 
 function deny403(): void {
     http_response_code(403);
@@ -139,25 +143,21 @@ function requireAdmin(): void {
     if (!isAdmin()) deny403();
 }
 
-function requireAdminOrStoreManager(): void {
-    if (!isAdmin() && !isStoreManager()) deny403();
+function requireAdminOrManager(): void {
+    if (!isAdmin() && !isManager()) deny403();
 }
 
 function requireCanImportExport(): void {
     if (!canImportExport()) deny403();
 }
 
-// ── Data-scope Helpers ───────────────────────────────────────────────────────
+// Data-scope Helpers
 
 function staffViewScope(): ?int {
-    $role = $_SESSION['role'] ?? '';
-    if ($role === 'staff' && !($_SESSION['allow_import_export'] ?? 0)) {
-        return (int)$_SESSION['user_id'];
-    }
     return null;
 }
 
-// ── User Helpers ─────────────────────────────────────────────────────────────
+// User Helpers
 
 function getCurrentUser(): array {
     return [

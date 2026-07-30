@@ -598,7 +598,7 @@ CREATE TABLE `users` (
   `username` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
   `full_name` varchar(100) NOT NULL,
-  `role` enum('admin','store_manager','staff') NOT NULL DEFAULT 'staff',
+  `role` enum('admin','manager','staff') NOT NULL DEFAULT 'staff',
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `allow_import_export` tinyint(1) NOT NULL DEFAULT 0,
   `has_schedule` tinyint(1) NOT NULL DEFAULT 0,
@@ -617,7 +617,7 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `role`, `is_active`, `allow_import_export`, `has_schedule`, `access_start`, `access_end`, `temp_access_until`, `created_by`, `created_at`, `last_login`) VALUES
 (1, 'admin', '$2y$12$tLxN.y5yFOlS4i676dUWJulxHF3T3imvv0VteXiNx7MphW6qhGjqW', 'Quản trị viên', 'admin', 1, 1, 0, NULL, NULL, NULL, 1, '2026-07-15 16:06:35', '2026-07-28 04:26:32'),
 (2, 'nv1', '$2y$12$Ty.RlU5SMnWGXZ.nL1tWe.rWUhEuvtD6OHm9w9rA8qM8E/6uxeWCK', 'Nguyễn Văn A', 'staff', 1, 1, 1, '06:00:00', '20:00:00', '2026-07-26 14:56:39', 1, '2026-05-01 07:24:39', '2026-07-27 08:27:23'),
-(3, 'chtruong1', '$2y$12$/o3yao3oowPI6Te1Y0wYT.aWMRO73CEpD0aaPKyhS8.TARzXAPhR2', 'Trần Thị B', 'store_manager', 1, 0, 0, '06:00:00', '22:00:00', NULL, 1, '2026-05-01 08:00:00', '2026-07-27 08:15:00'),
+(3, 'ql1', '$2y$12$/o3yao3oowPI6Te1Y0wYT.aWMRO73CEpD0aaPKyhS8.TARzXAPhR2', 'Trần Thị B', 'manager', 1, 0, 0, '06:00:00', '22:00:00', NULL, 1, '2026-05-01 08:00:00', '2026-07-27 08:15:00'),
 (4, 'nv2', '$2y$12$slpbf3kETWTWOJIcW8NtB.HBrD9l2CQI4wT7OLvgbORqXQjP.UZlK', 'Lê Văn C', 'staff', 1, 0, 1, '06:00:00', '22:00:00', NULL, 1, '2026-05-03 09:30:00', '2026-07-26 07:35:26');
 
 --
