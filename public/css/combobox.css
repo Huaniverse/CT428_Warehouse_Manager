@@ -1,5 +1,4 @@
 /* Combobox tìm kiếm sản phẩm và toggle switch */
-/* ===== PRODUCT SEARCH COMBOBOX ===== */
 .product_combobox {
     position: relative;
 }
@@ -43,7 +42,7 @@
     color: #97a5b8;
 }
 
-/* ===== TOGGLE SWITCH ===== */
+/* Công tắc gạt */
 .toggle_switch {
     position: relative;
     display: inline-block;

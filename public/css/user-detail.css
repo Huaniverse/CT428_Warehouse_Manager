@@ -1,5 +1,4 @@
 /* Chi tiết người dùng, lịch trình, truy cập tạm thời */
-/* ===== USER DETAIL MODAL ===== */
 .user_detail_info {
     display: flex;
     flex-direction: column;
@@ -79,7 +78,7 @@
     box-sizing: border-box;
 }
 
-/* ===== SCHEDULE ===== */
+/* Lịch truy cập */
 .schedule_badge {
     display: inline-flex;
     align-items: center;
@@ -113,7 +112,7 @@
     flex-wrap: nowrap;
 }
 
-/* ===== SCHEDULE NOTE & DISABLED ===== */
+/* Ghi chú lịch và vô hiệu hóa */
 .sched_note {
     background: #fef3c7;
     border: 1px solid #fbbf24;
@@ -130,7 +129,7 @@
     transition: opacity 0.2s ease;
 }
 
-/* ===== TEMPORARY ACCESS ===== */
+/* Truy cập tạm thời */
 .temp_duration_btn {
     display: inline-flex;
     align-items: center;

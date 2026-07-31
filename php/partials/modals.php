@@ -3,7 +3,7 @@ $is_admin         = $is_admin         ?? isAdmin();
 $is_manager = $is_manager ?? isManager();
 $categories_list  = $categories_list  ?? [];
 ?>
-  <!-- Modal tao tai khoan -->
+  <!-- Modal tạo tài khoản -->
   <?php if ($is_admin): ?>
   <div class="modal_overlay" id="createUserModal">
     <div class="modal_card">
@@ -48,7 +48,7 @@ $categories_list  = $categories_list  ?? [];
             </select>
           </div>
         </div>
-        <!-- Lich truy cap khi tao tai khoan -->
+        <!-- Lịch truy cập khi tạo tài khoản -->
         <div id="create_staff_note" class="sched_note hidden">
           <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">info</span>
           Nhân viên bắt buộc phải có lịch truy cập.
@@ -88,7 +88,7 @@ $categories_list  = $categories_list  ?? [];
   </div>
   <?php endif; ?>
 
-  <!-- Modal them san pham -->
+  <!-- Modal thêm sản phẩm -->
   <?php if ($is_admin || $is_manager): ?>
   <div class="modal_overlay" id="addProductModal">
     <div class="modal_card">
@@ -146,7 +146,7 @@ $categories_list  = $categories_list  ?? [];
   </div>
   <?php endif; ?>
 
-  <!-- Modal them danh muc -->
+  <!-- Modal thêm danh mục -->
   <?php if ($is_admin || $is_manager): ?>
   <div class="modal_overlay" id="addCategoryModal">
     <div class="modal_card modal_card_sm">
@@ -183,7 +183,7 @@ $categories_list  = $categories_list  ?? [];
   </div>
   <?php endif; ?>
 
-  <!-- Modal chi tiet san pham -->
+  <!-- Modal chi tiết sản phẩm -->
   <?php if (canViewProducts()): ?>
   <div class="modal_overlay" id="productDetailModal">
     <div class="modal_card modal_card_lg">
@@ -199,7 +199,7 @@ $categories_list  = $categories_list  ?? [];
       <div class="modal_body modal_body_scroll">
         <input type="hidden" id="detail_prod_id">
 
-        <!-- Thong tin san pham (hien thi) -->
+        <!-- Thông tin sản phẩm (hiển thị) -->
         <div id="productInfoDisplay">
           <div class="flex_between">
             <div class="flex_center">
@@ -257,7 +257,7 @@ $categories_list  = $categories_list  ?? [];
           </div>
         </div>
 
-        <!-- Form chinh sua san pham (an mac dinh, chi admin/manager) -->
+        <!-- Form chỉnh sửa sản phẩm (ẩn mặc định, chỉ admin/manager) -->
         <?php if ($is_admin || $is_manager): ?>
         <div id="productInfoEdit" class="display_none">
           <div class="flex_between">
@@ -307,7 +307,7 @@ $categories_list  = $categories_list  ?? [];
         </div>
         <?php endif; ?>
 
-        <!-- Lich su nhap xuat kho -->
+        <!-- Lịch sử nhập xuất kho -->
         <div class="section_block">
           <div class="flex_center_gap8 section_block_mb">
             <span class="material-symbols-outlined" style="font-size:20px; color:#475569;">history</span>
@@ -349,7 +349,7 @@ $categories_list  = $categories_list  ?? [];
 
   <?php endif; ?>
 
-  <!-- Modal nhap kho -->
+  <!-- Modal nhập kho -->
   <?php if (canImportExport()): ?>
   <div class="modal_overlay" id="importStockModal">
     <div class="modal_card modal_card_lg">
@@ -363,7 +363,7 @@ $categories_list  = $categories_list  ?? [];
         </button>
       </div>
       <div class="modal_body modal_body_scroll">
-        <!-- Bang danh sach hang da them vao phieu -->
+        <!-- Bảng danh sách hàng đã thêm vào phiếu -->
         <div id="importBatchTableWrapper" class="section_block_mb display_none">
           <label class="label_section">
             <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle; margin-right:4px;">list_alt</span>
@@ -385,7 +385,7 @@ $categories_list  = $categories_list  ?? [];
           </div>
         </div>
 
-        <!-- Form them tung san pham -->
+        <!-- Form thêm từng sản phẩm -->
           <label class="label_section section_block_mb">
             <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle; margin-right:4px;">add_box</span>
             Thêm sản phẩm vào phiếu
@@ -420,7 +420,7 @@ $categories_list  = $categories_list  ?? [];
             Thêm vào phiếu
           </button>
 
-        <!-- Danh sach hang can nhap (goi y) -->
+        <!-- Danh sách hàng cần nhập (gợi ý) -->
         <div id="importListSuggestions" class="suggestion_wrap">
           <div class="flex_between_wrap">
             <label class="label_section_inline">
@@ -445,7 +445,7 @@ $categories_list  = $categories_list  ?? [];
   </div>
   <?php endif; ?>
 
-  <!-- Modal xuat kho -->
+  <!-- Modal xuất kho -->
   <?php if (canImportExport()): ?>
   <div class="modal_overlay" id="exportStockModal">
     <div class="modal_card modal_card_lg">

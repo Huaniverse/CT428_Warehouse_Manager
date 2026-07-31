@@ -4,7 +4,7 @@
         <h1 class="page_title">Lịch sử nhập / xuất kho</h1>
         <p class="page_subtitle">Xem danh sách các phiếu nhập kho và xuất kho đã thực hiện.</p>
 
-        <!-- Tabs con Nhap / Xuat -->
+        <!-- Tabs con Nhập / Xuất -->
         <div class="tab_buttons_row">
           <button class="filter_button history_tab_btn active" id="hist_tab_import" onclick="switchHistoryTab('import')">
             <span class="material-symbols-outlined">download</span>
@@ -16,7 +16,7 @@
           </button>
         </div>
 
-        <!-- Bo loc tim kiem -->
+        <!-- Bộ lọc tìm kiếm -->
         <?php
         $today = date('Y-m-d');
         $users_list = [];
@@ -94,7 +94,7 @@
           </div>
         </div>
 
-        <!-- Bang phieu nhap -->
+        <!-- Bảng phiếu nhập -->
         <div id="history_import_panel">
           <div class="table_container">
             <table class="product_table">
@@ -116,7 +116,7 @@
           <div id="importHistoryPagination" class="pagination_wrap"></div>
         </div>
 
-        <!-- Bang phieu xuat (an mac dinh) -->
+        <!-- Bảng phiếu xuất (ẩn mặc định) -->
         <div id="history_export_panel" class="panel_hidden">
           <div class="table_container">
             <table class="product_table">

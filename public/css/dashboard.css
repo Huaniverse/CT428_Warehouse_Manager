@@ -204,7 +204,7 @@
     font-weight: 600;
 }
 
-/* Responsive */
+/* Giao diện thích ứng */
 @media (max-width: 1024px) {
     .dashboard_grid {
         grid-template-columns: repeat(2, 1fr);

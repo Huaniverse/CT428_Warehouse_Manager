@@ -1,5 +1,5 @@
 /* Các lớp CSS tiện ích dùng chung */
-/* ===== PAGE TITLES ===== */
+/* Tiêu đề trang */
 .page_title {
     font-size: 24px;
     font-weight: 600;
@@ -13,7 +13,7 @@
     margin: 0 0 24px 0;
 }
 
-/* ===== PAGINATION ===== */
+/* Phân trang */
 .pagination_wrap {
     padding: 12px 0;
     display: flex;
@@ -23,25 +23,25 @@
     margin-top: 10px;
 }
 
-/* ===== TAB BUTTONS ROW ===== */
+/* Hàng nút tab */
 .tab_buttons_row {
     display: flex;
     gap: 8px;
     margin-bottom: 20px;
 }
 
-/* ===== SEARCH ICON ===== */
+/* Biểu tượng tìm kiếm */
 .search_icon_md {
     font-size: 18px;
     color: #97a5b8;
 }
 
-/* ===== HIDDEN PANEL ===== */
+/* Bảng ẩn */
 .panel_hidden {
     display: none;
 }
 
-/* ===== ICON HELPERS ===== */
+/* Trợ giúp biểu tượng */
 .icon_expand {
     font-size: 16px;
     color: #94a3b8;
@@ -52,7 +52,7 @@
     vertical-align: middle;
 }
 
-/* ===== TOAST NOTIFICATION ===== */
+/* Thông báo toast */
 .toast_container {
     position: fixed;
     bottom: 24px;
@@ -99,7 +99,7 @@
     to   { opacity: 0; transform: translateX(20px); }
 }
 
-/* ===== SHARED BUTTONS ===== */
+/* Nút dùng chung */
 .btn_primary {
     display: inline-flex;
     align-items: center;
@@ -156,7 +156,7 @@
     font-size: 18px;
 }
 
-/* ===== PAGINATION ===== */
+/* Phân trang */
 .pagination_btn {
     min-width: 36px;
     height: 36px;
@@ -224,7 +224,7 @@
     user-select: none;
 }
 
-/* ===== EMPTY STATE ===== */
+/* Trạng thái rỗng */
 .empty_state {
     text-align: center;
     padding: 40px 24px;
@@ -243,7 +243,7 @@
     margin: 0;
 }
 
-/* ===== TABLE LOADING ===== */
+/* Đang tải bảng */
 .table_loading {
     text-align: center;
     padding: 32px;
@@ -251,7 +251,7 @@
     font-size: 14px;
 }
 
-/* ===== PRODUCT DETAIL MODAL ===== */
+/* Modal chi tiết sản phẩm */
 .product_detail_grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -299,7 +299,7 @@
     }
 }
 
-/* ===== PRODUCT HISTORY TAB BUTTONS ===== */
+/* Nút tab lịch sử sản phẩm */
 .product_history_tab {
     background: #ffffff !important;
     color: #3d4555 !important;
@@ -353,7 +353,7 @@
 
 .product_history_tab.active .material-symbols-outlined { color: #ffffff !important; }
 
-/* ===== IMPORT LIST SUGGESTION CHIPS ===== */
+/* Gợi ý danh sách nhập */
 .import_list_chip {
     display: inline-flex;
     align-items: center;
@@ -425,7 +425,7 @@
     pointer-events: none;
 }
 
-/* ===== EXPORT LIST SUGGESTION CHIPS ===== */
+/* Gợi ý danh sách xuất */
 .export_list_chip {
     display: inline-flex;
     align-items: center;
@@ -485,7 +485,7 @@
     font-size: 14px;
 }
 
-/* ===== PAGE TITLE & SUBTITLE ===== */
+/* Tiêu đề và phụ đề trang */
 .page_title {
     font-size: 24px;
     font-weight: 600;
@@ -499,7 +499,7 @@
     margin: 0 0 24px 0;
 }
 
-/* ===== FLEX UTILITIES ===== */
+/* Tiện ích flex */
 .flex_row {
     display: flex;
     align-items: center;
@@ -552,7 +552,7 @@
 .mt_10 { margin-top: 10px; }
 .mt_16 { margin-top: 16px; }
 
-/* ===== TEXT UTILITIES ===== */
+/* Tiện ích văn bản */
 .text_muted {
     font-size: 13px;
     color: #64748b;
@@ -591,7 +591,7 @@
     text-transform: uppercase;
 }
 
-/* ===== ICON UTILITIES ===== */
+/* Tiện ích biểu tượng */
 .icon_sm {
     font-size: 16px;
     vertical-align: middle;
@@ -611,7 +611,7 @@
     margin-right: 4px;
 }
 
-/* ===== CHECKBOX ===== */
+/* Hộp kiểm */
 .form_checkbox {
     width: 18px;
     height: 18px;
@@ -625,7 +625,7 @@
     cursor: pointer;
 }
 
-/* ===== LABEL WITH ICON ===== */
+/* Nhãn có biểu tượng */
 .label_with_icon {
     display: block;
     font-weight: 600;
@@ -633,14 +633,14 @@
     color: #334155;
 }
 
-/* ===== EMPTY TABLE CELL ===== */
+/* Ô bảng rỗng */
 .empty_cell {
     text-align: center;
     color: #94a3b8;
     padding: 20px;
 }
 
-/* ===== BUTTON VARIANTS ===== */
+/* Biến thể nút */
 .btn_sm {
     padding: 6px 14px;
     font-size: 13px;
@@ -687,7 +687,7 @@
     background: #fef2f2;
 }
 
-/* ===== ALERT BANNERS ===== */
+/* Cảnh báo */
 .alert_warning {
     display: none;
     background: #fef3c7;
@@ -717,17 +717,17 @@
     color: #92400e;
 }
 
-/* ===== FORM GROUP MARGIN ===== */
+/* Lề nhóm form */
 .form_group_mb {
     margin-bottom: 10px;
 }
 
-/* ===== NO PADDING ===== */
+/* Không đệm */
 .no_padding {
     padding: 0;
 }
 
-/* ===== TABLE COMPACT ===== */
+/* Bảng gọn */
 .table_compact {
     margin: 0;
     font-size: 13px;

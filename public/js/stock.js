@@ -1,9 +1,9 @@
 // Quản lý nhập xuất kho, lịch sử, danh sách lưu
-// ─── Import/Export Stock Modal (Batch) ─────────────────────────────────────
+// Modal nhập/xuất kho hàng loạt
 let importModal, exportModal;
 let importBatchItems = [], exportBatchItems = [];
 
-// ─── Shared: Batch table render ────────────────────────────────────────────
+// Hiển thị bảng nhập/xuất hàng loạt
 function getBatchConfig(type) {
     return type === 'import'
         ? { items: importBatchItems, tbodyId: 'importBatchBody', wrapperId: 'importBatchTableWrapper', countId: 'importBatchCount', submitId: 'btnSubmitImport', removeFn: 'removeImportBatchItem', icon: 'add_circle', color: '#16a34a' }
@@ -52,7 +52,7 @@ function resetBatchForm(type) {
 window.removeImportBatchItem = function(idx) { importBatchItems.splice(idx, 1); renderBatchTable('import'); };
 window.removeExportBatchItem = function(idx) { exportBatchItems.splice(idx, 1); renderBatchTable('export'); };
 
-// ─── Import Modal ──────────────────────────────────────────────────────────
+// Modal nhập kho
 importModal = document.getElementById('importStockModal');
 if (importModal) {
     document.getElementById('btn_import_stock')?.addEventListener('click', () => {
@@ -123,7 +123,7 @@ if (importModal) {
     });
 }
 
-// ─── Export Modal ───────────────────────────────────────────────────────────
+// Modal xuất kho
 exportModal = document.getElementById('exportStockModal');
 if (exportModal) {
     document.getElementById('btn_export_stock')?.addEventListener('click', () => {
@@ -219,7 +219,7 @@ if (exportModal) {
     });
 }
 
-// ─── Shared: History filter params ─────────────────────────────────────────
+// Tham số lọc lịch sử
 var __priceFilterDirty = false;
 function getHistoryFilterParams() {
     const search   = (document.getElementById('hist_search_product')?.value || '').trim();
@@ -242,7 +242,7 @@ function getHistoryFilterParams() {
     return params.toString();
 }
 
-// ─── Shared: Load history ──────────────────────────────────────────────────
+// Tải lịch sử nhập/xuất
 function loadHistory(type, page = 1) {
     const cfg = type === 'import'
         ? { tbodyId: 'importHistoryBody', paginationId: 'importHistoryPagination', endpoint: 'import_stock.php', color: '#16a34a', emptyMsg: 'Chưa có phiếu nhập kho nào.' }
@@ -287,7 +287,7 @@ function loadHistory(type, page = 1) {
 function loadImportHistory(page = 1) { loadHistory('import', page); }
 function loadExportHistory(page = 1) { loadHistory('export', page); }
 
-// ─── Switch history sub-tab ────────────────────────────────────────────────
+// Chuyển đổi tab lịch sử nhập/xuất
 function switchHistoryTab(type) {
     const importBtn   = document.getElementById('hist_tab_import');
     const exportBtn   = document.getElementById('hist_tab_export');
@@ -312,7 +312,7 @@ function switchHistoryTab(type) {
     }
 }
 
-// ─── Receipt Detail Modal ──────────────────────────────────────────────────
+// Modal chi tiết phiếu nhập/xuất
 const receiptDetailModal = document.getElementById('receiptDetailModal');
 if (receiptDetailModal) {
     document.getElementById('btnCloseReceiptDetailModal')?.addEventListener('click', () => receiptDetailModal.classList.remove('open'));
@@ -403,7 +403,7 @@ function openReceiptDetail(type, receiptId) {
         });
 }
 
-// ─── Shared: History pagination ─────────────────────────────────────────────
+// Phân trang lịch sử
 window.renderHistoryPagination = function(totalPages, currentPage, type) {
     const onClickName = (type === 'import') ? 'loadImportHistory' : 'loadExportHistory';
     let html = '';
@@ -432,7 +432,7 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
     return html;
 };
 
-// ─── History filter event listeners ─────────────────────────────────────────
+// Sự kiện lọc lịch sử
 (function() {
     let debounceTimer = null;
     const todayStr = new Date().toISOString().slice(0, 10);
@@ -526,7 +526,7 @@ window.renderHistoryPagination = function(totalPages, currentPage, type) {
     toggleClearBtn();
 })();
 
-// ─── Shared: Storage list (localStorage) ───────────────────────────────────
+// Danh sách lưu tạm (localStorage)
 function getListConfig(type) {
     return type === 'import'
         ? { key: 'warehouse_import_list', msg: 'Sản phẩm đã có trong danh sách.', addMsg: 'Đã thêm vào danh sách hàng cần nhập.', clearMsg: 'Xóa toàn bộ danh sách hàng cần nhập?', clearDoneMsg: 'Đã xóa danh sách hàng cần nhập.', chipClass: 'import_list_chip', promptLabel: 'Nhập số lượng cần nhập cho', suggestTitle: 'Nhấn để thêm nhanh vào phiếu nhập', quickNote: 'Thêm từ danh sách cần nhập', icon: 'add_circle', color: '#ea580c', countId: 'importListCount', containerId: 'importListSuggestions', itemsId: 'importListItems' }
@@ -658,7 +658,7 @@ function quickAddFromList(type, productId, productName) {
 window.removeFromList = removeFromList;
 window.quickAddFromList = quickAddFromList;
 
-// Backward-compatible aliases (used by products.js)
+// Bí danh tương thích ngược (dùng bởi products.js)
 window.addToImportList = (pid, pname) => addToList('import', pid, pname);
 window.addToExportList  = (pid, pname) => addToList('export', pid, pname);
 

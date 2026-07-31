@@ -1,5 +1,4 @@
-/* Tab và bộ lọc lịch sử */
-/* ===== HISTORY TAB BUTTONS =====
+/* Tab và bộ lọc lịch sử
    Lưu ý màu sắc: cân bằng độ bật giữa 2 nút
       nhập:  green-700   #15803d  (màu đậm truyền thống)
       xuất:  orange-600  #ea580c  (lên shade -600 thay vì -700 để mắt
@@ -8,8 +7,7 @@
    Độ tương phản trắng:
       green-700   → 7.6:1 (✅ AAA)
       orange-600  → 3.3:1 (✅ WCAG AA cho large text, nút có icon + text
-                            kích thước lớn → thoả mãn)
-─────────────────────────────────────────────────────────────────────── */
+                            kích thước lớn → thoả mãn) */
 .history_tab_btn {
     background: #ffffff !important;
     color: #3d4555 !important;
@@ -72,7 +70,7 @@
 
 .history_tab_btn.active .material-symbols-outlined { color: #ffffff !important; }
 
-/* ===== HISTORY CLEAR FILTER BUTTON ===== */
+/* Nút xóa bộ lọc lịch sử */
 #btnClearHistoryFilter {
     background: #ffffff !important;
     color: #ef4444 !important;

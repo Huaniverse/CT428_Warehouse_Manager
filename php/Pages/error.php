@@ -1,5 +1,5 @@
 <?php
-// Trang hiển thị lỗi (403, 404, 500)
+// Trang hiển thị lỗi (403, 404, 500) template từ internet
 $code = isset($_GET['code']) ? (int)$_GET['code'] : 500;
 $base = rtrim(dirname(dirname(dirname($_SERVER['SCRIPT_NAME']))), '/');
 

@@ -8,7 +8,7 @@
     const chartFont = { family: "'Inter', sans-serif" };
     const dlFont = { family: "'Inter', sans-serif", weight: '600' };
 
-    // ── Biểu đồ 1: Số lượng theo danh mục ──────────────────────────────
+    // Biểu đồ 1: Số lượng theo danh mục
     const ctxQty = document.getElementById('quantityChart');
     if (ctxQty) {
         const max1 = Math.max(...chart1Data, 0);
@@ -49,7 +49,7 @@
         });
     }
 
-    // ── Biểu đồ 2: Giá trị theo danh mục (donut) ──────────────────────
+    // Biểu đồ 2: Giá trị theo danh mục (donut)
     const ctxVal = document.getElementById('valueChart');
     if (ctxVal) {
         const chart2DataMillion = chart2Data.map(val => (val / 1000).toFixed(2));
@@ -91,7 +91,7 @@
         });
     }
 
-    // ── Biểu đồ 3: Xu hướng nhập/xuất 6 tháng ─────────────────────────
+    // Biểu đồ 3: Xu hướng nhập/xuất 6 tháng
     const ctxTrend = document.getElementById('trendChart');
     if (ctxTrend && typeof chartTrendLabels !== 'undefined') {
         const allTrendData = [...chartTrendImport, ...chartTrendExport].filter(v => v != null);
@@ -152,7 +152,7 @@
         });
     }
 
-    // ── Biểu đồ 4: Trạng thái kho (donut) ──────────────────────────────
+    // Biểu đồ 4: Trạng thái kho (donut)
     const ctxStatus = document.getElementById('statusChart');
     if (ctxStatus && typeof chartStatusLabels !== 'undefined') {
         const total4 = chartStatusData.reduce((a, b) => a + b, 0);
@@ -192,7 +192,7 @@
         });
     }
 
-    // ── Biểu đồ 5: Top 5 bán chạy (horizontal bar) ─────────────────────
+    // Biểu đồ 5: Top 5 bán chạy (horizontal bar)
     const ctxTop = document.getElementById('topSellingChart');
     if (ctxTop && typeof chartTopLabels !== 'undefined') {
         const max5 = Math.max(...chartTopData, 0);

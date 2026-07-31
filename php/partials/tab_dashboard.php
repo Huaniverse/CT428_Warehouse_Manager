@@ -16,7 +16,7 @@
         <h1 class="page_title">Tổng quan kho hàng</h1>
         <p class="page_subtitle">Thống kê và báo cáo số lượng, giá trị tồn kho theo thời gian thực</p>
 
-        <!-- Cac the KPI -->
+        <!-- Các thẻ KPI -->
         <div class="dashboard_grid">
           <div class="kpi_card">
             <div class="kpi_icon blue">
@@ -99,7 +99,7 @@
           </div>
         </div>
 
-        <!-- Bieu do -->
+        <!-- Biểu đồ -->
         <div class="chart_grid">
           <div class="chart_card">
             <h3>Số lượng sản phẩm theo danh mục</h3>
@@ -139,9 +139,9 @@
           </div>
         </div>
 
-        <!-- Bang danh sach -->
+        <!-- Bảng danh sách -->
         <div class="dashboard_tables_grid">
-          <!-- Sap het hang -->
+          <!-- Sắp hết hàng -->
           <div class="dashboard_table_card">
             <div class="dashboard_table_header">
               <span class="material-symbols-outlined" style="color:#f59e0b;">warning</span>
@@ -173,7 +173,7 @@
             </div>
           </div>
 
-          <!-- Ban chay nhat -->
+          <!-- Bán chạy nhất -->
           <div class="dashboard_table_card">
             <div class="dashboard_table_header">
               <span class="material-symbols-outlined" style="color:#10b981;">local_fire_department</span>
@@ -205,7 +205,7 @@
             </div>
           </div>
 
-          <!-- Hoat dong gan day -->
+          <!-- Hoạt động gần đây -->
           <div class="dashboard_table_card dashboard_table_full">
             <div class="dashboard_table_header">
               <span class="material-symbols-outlined" style="color:#3b82f6;">history</span>

@@ -20,7 +20,7 @@ if (!$conn) {
 }
 
 // Nhận và làm sạch dữ liệu
-$id   = strtoupper(trim($_POST['id'] ?? ''));
+$id   = trim($_POST['id'] ?? '');
 $name = trim($_POST['name'] ?? '');
 
 if ($id === '') {

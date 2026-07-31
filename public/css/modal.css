@@ -531,7 +531,7 @@
     gap: 6px;
 }
 
-/* Block section */
+/* Khối section */
 .section_block {
     margin-top: 24px;
     border-top: 1px solid #e8ecf0;
@@ -597,7 +597,7 @@
     gap: 12px;
 }
 
-/* Reset padding */
+/* Đặt lại đệm */
 .padding_reset {
     padding: 0;
 }
@@ -607,7 +607,7 @@
     display: none;
 }
 
-/* Textarea */
+/* Vùng nhập văn bản */
 .form_textarea {
     resize: vertical;
     border: none;
@@ -617,7 +617,7 @@
     font-family: inherit;
 }
 
-/* Label checkbox */
+/* Nhãn hộp kiểm */
 .checkbox_label {
     display: flex;
     align-items: center;

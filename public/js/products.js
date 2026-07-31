@@ -163,7 +163,7 @@ if (searchBtn) {
     });
 }
 
-// ─── Product Detail ──────────────────────────────────────────────────────
+// Chi tiết sản phẩm
 let currentDetailProduct = null;
 let currentProductHistoryType = 'import';
 
@@ -291,7 +291,7 @@ function deleteProduct(productId) {
     });
 }
 
-// ─── Product Detail Modal ────────────────────────────────────────────────
+// Modal chi tiết sản phẩm
 const prodDetailModal = document.getElementById('productDetailModal');
 if (prodDetailModal) {
     document.getElementById('btnCloseProductDetailModal')?.addEventListener('click', () => prodDetailModal.classList.remove('open'));
@@ -424,7 +424,7 @@ if (prodDetailModal) {
     });
 }
 
-// ─── Modal: Thêm sản phẩm mới ─────────────────────────────────────────────
+// Modal thêm sản phẩm mới
 const addProdModal         = document.getElementById('addProductModal');
 const btnOpenProdModal     = document.getElementById('btn_add_product');
 const btnCloseProdModal    = document.getElementById('btnCloseAddProductModal');
@@ -496,7 +496,7 @@ if (btnSubmitProd) {
     });
 }
 
-// ─── Modal: Thêm danh mục mới ─────────────────────────────────────────────
+// Modal thêm danh mục mới
 const addCatModal          = document.getElementById('addCategoryModal');
 const btnOpenCatModal      = document.getElementById('btn_add_category');
 const btnCloseCatModal     = document.getElementById('btnCloseAddCategoryModal');
@@ -525,12 +525,7 @@ if (addCatModal) {
     });
 }
 
-const catCodeInput = document.getElementById('new_cat_code');
-if (catCodeInput) {
-    catCodeInput.addEventListener('input', function() {
-        this.value = this.value.toUpperCase();
-    });
-}
+
 
 function updateCategoryDropdowns(categories) {
     const filterSelect = document.getElementById('select_category');

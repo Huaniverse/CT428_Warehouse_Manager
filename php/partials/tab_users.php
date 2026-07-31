@@ -4,12 +4,12 @@
       $is_manager = $is_manager ?? isManager();
       if ($is_admin || $is_manager):
       ?>
-      <!-- Tab quan ly nhan vien -->
+      <!-- Tab quản lý nhân viên -->
       <div id="content_users" class="tab_content">
         <h1 class="page_title">Quản lý nhân viên</h1>
         <p class="page_subtitle">Tạo và quản lý tài khoản nhân viên, theo dõi phiên đăng nhập đang hoạt động.</p>
 
-        <!-- Danh sach tai khoan -->
+        <!-- Danh sách tài khoản -->
         <div class="settings_section">
           <div class="settings_section_header">
             <h3>
@@ -41,7 +41,7 @@
           </div>
         </div>
 
-        <!-- Phien dang nhap dang hoat dong -->
+        <!-- Phiên đăng nhập đang hoạt động -->
         <div class="settings_section">
           <div class="settings_section_header">
             <h3>
